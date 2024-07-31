@@ -90,3 +90,79 @@ func (r *UserRepository) SignUp(ctx context.Context, user models.User) error {
 
 	return nil
 }
+
+func (r *UserRepository) LogIn(ctx context.Context, user models.User) (int, error) {
+	var storedUser models.User
+
+	query := "SELECT id, name, last_name, email, phone, inn, password, balance FROM users WHERE email = ? OR phone = ?"
+	err := r.Db.QueryRowContext(ctx, query, user.Email, user.Phone).Scan(
+		&storedUser.ID,
+		&storedUser.Name,
+		&storedUser.LastName,
+		&storedUser.Email,
+		&storedUser.Phone,
+		&storedUser.INN,
+		&storedUser.Password,
+		&storedUser.Balance,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, models.ErrUserNotFound
+		}
+		return 0, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, models.ErrInvalidPassword
+		}
+		return 0, err
+	}
+
+	return storedUser.ID, nil
+}
+
+func (r *UserRepository) GetUserByID(ctx context.Context, id int) (models.User, error) {
+	var user models.User
+
+	query := "SELECT id, name, last_name, email, phone, inn, balance, password FROM users WHERE id = ?"
+	err := r.Db.QueryRowContext(ctx, query, id).Scan(
+		&user.ID,
+		&user.Name,
+		&user.LastName,
+		&user.Email,
+		&user.Phone,
+		&user.INN,
+		&user.Balance,
+		&user.Password,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.User{}, models.ErrUserNotFound
+		}
+		return models.User{}, err
+	}
+
+	return user, nil
+}
+
+func (r *UserRepository) UpdateBalance(ctx context.Context, id int, amount float64) error {
+	_, err := r.Db.ExecContext(ctx, "UPDATE users SET balance = balance + ? WHERE id = ?", amount, id)
+	return err
+}
+
+func (r *UserRepository) GetBalance(ctx context.Context, id int) (float64, error) {
+	var balance float64
+
+	query := "SELECT balance FROM users WHERE id = ?"
+	err := r.Db.QueryRowContext(ctx, query, id).Scan(&balance)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, models.ErrUserNotFound
+		}
+		return 0, err
+	}
+
+	return balance, nil
+}

@@ -19,6 +19,5 @@ func (s *PartService) GetAllParts(ctx context.Context) ([]models.Part, error) {
 }
 
 func (s *PartService) AddPart(ctx context.Context, part models.Part) error {
-	// Add business logic validations if necessary
 	return s.repo.AddPart(ctx, part)
 }
