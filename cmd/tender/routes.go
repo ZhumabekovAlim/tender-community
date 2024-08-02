@@ -21,5 +21,11 @@ func (app *application) routes() http.Handler {
 	mux.Get("/users/balance/:id", standardMiddleware.ThenFunc(app.userHandler.GetBalance))           // get user balance by id
 	mux.Put("/users/balance/update/:id", standardMiddleware.ThenFunc(app.userHandler.UpdateBalance)) // update user balance
 
+	// PERMISSIONS
+	mux.Post("/permissions", dynamicMiddleware.ThenFunc(app.userHandler.AddPermission))                        // add a new permission
+	mux.Get("/permissions/user/:user_id", standardMiddleware.ThenFunc(app.userHandler.GetPermissionsByUserID)) // get all permissions by user ID
+	mux.Put("/permissions/:id", standardMiddleware.ThenFunc(app.userHandler.UpdatePermission))                 // update a permission by id
+	mux.Del("/permissions/:id", standardMiddleware.ThenFunc(app.userHandler.DeletePermission))                 // delete a permission by id
+
 	return standardMiddleware.Then(mux)
 }

@@ -8,4 +8,5 @@ var (
 	ErrDuplicateEmail     = errors.New("models: duplicate email")
 	ErrUserNotFound       = errors.New("models: user not found")
 	ErrInvalidPassword    = errors.New("models: invalid password")
+	ErrPermissionNotFound = errors.New("permission not found")
 )
