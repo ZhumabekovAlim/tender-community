@@ -22,10 +22,17 @@ func (app *application) routes() http.Handler {
 	mux.Put("/users/balance/update/:id", standardMiddleware.ThenFunc(app.userHandler.UpdateBalance)) // update user balance
 
 	// PERMISSIONS
-	mux.Post("/permissions", dynamicMiddleware.ThenFunc(app.userHandler.AddPermission))                        // add a new permission
-	mux.Get("/permissions/user/:user_id", standardMiddleware.ThenFunc(app.userHandler.GetPermissionsByUserID)) // get all permissions by user ID
-	mux.Put("/permissions/:id", standardMiddleware.ThenFunc(app.userHandler.UpdatePermission))                 // update a permission by id
-	mux.Del("/permissions/:id", standardMiddleware.ThenFunc(app.userHandler.DeletePermission))                 // delete a permission by id
+	mux.Post("/permissions", dynamicMiddleware.ThenFunc(app.permissionHandler.AddPermission))                        // add a new permission
+	mux.Get("/permissions/user/:user_id", standardMiddleware.ThenFunc(app.permissionHandler.GetPermissionsByUserID)) // get all permissions by user ID
+	mux.Put("/permissions/:id", standardMiddleware.ThenFunc(app.permissionHandler.UpdatePermission))                 // update a permission by id
+	mux.Del("/permissions/:id", standardMiddleware.ThenFunc(app.permissionHandler.DeletePermission))                 // delete a permission by id
+
+	// COMPANY
+	mux.Post("/companies", dynamicMiddleware.ThenFunc(app.companyHandler.CreateCompany))      // Create a new company
+	mux.Get("/companies", standardMiddleware.ThenFunc(app.companyHandler.GetAllCompanies))    // Get all companies
+	mux.Get("/companies/:id", standardMiddleware.ThenFunc(app.companyHandler.GetCompanyByID)) // Get company by ID
+	mux.Put("/companies/:id", standardMiddleware.ThenFunc(app.companyHandler.UpdateCompany))  // Update company by ID
+	mux.Del("/companies/:id", standardMiddleware.ThenFunc(app.companyHandler.DeleteCompany))  // Delete company by ID
 
 	return standardMiddleware.Then(mux)
 }

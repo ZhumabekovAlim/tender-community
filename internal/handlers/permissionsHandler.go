@@ -6,10 +6,15 @@ import (
 	"net/http"
 	"strconv"
 	"tender/internal/models"
+	"tender/internal/services"
 )
 
+type PermissionHandler struct {
+	Service *services.PermissionService
+}
+
 // AddPermission adds a new permission for a user.
-func (h *UserHandler) AddPermission(w http.ResponseWriter, r *http.Request) {
+func (h *PermissionHandler) AddPermission(w http.ResponseWriter, r *http.Request) {
 	var permission models.Permission
 	err := json.NewDecoder(r.Body).Decode(&permission)
 	if err != nil {
@@ -27,7 +32,7 @@ func (h *UserHandler) AddPermission(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeletePermission deletes a permission for a user.
-func (h *UserHandler) DeletePermission(w http.ResponseWriter, r *http.Request) {
+func (h *PermissionHandler) DeletePermission(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
 	if idStr == "" {
 		http.Error(w, "Missing permission ID", http.StatusBadRequest)
@@ -54,7 +59,7 @@ func (h *UserHandler) DeletePermission(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdatePermission updates an existing permission.
-func (h *UserHandler) UpdatePermission(w http.ResponseWriter, r *http.Request) {
+func (h *PermissionHandler) UpdatePermission(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
 	if idStr == "" {
 		http.Error(w, "Missing permission ID", http.StatusBadRequest)
@@ -89,7 +94,7 @@ func (h *UserHandler) UpdatePermission(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetPermissionsByUserID getting permissions by user_id
-func (h *UserHandler) GetPermissionsByUserID(w http.ResponseWriter, r *http.Request) {
+func (h *PermissionHandler) GetPermissionsByUserID(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get(":user_id")
 	if userIDStr == "" {
 		http.Error(w, "Missing user ID", http.StatusBadRequest)
