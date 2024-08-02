@@ -11,4 +11,5 @@ var (
 	ErrPermissionNotFound  = errors.New("permission not found")
 	ErrCompanyNotFound     = errors.New("company not found")
 	ErrTransactionNotFound = errors.New("transaction not found")
+	ErrExpenseNotFound     = errors.New("personal expense not found")
 )

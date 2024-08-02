@@ -41,5 +41,12 @@ func (app *application) routes() http.Handler {
 	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))  // Update transaction by ID
 	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))  // Delete transaction by ID
 
+	// PERSONAL EXPENSES ROUTES
+	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))      // Create a new expense
+	mux.Get("/expenses", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpenses))     // Get all expenses
+	mux.Get("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpenseByID)) // Get expense by ID
+	mux.Put("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.UpdatePersonalExpense))  // Update expense by ID
+	mux.Del("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.DeletePersonalExpense))  // Delete expense by ID
+
 	return standardMiddleware.Then(mux)
 }

@@ -17,6 +17,7 @@ type application struct {
 	permissionHandler  *handlers.PermissionHandler
 	companyHandler     *handlers.CompanyHandler
 	transactionHandler *handlers.TransactionHandler
+	expenseHandler     *handlers.PersonalExpenseHandler
 }
 
 func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
@@ -37,6 +38,10 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	transactionService := &services.TransactionService{Repo: transactionRepo}
 	transactionHandler := &handlers.TransactionHandler{Service: transactionService}
 
+	expenseRepo := &repositories.PersonalExpenseRepository{Db: db}
+	expenseService := &services.PersonalExpenseService{Repo: expenseRepo}
+	expenseHandler := &handlers.PersonalExpenseHandler{Service: expenseService}
+
 	return &application{
 		errorLog:           errorLog,
 		infoLog:            infoLog,
@@ -44,6 +49,7 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 		permissionHandler:  permissionHandler,
 		companyHandler:     companyHandler,
 		transactionHandler: transactionHandler,
+		expenseHandler:     expenseHandler,
 	}
 
 }
