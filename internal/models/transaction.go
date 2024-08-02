@@ -13,4 +13,13 @@ type Transaction struct {
 	Total        float64   `json:"total"`
 	Date         time.Time `json:"date"`
 	Status       int       `json:"status"`
+	Expenses     []Expense `json:"expenses"`
+}
+
+type Expense struct {
+	ID            int       `json:"id"`
+	Name          string    `json:"name"`
+	Amount        float64   `json:"amount"`
+	TransactionID int       `json:"transaction_id"`
+	Date          time.Time `json:"date"`
 }

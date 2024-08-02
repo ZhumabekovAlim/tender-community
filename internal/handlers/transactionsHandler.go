@@ -13,7 +13,7 @@ type TransactionHandler struct {
 	Service *services.TransactionService
 }
 
-// CreateTransaction creates a new transaction.
+// CreateTransaction creates a new transaction with expenses.
 func (h *TransactionHandler) CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	var transaction models.Transaction
 	err := json.NewDecoder(r.Body).Decode(&transaction)
@@ -31,7 +31,7 @@ func (h *TransactionHandler) CreateTransaction(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusCreated)
 }
 
-// GetTransactionByID retrieves a transaction by ID.
+// GetTransactionByID retrieves a transaction by ID along with its expenses.
 func (h *TransactionHandler) GetTransactionByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
 	if idStr == "" {
@@ -71,7 +71,7 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(transactions)
 }
 
-// UpdateTransaction updates an existing transaction.
+// UpdateTransaction updates an existing transaction and its expenses.
 func (h *TransactionHandler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
 	if idStr == "" {
@@ -106,7 +106,7 @@ func (h *TransactionHandler) UpdateTransaction(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusOK)
 }
 
-// DeleteTransaction deletes a transaction by ID.
+// DeleteTransaction deletes a transaction and its expenses by ID.
 func (h *TransactionHandler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
 	if idStr == "" {
