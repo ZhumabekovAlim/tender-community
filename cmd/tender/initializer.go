@@ -11,11 +11,12 @@ import (
 )
 
 type application struct {
-	errorLog          *log.Logger
-	infoLog           *log.Logger
-	userHandler       *handlers.UserHandler
-	permissionHandler *handlers.PermissionHandler
-	companyHandler    *handlers.CompanyHandler
+	errorLog           *log.Logger
+	infoLog            *log.Logger
+	userHandler        *handlers.UserHandler
+	permissionHandler  *handlers.PermissionHandler
+	companyHandler     *handlers.CompanyHandler
+	transactionHandler *handlers.TransactionHandler
 }
 
 func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
@@ -32,12 +33,17 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	companyService := &services.CompanyService{Repo: companyRepo}
 	companyHandler := &handlers.CompanyHandler{Service: companyService}
 
+	transactionRepo := &repositories.TransactionRepository{Db: db}
+	transactionService := &services.TransactionService{Repo: transactionRepo}
+	transactionHandler := &handlers.TransactionHandler{Service: transactionService}
+
 	return &application{
-		errorLog:          errorLog,
-		infoLog:           infoLog,
-		userHandler:       userHandler,
-		permissionHandler: permissionHandler,
-		companyHandler:    companyHandler,
+		errorLog:           errorLog,
+		infoLog:            infoLog,
+		userHandler:        userHandler,
+		permissionHandler:  permissionHandler,
+		companyHandler:     companyHandler,
+		transactionHandler: transactionHandler,
 	}
 
 }

@@ -12,7 +12,7 @@ type PermissionRepository struct {
 
 // AddPermission inserts a new permission into the database.
 func (r *PermissionRepository) AddPermission(ctx context.Context, permission models.Permission) error {
-	_, err := r.Db.ExecContext(ctx, "INSERT INTO permissions (user_id, company_id) VALUES (?, ?)", permission.UserID, permission.CompanyID)
+	_, err := r.Db.ExecContext(ctx, "INSERT INTO permissions (user_id, company_id, status) VALUES (?, ?, 1)", permission.UserID, permission.CompanyID)
 	return err
 }
 
@@ -37,7 +37,7 @@ func (r *PermissionRepository) DeletePermission(ctx context.Context, id int) err
 
 // UpdatePermission updates an existing permission in the database.
 func (r *PermissionRepository) UpdatePermission(ctx context.Context, permission models.Permission) error {
-	result, err := r.Db.ExecContext(ctx, "UPDATE permissions SET user_id = ?, company_id = ? WHERE id = ?", permission.UserID, permission.CompanyID, permission.ID)
+	result, err := r.Db.ExecContext(ctx, "UPDATE permissions SET user_id = ?, company_id = ?, status = ? WHERE id = ?", permission.UserID, permission.CompanyID, permission.Status, permission.ID)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (r *PermissionRepository) UpdatePermission(ctx context.Context, permission 
 
 // GetPermission retrieves a permission by ID from the database.
 func (r *PermissionRepository) GetPermissionsByUserID(ctx context.Context, userID int) ([]models.Permission, error) {
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, user_id, company_id FROM permissions WHERE user_id = ?", userID)
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, user_id, company_id, status FROM permissions WHERE user_id = ?", userID)
 	if err != nil {
 		return nil, err
 	}
