@@ -11,8 +11,15 @@ type PermissionService struct {
 }
 
 // AddPermission adds a new permission for a user.
-func (s *PermissionService) AddPermission(ctx context.Context, permission models.Permission) error {
-	return s.Repo.AddPermission(ctx, permission)
+func (s *PermissionService) AddPermission(ctx context.Context, permission models.Permission) (models.Permission, error) {
+	id, err := s.Repo.AddPermission(ctx, permission)
+	if err != nil {
+		return models.Permission{}, err
+	}
+
+	permission.ID = id
+	permission.Status = 1
+	return permission, nil
 }
 
 // DeletePermission deletes a permission for a user.

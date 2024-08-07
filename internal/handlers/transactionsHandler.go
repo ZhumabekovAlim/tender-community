@@ -22,13 +22,15 @@ func (h *TransactionHandler) CreateTransaction(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	err = h.Service.CreateTransaction(r.Context(), transaction)
+	createdTransaction, err := h.Service.CreateTransaction(r.Context(), transaction)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(createdTransaction)
 }
 
 // GetTransactionByID retrieves a transaction by ID along with its expenses.

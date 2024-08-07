@@ -11,9 +11,18 @@ type PermissionRepository struct {
 }
 
 // AddPermission inserts a new permission into the database.
-func (r *PermissionRepository) AddPermission(ctx context.Context, permission models.Permission) error {
-	_, err := r.Db.ExecContext(ctx, "INSERT INTO permissions (user_id, company_id, status) VALUES (?, ?, 1)", permission.UserID, permission.CompanyID)
-	return err
+func (r *PermissionRepository) AddPermission(ctx context.Context, permission models.Permission) (int, error) {
+	result, err := r.Db.ExecContext(ctx, "INSERT INTO permissions (user_id, company_id, status) VALUES (?, ?, 1)", permission.UserID, permission.CompanyID)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
 }
 
 // DeletePermission removes a permission from the database by ID.
@@ -66,7 +75,7 @@ func (r *PermissionRepository) GetPermissionsByUserID(ctx context.Context, userI
 
 	for rows.Next() {
 		var permission models.Permission
-		err := rows.Scan(&permission.ID, &permission.UserID, &permission.CompanyID)
+		err := rows.Scan(&permission.ID, &permission.UserID, &permission.CompanyID, &permission.Status)
 		if err != nil {
 			return nil, err
 		}

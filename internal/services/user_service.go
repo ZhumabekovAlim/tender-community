@@ -14,7 +14,7 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]models.User, error) {
 	return s.Repo.GetAllUsers(ctx)
 }
 
-func (s *UserService) SignUp(ctx context.Context, user models.User) error {
+func (s *UserService) SignUp(ctx context.Context, user models.User) (models.User, error) {
 	return s.Repo.SignUp(ctx, user)
 }
 

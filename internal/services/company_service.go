@@ -11,8 +11,14 @@ type CompanyService struct {
 }
 
 // CreateCompany creates a new company.
-func (s *CompanyService) CreateCompany(ctx context.Context, company models.Company) error {
-	return s.Repo.CreateCompany(ctx, company)
+func (s *CompanyService) CreateCompany(ctx context.Context, company models.Company) (models.Company, error) {
+	id, err := s.Repo.CreateCompany(ctx, company)
+	if err != nil {
+		return models.Company{}, err
+	}
+
+	company.ID = id
+	return company, nil
 }
 
 // DeleteCompany deletes a company by ID.

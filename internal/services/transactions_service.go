@@ -11,7 +11,7 @@ type TransactionService struct {
 }
 
 // CreateTransaction creates a new transaction with expenses.
-func (s *TransactionService) CreateTransaction(ctx context.Context, transaction models.Transaction) error {
+func (s *TransactionService) CreateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	return s.Repo.CreateTransaction(ctx, transaction)
 }
 

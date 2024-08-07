@@ -23,13 +23,15 @@ func (h *PersonalExpenseHandler) CreatePersonalExpense(w http.ResponseWriter, r 
 		return
 	}
 
-	err = h.Service.CreatePersonalExpense(r.Context(), expense)
+	createdPersonalExpanse, err := h.Service.CreatePersonalExpense(r.Context(), expense)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(createdPersonalExpanse)
 }
 
 // GetPersonalExpenseByID retrieves a personal expense by ID.

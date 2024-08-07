@@ -22,13 +22,15 @@ func (h *CompanyHandler) CreateCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.Service.CreateCompany(r.Context(), company)
+	createdCompany, err := h.Service.CreateCompany(r.Context(), company)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(createdCompany)
 }
 
 // DeleteCompany deletes a company by ID.

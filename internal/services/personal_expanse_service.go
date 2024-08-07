@@ -12,8 +12,14 @@ type PersonalExpenseService struct {
 }
 
 // CreatePersonalExpense creates a new personal expense.
-func (s *PersonalExpenseService) CreatePersonalExpense(ctx context.Context, expense models.PersonalExpense) error {
-	return s.Repo.CreatePersonalExpense(ctx, expense)
+func (s *PersonalExpenseService) CreatePersonalExpense(ctx context.Context, expense models.PersonalExpense) (models.PersonalExpense, error) {
+	id, err := s.Repo.CreatePersonalExpense(ctx, expense)
+	if err != nil {
+		return models.PersonalExpense{}, err
+	}
+
+	expense.ID = id
+	return expense, nil
 }
 
 // GetPersonalExpenseByID retrieves a personal expense by ID.

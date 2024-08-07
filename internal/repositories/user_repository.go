@@ -42,53 +42,50 @@ func (r *UserRepository) GetAllUsers(ctx context.Context) ([]models.User, error)
 	return users, nil
 }
 
-func (r *UserRepository) SignUp(ctx context.Context, user models.User) error {
-
+func (r *UserRepository) SignUp(ctx context.Context, user models.User) (models.User, error) {
 	var exists int
 	emailCheckQuery := "SELECT COUNT(*) FROM users WHERE email= ?"
 	phoneCheckQuery := "SELECT COUNT(*) FROM users WHERE phone IS NOT NULL AND phone = ? "
 
 	err := r.Db.QueryRow(emailCheckQuery, user.Email).Scan(&exists)
 	if err != nil {
-		return err
+		return models.User{}, err
 	}
 	if exists > 0 && user.Email != "" {
-		return ErrDuplicateEmail
+		return models.User{}, ErrDuplicateEmail
 	}
 
 	err = r.Db.QueryRow(phoneCheckQuery, user.Phone).Scan(&exists)
 	if err != nil {
-		return err
+		return models.User{}, err
 	}
 	if exists > 0 && user.Phone != "" {
-		return ErrDuplicatePhone
+		return models.User{}, ErrDuplicatePhone
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 	if err != nil {
-		return err
+		return models.User{}, err
 	}
 
-	_, err = r.Db.ExecContext(ctx, "INSERT INTO users(name, last_name, email, phone, inn, password, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
+	result, err := r.Db.ExecContext(ctx, "INSERT INTO users(name, last_name, email, phone, inn, password, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
 		user.Name, user.LastName, user.Email, user.Phone, user.INN, hashedPassword, 0)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
-			return models.ErrDuplicateEmail
+			return models.User{}, models.ErrDuplicateEmail
 		}
-		return err
+		return models.User{}, err
 	}
 
-	//clientID, err := result.LastInsertId()
-	//if err != nil {
-	//	return err
-	//}
+	userID, err := result.LastInsertId()
+	if err != nil {
+		return models.User{}, err
+	}
 
-	//convertedClientInfo, err := json.Marshal(clientID)
-	//if err != nil {
-	//	return err
-	//}
+	user.ID = int(userID)
+	user.Balance = 0
 
-	return nil
+	return user, nil
 }
 
 func (r *UserRepository) LogIn(ctx context.Context, user models.User) (int, error) {

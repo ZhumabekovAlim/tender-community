@@ -12,9 +12,18 @@ type PersonalExpenseRepository struct {
 }
 
 // CreatePersonalExpense inserts a new expense into the database.
-func (r *PersonalExpenseRepository) CreatePersonalExpense(ctx context.Context, expense models.PersonalExpense) error {
-	_, err := r.Db.ExecContext(ctx, "INSERT INTO personal_expenses (amount, reason, description) VALUES (?, ?, ?)", expense.Amount, expense.Reason, expense.Description)
-	return err
+func (r *PersonalExpenseRepository) CreatePersonalExpense(ctx context.Context, expense models.PersonalExpense) (int, error) {
+	result, err := r.Db.ExecContext(ctx, "INSERT INTO personal_expenses (amount, reason, description) VALUES (?, ?, ?)", expense.Amount, expense.Reason, expense.Description)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
 }
 
 // GetPersonalExpenseByID retrieves an expense by ID from the database.

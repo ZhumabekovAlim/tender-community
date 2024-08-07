@@ -11,9 +11,18 @@ type CompanyRepository struct {
 }
 
 // CreateCompany inserts a new company into the database.
-func (r *CompanyRepository) CreateCompany(ctx context.Context, company models.Company) error {
-	_, err := r.Db.ExecContext(ctx, "INSERT INTO companies (name, description) VALUES (?, ?)", company.Name, company.Description)
-	return err
+func (r *CompanyRepository) CreateCompany(ctx context.Context, company models.Company) (int, error) {
+	result, err := r.Db.ExecContext(ctx, "INSERT INTO companies (name, description) VALUES (?, ?)", company.Name, company.Description)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
 }
 
 // DeleteCompany removes a company from the database by ID.

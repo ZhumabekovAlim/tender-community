@@ -22,13 +22,15 @@ func (h *PermissionHandler) AddPermission(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = h.Service.AddPermission(r.Context(), permission)
+	createdPermission, err := h.Service.AddPermission(r.Context(), permission)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(createdPermission)
 }
 
 // DeletePermission deletes a permission for a user.

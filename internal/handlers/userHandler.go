@@ -36,12 +36,19 @@ func (h *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.Service.SignUp(r.Context(), user); err != nil {
+	createdUser, err := h.Service.SignUp(r.Context(), user)
+	if err != nil {
+		if errors.Is(err, models.ErrDuplicateEmail) || errors.Is(err, models.ErrDuplicatePhone) {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(createdUser)
 }
 
 func (h *UserHandler) LogIn(w http.ResponseWriter, r *http.Request) {

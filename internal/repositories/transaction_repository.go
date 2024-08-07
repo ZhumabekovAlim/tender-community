@@ -10,52 +10,52 @@ type TransactionRepository struct {
 	Db *sql.DB
 }
 
-func (r *TransactionRepository) CreateTransaction(ctx context.Context, transaction models.Transaction) error {
+func (r *TransactionRepository) CreateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	// Begin a new database transaction
 	tx, err := r.Db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return models.Transaction{}, err
 	}
 
 	// Insert the transaction
 	result, err := tx.ExecContext(ctx, `
-		INSERT INTO transactions (type, tender_number, user_id, company_id, organization, amount, total, status)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    INSERT INTO transactions (type, tender_number, user_id, company_id, organization, amount, total, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
 		transaction.Organization, transaction.Amount, transaction.Total, transaction.Status)
 	if err != nil {
-		err := tx.Rollback()
-		if err != nil {
-			return err
-		} // Rollback the transaction on error
-		return err
+		tx.Rollback() // Rollback the transaction on error
+		return models.Transaction{}, err
 	}
 
 	// Get the last inserted transaction ID
 	transactionID, err := result.LastInsertId()
 	if err != nil {
 		tx.Rollback() // Rollback the transaction on error
-		return err
+		return models.Transaction{}, err
 	}
+	transaction.ID = int(transactionID)
 
 	// Insert the expenses associated with the transaction
-	for _, expense := range transaction.Expenses {
+	for i, expense := range transaction.Expenses {
 		_, err := tx.ExecContext(ctx, `
-			INSERT INTO additional_expenses (name, amount, transaction_id)
-			VALUES (?, ?, ?)`,
+      INSERT INTO additional_expenses (name, amount, transaction_id)
+      VALUES (?, ?, ?)`,
 			expense.Name, expense.Amount, transactionID)
 		if err != nil {
 			tx.Rollback() // Rollback the transaction on error
-			return err
+			return models.Transaction{}, err
 		}
+		// Update the transaction ID in the expense
+		transaction.Expenses[i].TransactionID = int(transactionID)
 	}
 
 	// Commit the transaction
 	if err := tx.Commit(); err != nil {
-		return err
+		return models.Transaction{}, err
 	}
 
-	return nil
+	return transaction, nil
 }
 
 // GetTransactionByID retrieves a transaction by ID from the database along with its expenses.
