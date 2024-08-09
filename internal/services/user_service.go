@@ -33,3 +33,11 @@ func (s *UserService) UpdateBalance(ctx context.Context, id int, amount float64)
 func (s *UserService) GetBalance(ctx context.Context, id int) (float64, error) {
 	return s.Repo.GetBalance(ctx, id)
 }
+
+func (s *UserService) DeleteUserByID(ctx context.Context, id int) error {
+	return s.Repo.DeleteUserByID(ctx, id)
+}
+
+func (s *UserService) UpdateUser(ctx context.Context, user models.User) (models.User, error) {
+	return s.Repo.UpdateUser(ctx, user)
+}

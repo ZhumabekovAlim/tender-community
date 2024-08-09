@@ -67,22 +67,45 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpenses(ctx context.Context) 
 }
 
 // UpdatePersonalExpense updates an existing expense in the database.
-func (r *PersonalExpenseRepository) UpdatePersonalExpense(ctx context.Context, expense models.PersonalExpense) error {
-	result, err := r.Db.ExecContext(ctx, "UPDATE personal_expenses SET amount = ?, reason = ?, description = ? WHERE id = ?", expense.Amount, expense.Reason, expense.Description, expense.ID)
+func (r *PersonalExpenseRepository) UpdatePersonalExpense(ctx context.Context, expense models.PersonalExpense) (models.PersonalExpense, error) {
+	query := "UPDATE personal_expenses SET"
+	params := []interface{}{}
+
+	if expense.Amount != 0 {
+		query += " amount = ?,"
+		params = append(params, expense.Amount)
+	}
+	if expense.Reason != "" {
+		query += " reason = ?,"
+		params = append(params, expense.Reason)
+	}
+	if expense.Description != "" {
+		query += " description = ?,"
+		params = append(params, expense.Description)
+	}
+
+	// Trim the last comma from the query
+	query = query[:len(query)-1]
+	query += " WHERE id = ?"
+	params = append(params, expense.ID)
+
+	_, err := r.Db.ExecContext(ctx, query, params...)
 	if err != nil {
-		return err
+		return models.PersonalExpense{}, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	// Retrieve the updated expense data
+	row := r.Db.QueryRowContext(ctx, "SELECT id, amount, reason, description FROM personal_expenses WHERE id = ?", expense.ID)
+	var updatedExpense models.PersonalExpense
+	err = row.Scan(&updatedExpense.ID, &updatedExpense.Amount, &updatedExpense.Reason, &updatedExpense.Description)
 	if err != nil {
-		return err
+		if err == sql.ErrNoRows {
+			return models.PersonalExpense{}, models.ErrExpenseNotFound
+		}
+		return models.PersonalExpense{}, err
 	}
 
-	if rowsAffected == 0 {
-		return models.ErrExpenseNotFound
-	}
-
-	return nil
+	return updatedExpense, nil
 }
 
 // DeletePersonalExpense removes an expense from the database by ID.

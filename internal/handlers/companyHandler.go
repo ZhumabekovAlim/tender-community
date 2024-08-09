@@ -82,7 +82,7 @@ func (h *CompanyHandler) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	}
 	company.ID = id
 
-	err = h.Service.UpdateCompany(r.Context(), company)
+	updatedCompany, err := h.Service.UpdateCompany(r.Context(), company)
 	if err != nil {
 		if errors.Is(err, models.ErrCompanyNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -92,7 +92,9 @@ func (h *CompanyHandler) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(updatedCompany)
 }
 
 // GetCompanyByID retrieves a company by ID.

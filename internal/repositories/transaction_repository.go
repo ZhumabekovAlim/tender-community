@@ -102,8 +102,8 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id int) 
 // GetAllTransactions retrieves all transactions from the database along with their expenses.
 func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]models.Transaction, error) {
 	rows, err := r.Db.QueryContext(ctx, `
-		SELECT id, type, tender_number, user_id, company_id, organization, amount, total, date, status
-		FROM transactions`)
+		SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.date, t.status, c.name, u.name
+		FROM transactions t JOIN tender.companies c on c.id = t.company_id JOIN tender.users u on u.id = t.user_id`)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 		var transaction models.Transaction
 		err := rows.Scan(&transaction.ID, &transaction.Type, &transaction.TenderNumber,
 			&transaction.UserID, &transaction.CompanyID, &transaction.Organization,
-			&transaction.Amount, &transaction.Total, &transaction.Date, &transaction.Status)
+			&transaction.Amount, &transaction.Total, &transaction.Date, &transaction.Status, &transaction.CompanyName, &transaction.UserName)
 		if err != nil {
 			return nil, err
 		}
@@ -151,11 +151,50 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 }
 
 // UpdateTransaction updates an existing transaction and its expenses in the database.
-func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transaction models.Transaction) error {
+func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	// Begin a new database transaction
 	tx, err := r.Db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return models.Transaction{}, err
+	}
+
+	// Retrieve existing transaction data to preserve non-updated fields
+	var existingTransaction models.Transaction
+	row := tx.QueryRowContext(ctx, `
+		SELECT type, tender_number, user_id, company_id, organization, amount, total, status 
+		FROM transactions WHERE id = ?`, transaction.ID)
+	err = row.Scan(&existingTransaction.Type, &existingTransaction.TenderNumber, &existingTransaction.UserID,
+		&existingTransaction.CompanyID, &existingTransaction.Organization, &existingTransaction.Amount,
+		&existingTransaction.Total, &existingTransaction.Status)
+	if err != nil {
+		tx.Rollback()
+		return models.Transaction{}, err
+	}
+
+	// Set the values to be updated, preserving existing ones if not provided
+	if transaction.Type == "" {
+		transaction.Type = existingTransaction.Type
+	}
+	if transaction.TenderNumber == nil {
+		transaction.TenderNumber = existingTransaction.TenderNumber
+	}
+	if transaction.UserID == 0 {
+		transaction.UserID = existingTransaction.UserID
+	}
+	if transaction.CompanyID == nil {
+		transaction.CompanyID = existingTransaction.CompanyID
+	}
+	if transaction.Organization == nil {
+		transaction.Organization = existingTransaction.Organization
+	}
+	if transaction.Amount == 0 {
+		transaction.Amount = existingTransaction.Amount
+	}
+	if transaction.Total == 0 {
+		transaction.Total = existingTransaction.Total
+	}
+	if transaction.Status == 0 {
+		transaction.Status = existingTransaction.Status
 	}
 
 	// Update the transaction
@@ -165,26 +204,26 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
 		transaction.Organization, transaction.Amount, transaction.Total, transaction.Status, transaction.ID)
 	if err != nil {
-		tx.Rollback() // Rollback the transaction on error
-		return err
+		tx.Rollback()
+		return models.Transaction{}, err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		tx.Rollback()
-		return err
+		return models.Transaction{}, err
 	}
 
 	if rowsAffected == 0 {
 		tx.Rollback()
-		return models.ErrTransactionNotFound
+		return models.Transaction{}, models.ErrTransactionNotFound
 	}
 
 	// Delete existing expenses
 	_, err = tx.ExecContext(ctx, `DELETE FROM additional_expenses WHERE transaction_id = ?`, transaction.ID)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return models.Transaction{}, err
 	}
 
 	// Insert the updated expenses
@@ -195,16 +234,42 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 			expense.Name, expense.Amount, transaction.ID)
 		if err != nil {
 			tx.Rollback()
-			return err
+			return models.Transaction{}, err
 		}
 	}
 
 	// Commit the transaction
 	if err := tx.Commit(); err != nil {
-		return err
+		return models.Transaction{}, err
 	}
 
-	return nil
+	// Retrieve the updated transaction data including the updated expenses
+	row = r.Db.QueryRowContext(ctx, `
+		SELECT id, type, tender_number, user_id, company_id, organization, amount, total, status 
+		FROM transactions WHERE id = ?`, transaction.ID)
+	err = row.Scan(&transaction.ID, &transaction.Type, &transaction.TenderNumber, &transaction.UserID,
+		&transaction.CompanyID, &transaction.Organization, &transaction.Amount, &transaction.Total, &transaction.Status)
+	if err != nil {
+		return models.Transaction{}, err
+	}
+
+	// Retrieve the updated expenses
+	rows, err := r.Db.QueryContext(ctx, `SELECT id, name, amount, transaction_id FROM additional_expenses WHERE transaction_id = ?`, transaction.ID)
+	if err != nil {
+		return models.Transaction{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var expense models.Expense
+		err := rows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID)
+		if err != nil {
+			return models.Transaction{}, err
+		}
+		transaction.Expenses = append(transaction.Expenses, expense)
+	}
+
+	return transaction, nil
 }
 
 // DeleteTransaction removes a transaction and its expenses from the database by ID.

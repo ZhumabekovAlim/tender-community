@@ -45,22 +45,41 @@ func (r *CompanyRepository) DeleteCompany(ctx context.Context, id int) error {
 }
 
 // UpdateCompany updates an existing company in the database.
-func (r *CompanyRepository) UpdateCompany(ctx context.Context, company models.Company) error {
-	result, err := r.Db.ExecContext(ctx, "UPDATE companies SET name = ?, description = ? WHERE id = ?", company.Name, company.Description, company.ID)
+func (r *CompanyRepository) UpdateCompany(ctx context.Context, company models.Company) (models.Company, error) {
+	query := "UPDATE companies SET"
+	params := []interface{}{}
+
+	if company.Name != "" {
+		query += " name = ?,"
+		params = append(params, company.Name)
+	}
+	if company.Description != "" {
+		query += " description = ?,"
+		params = append(params, company.Description)
+	}
+
+	// Trim the last comma from the query
+	query = query[:len(query)-1]
+	query += " WHERE id = ?"
+	params = append(params, company.ID)
+
+	_, err := r.Db.ExecContext(ctx, query, params...)
 	if err != nil {
-		return err
+		return models.Company{}, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	// Retrieve the updated company data
+	row := r.Db.QueryRowContext(ctx, "SELECT id, name, description FROM companies WHERE id = ?", company.ID)
+	var updatedCompany models.Company
+	err = row.Scan(&updatedCompany.ID, &updatedCompany.Name, &updatedCompany.Description)
 	if err != nil {
-		return err
+		if err == sql.ErrNoRows {
+			return models.Company{}, models.ErrCompanyNotFound
+		}
+		return models.Company{}, err
 	}
 
-	if rowsAffected == 0 {
-		return models.ErrCompanyNotFound
-	}
-
-	return nil
+	return updatedCompany, nil
 }
 
 // GetCompanyByID retrieves a company by ID from the database.

@@ -26,7 +26,7 @@ func (s *TransactionService) GetAllTransactions(ctx context.Context) ([]models.T
 }
 
 // UpdateTransaction updates an existing transaction and its expenses.
-func (s *TransactionService) UpdateTransaction(ctx context.Context, transaction models.Transaction) error {
+func (s *TransactionService) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	return s.Repo.UpdateTransaction(ctx, transaction)
 }
 

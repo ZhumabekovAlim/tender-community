@@ -27,7 +27,7 @@ func (s *CompanyService) DeleteCompany(ctx context.Context, id int) error {
 }
 
 // UpdateCompany updates an existing company.
-func (s *CompanyService) UpdateCompany(ctx context.Context, company models.Company) error {
+func (s *CompanyService) UpdateCompany(ctx context.Context, company models.Company) (models.Company, error) {
 	return s.Repo.UpdateCompany(ctx, company)
 }
 

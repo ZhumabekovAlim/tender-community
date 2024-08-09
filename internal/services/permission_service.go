@@ -18,7 +18,8 @@ func (s *PermissionService) AddPermission(ctx context.Context, permission models
 	}
 
 	permission.ID = id
-	permission.Status = 1
+	statusValue := 1
+	permission.Status = &statusValue
 	return permission, nil
 }
 
@@ -28,7 +29,7 @@ func (s *PermissionService) DeletePermission(ctx context.Context, id int) error 
 }
 
 // UpdatePermission updates an existing permission.
-func (s *PermissionService) UpdatePermission(ctx context.Context, permission models.Permission) error {
+func (s *PermissionService) UpdatePermission(ctx context.Context, permission models.Permission) (models.Permission, error) {
 	return s.Repo.UpdatePermission(ctx, permission)
 }
 

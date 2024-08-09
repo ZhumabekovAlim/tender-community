@@ -14,6 +14,8 @@ type Transaction struct {
 	Date         time.Time `json:"date"`
 	Status       int       `json:"status"`
 	Expenses     []Expense `json:"expenses"`
+	UserName     *string   `json:"username,omitempty"`
+	CompanyName  *string   `json:"companyname,omitempty"`
 }
 
 type Expense struct {

@@ -82,7 +82,7 @@ func (h *PermissionHandler) UpdatePermission(w http.ResponseWriter, r *http.Requ
 	}
 	permission.ID = id
 
-	err = h.Service.UpdatePermission(r.Context(), permission)
+	updatedPermission, err := h.Service.UpdatePermission(r.Context(), permission)
 	if err != nil {
 		if errors.Is(err, models.ErrPermissionNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -92,7 +92,9 @@ func (h *PermissionHandler) UpdatePermission(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(updatedPermission)
 }
 
 // GetPermissionsByUserID getting permissions by user_id

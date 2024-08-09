@@ -96,7 +96,7 @@ func (h *PersonalExpenseHandler) UpdatePersonalExpense(w http.ResponseWriter, r 
 	}
 	expense.ID = id
 
-	err = h.Service.UpdatePersonalExpense(r.Context(), expense)
+	updatedExpense, err := h.Service.UpdatePersonalExpense(r.Context(), expense)
 	if err != nil {
 		if errors.Is(err, models.ErrExpenseNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -106,7 +106,9 @@ func (h *PersonalExpenseHandler) UpdatePersonalExpense(w http.ResponseWriter, r 
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(updatedExpense)
 }
 
 // DeletePersonalExpense deletes a personal expense by ID.

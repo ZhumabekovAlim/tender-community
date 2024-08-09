@@ -33,7 +33,7 @@ func (s *PersonalExpenseService) GetAllPersonalExpenses(ctx context.Context) ([]
 }
 
 // UpdatePersonalExpense updates an existing personal expense.
-func (s *PersonalExpenseService) UpdatePersonalExpense(ctx context.Context, expense models.PersonalExpense) error {
+func (s *PersonalExpenseService) UpdatePersonalExpense(ctx context.Context, expense models.PersonalExpense) (models.PersonalExpense, error) {
 	return s.Repo.UpdatePersonalExpense(ctx, expense)
 }
 

@@ -95,7 +95,7 @@ func (h *TransactionHandler) UpdateTransaction(w http.ResponseWriter, r *http.Re
 	}
 	transaction.ID = id
 
-	err = h.Service.UpdateTransaction(r.Context(), transaction)
+	updatedTransaction, err := h.Service.UpdateTransaction(r.Context(), transaction)
 	if err != nil {
 		if errors.Is(err, models.ErrTransactionNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -105,7 +105,9 @@ func (h *TransactionHandler) UpdateTransaction(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(updatedTransaction)
 }
 
 // DeleteTransaction deletes a transaction and its expenses by ID.

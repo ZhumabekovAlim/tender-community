@@ -24,7 +24,7 @@ var (
 
 func (r *UserRepository) GetAllUsers(ctx context.Context) ([]models.User, error) {
 
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, name, last_name, email, phone, inn, balance, password FROM users")
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, name, last_name, email, phone, inn, balance, password FROM users WHERE id != 1")
 	if err != nil {
 		return nil, err
 	}
@@ -162,4 +162,80 @@ func (r *UserRepository) GetBalance(ctx context.Context, id int) (float64, error
 	}
 
 	return balance, nil
+}
+
+// DeleteUserByID removes a user from the database by ID.
+func (r *UserRepository) DeleteUserByID(ctx context.Context, id int) error {
+	result, err := r.Db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return models.ErrUserNotFound
+	}
+
+	return nil
+}
+
+func (r *UserRepository) UpdateUser(ctx context.Context, user models.User) (models.User, error) {
+	query := "UPDATE users SET"
+	params := []interface{}{}
+
+	if user.Name != "" {
+		query += " name = ?,"
+		params = append(params, user.Name)
+	}
+	if user.LastName != "" {
+		query += " last_name = ?,"
+		params = append(params, user.LastName)
+	}
+	if user.Email != "" {
+		query += " email = ?,"
+		params = append(params, user.Email)
+	}
+	if user.Phone != "" {
+		query += " phone = ?,"
+		params = append(params, user.Phone)
+	}
+	if user.INN != "" {
+		query += " inn = ?,"
+		params = append(params, user.INN)
+	}
+	if user.Balance != 0 {
+		query += " balance = ?,"
+		params = append(params, user.Balance)
+	}
+	if user.Password != "" {
+		query += " password = ?,"
+		params = append(params, user.Password)
+	}
+
+	// Trim the last comma from the query
+	query = query[:len(query)-1]
+	query += " WHERE id = ?"
+	params = append(params, user.ID)
+
+	_, err := r.Db.ExecContext(ctx, query, params...)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	// Retrieve the updated user
+	row := r.Db.QueryRowContext(ctx, "SELECT id, name, last_name, email, phone, inn, balance, password FROM users WHERE id = ?", user.ID)
+	var updatedUser models.User
+	err = row.Scan(&updatedUser.ID, &updatedUser.Name, &updatedUser.LastName, &updatedUser.Email, &updatedUser.Phone, &updatedUser.INN, &updatedUser.Balance, &updatedUser.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return models.User{}, models.ErrUserNotFound
+		}
+		return models.User{}, err
+	}
+
+	return updatedUser, nil
 }

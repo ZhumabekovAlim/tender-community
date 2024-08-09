@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"tender/internal/models"
 )
 
@@ -45,27 +46,55 @@ func (r *PermissionRepository) DeletePermission(ctx context.Context, id int) err
 }
 
 // UpdatePermission updates an existing permission in the database.
-func (r *PermissionRepository) UpdatePermission(ctx context.Context, permission models.Permission) error {
-	result, err := r.Db.ExecContext(ctx, "UPDATE permissions SET user_id = ?, company_id = ?, status = ? WHERE id = ?", permission.UserID, permission.CompanyID, permission.Status, permission.ID)
+func (r *PermissionRepository) UpdatePermission(ctx context.Context, permission models.Permission) (models.Permission, error) {
+	query := "UPDATE permissions SET"
+	params := []interface{}{}
+
+	if permission.UserID != 0 {
+		query += " user_id = ?,"
+		params = append(params, permission.UserID)
+	}
+	if permission.CompanyID != 0 {
+		query += " company_id = ?,"
+		params = append(params, permission.CompanyID)
+	}
+	if permission.Status != nil { // Check if Status is provided in the JSON
+		query += " status = ?,"
+		params = append(params, *permission.Status)
+	}
+
+	// Check if any fields were updated (i.e., if there are any params)
+	if len(params) == 0 {
+		return models.Permission{}, fmt.Errorf("no fields to update")
+	}
+
+	// Trim the last comma from the query string
+	query = query[:len(query)-1]
+	query += " WHERE id = ?"
+	params = append(params, permission.ID)
+
+	_, err := r.Db.ExecContext(ctx, query, params...)
 	if err != nil {
-		return err
+		return models.Permission{}, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	// Retrieve the updated permission data
+	row := r.Db.QueryRowContext(ctx, "SELECT id, user_id, company_id, status FROM permissions WHERE id = ?", permission.ID)
+	var updatedPermission models.Permission
+	err = row.Scan(&updatedPermission.ID, &updatedPermission.UserID, &updatedPermission.CompanyID, &updatedPermission.Status)
 	if err != nil {
-		return err
+		if err == sql.ErrNoRows {
+			return models.Permission{}, models.ErrPermissionNotFound
+		}
+		return models.Permission{}, err
 	}
 
-	if rowsAffected == 0 {
-		return models.ErrPermissionNotFound
-	}
-
-	return nil
+	return updatedPermission, nil
 }
 
 // GetPermission retrieves a permission by ID from the database.
 func (r *PermissionRepository) GetPermissionsByUserID(ctx context.Context, userID int) ([]models.Permission, error) {
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, user_id, company_id, status FROM permissions WHERE user_id = ?", userID)
+	rows, err := r.Db.QueryContext(ctx, "SELECT p.id, p.user_id, p.company_id, p.status, u.name, c.name FROM permissions p JOIN tender.users u on u.id = p.user_id JOIN tender.companies c on c.id = p.company_id WHERE user_id = ?", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +104,7 @@ func (r *PermissionRepository) GetPermissionsByUserID(ctx context.Context, userI
 
 	for rows.Next() {
 		var permission models.Permission
-		err := rows.Scan(&permission.ID, &permission.UserID, &permission.CompanyID, &permission.Status)
+		err := rows.Scan(&permission.ID, &permission.UserID, &permission.CompanyID, &permission.Status, &permission.UserName, &permission.CompanyName)
 		if err != nil {
 			return nil, err
 		}
