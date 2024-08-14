@@ -12,12 +12,11 @@ type PermissionService struct {
 
 // AddPermission adds a new permission for a user.
 func (s *PermissionService) AddPermission(ctx context.Context, permission models.Permission) (models.Permission, error) {
-	id, err := s.Repo.AddPermission(ctx, permission)
+	permission, err := s.Repo.AddPermission(ctx, permission)
 	if err != nil {
 		return models.Permission{}, err
 	}
 
-	permission.ID = id
 	statusValue := 1
 	permission.Status = &statusValue
 	return permission, nil
