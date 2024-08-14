@@ -12,18 +12,34 @@ type PermissionRepository struct {
 }
 
 // AddPermission inserts a new permission into the database.
-func (r *PermissionRepository) AddPermission(ctx context.Context, permission models.Permission) (int, error) {
+func (r *PermissionRepository) AddPermission(ctx context.Context, permission models.Permission) (models.Permission, error) {
 	result, err := r.Db.ExecContext(ctx, "INSERT INTO permissions (user_id, company_id, status) VALUES (?, ?, 1)", permission.UserID, permission.CompanyID)
 	if err != nil {
-		return 0, err
+		return models.Permission{}, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, err
+		return models.Permission{}, err
 	}
 
-	return int(id), nil
+	row := r.Db.QueryRowContext(ctx,
+		`SELECT permissions.id, user_id, company_id, status, c.name, u.name
+				FROM permissions 
+				    JOIN companies c on permissions.company_id = c.id 
+				    JOIN users u on u.id = permissions.user_id 
+				WHERE id = ?`, id)
+
+	var createdPermission models.Permission
+	err = row.Scan(&createdPermission.ID, &createdPermission.UserID, &createdPermission.CompanyID, &createdPermission.Status, &createdPermission.CompanyName, &createdPermission.UserName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return models.Permission{}, models.ErrPermissionNotFound
+		}
+		return models.Permission{}, err
+	}
+
+	return createdPermission, nil
 }
 
 // DeletePermission removes a permission from the database by ID.
@@ -79,9 +95,15 @@ func (r *PermissionRepository) UpdatePermission(ctx context.Context, permission 
 	}
 
 	// Retrieve the updated permission data
-	row := r.Db.QueryRowContext(ctx, "SELECT id, user_id, company_id, status FROM permissions WHERE id = ?", permission.ID)
+	row := r.Db.QueryRowContext(ctx,
+		`SELECT permissions.id, user_id, company_id, status, c.name, u.name
+				FROM permissions 
+				    JOIN companies c on permissions.company_id = c.id 
+				    JOIN users u on u.id = permissions.user_id 
+				WHERE id = ?`, permission.ID)
+
 	var updatedPermission models.Permission
-	err = row.Scan(&updatedPermission.ID, &updatedPermission.UserID, &updatedPermission.CompanyID, &updatedPermission.Status)
+	err = row.Scan(&updatedPermission.ID, &updatedPermission.UserID, &updatedPermission.CompanyID, &updatedPermission.Status, &updatedPermission.CompanyName, &updatedPermission.UserName)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return models.Permission{}, models.ErrPermissionNotFound

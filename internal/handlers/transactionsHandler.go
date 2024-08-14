@@ -136,3 +136,15 @@ func (h *TransactionHandler) DeleteTransaction(w http.ResponseWriter, r *http.Re
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// 1
+func (h *TransactionHandler) GetMonthlyAmountsByYear(w http.ResponseWriter, r *http.Request) {
+	monthlyAmounts, err := h.Service.GetMonthlyAmountsByYear(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(monthlyAmounts)
+}

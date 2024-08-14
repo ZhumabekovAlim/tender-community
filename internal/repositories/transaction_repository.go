@@ -312,3 +312,72 @@ func (r *TransactionRepository) DeleteTransaction(ctx context.Context, id int) e
 
 	return nil
 }
+
+type MonthlyAmount struct {
+	Month  string  `json:"name"`
+	Amount float64 `json:"amount"`
+}
+
+type YearlyAmounts struct {
+	Year   int             `json:"year"`
+	Months []MonthlyAmount `json:"months"`
+}
+
+func (r *TransactionRepository) GetMonthlyAmountsByYear(ctx context.Context) ([]YearlyAmounts, error) {
+	query := `
+		SELECT 
+			YEAR(date) as year, 
+			MONTHNAME(date) as month, 
+			SUM(amount) as total_amount 
+		FROM 
+			transactions 
+		GROUP BY 
+			year, MONTH(date) 
+		ORDER BY 
+			year DESC, MONTH(date) DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var yearlyAmounts []YearlyAmounts
+	var currentYear int
+	var yearlyData YearlyAmounts
+	var monthlyData MonthlyAmount
+
+	for rows.Next() {
+		var year int
+		var month string
+		var totalAmount float64
+
+		if err := rows.Scan(&year, &month, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		if currentYear != year {
+			if currentYear != 0 {
+				yearlyAmounts = append(yearlyAmounts, yearlyData)
+			}
+			yearlyData = YearlyAmounts{
+				Year:   year,
+				Months: []MonthlyAmount{},
+			}
+			currentYear = year
+		}
+
+		monthlyData = MonthlyAmount{
+			Month:  month,
+			Amount: totalAmount,
+		}
+		yearlyData.Months = append(yearlyData.Months, monthlyData)
+	}
+
+	if currentYear != 0 {
+		yearlyAmounts = append(yearlyAmounts, yearlyData)
+	}
+
+	return yearlyAmounts, nil
+}

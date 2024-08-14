@@ -34,3 +34,17 @@ func (s *TransactionService) UpdateTransaction(ctx context.Context, transaction 
 func (s *TransactionService) DeleteTransaction(ctx context.Context, id int) error {
 	return s.Repo.DeleteTransaction(ctx, id)
 }
+
+type MonthlyAmount struct {
+	Month  string  `json:"name"`
+	Amount float64 `json:"amount"`
+}
+
+type YearlyAmounts struct {
+	Year   int             `json:"year"`
+	Months []MonthlyAmount `json:"months"`
+}
+
+func (s *TransactionService) GetMonthlyAmountsByYear(ctx context.Context) ([]YearlyAmounts, error) {
+	return s.Repo.GetMonthlyAmountsByYear(ctx)
+}
