@@ -37,11 +37,12 @@ func (app *application) routes() http.Handler {
 	mux.Del("/companies/:id", standardMiddleware.ThenFunc(app.companyHandler.DeleteCompany))  // Delete company by ID
 
 	// TRANSACTION
-	mux.Post("/transactions", dynamicMiddleware.ThenFunc(app.transactionHandler.CreateTransaction))      // Create a new transaction
-	mux.Get("/transactions", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactions))     // Get all transactions
-	mux.Get("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionByID)) // Get transaction by ID
-	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))  // Update transaction by ID
-	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))  // Delete transaction by ID
+	mux.Post("/transactions", dynamicMiddleware.ThenFunc(app.transactionHandler.CreateTransaction))              // Create a new transaction
+	mux.Get("/transactions", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactions))             // Get all transactions
+	mux.Get("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionByID))         // Get transaction by ID
+	mux.Get("/transactions/user/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByUser)) // Get transaction by user ID
+	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))          // Update transaction by ID
+	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))          // Delete transaction by ID
 
 	// PERSONAL EXPENSES
 	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))      // Create a new expense

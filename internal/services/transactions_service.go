@@ -25,6 +25,11 @@ func (s *TransactionService) GetAllTransactions(ctx context.Context) ([]models.T
 	return s.Repo.GetAllTransactions(ctx)
 }
 
+// GetTransactionsByUser retrieves transactions by user id.
+func (s *TransactionService) GetTransactionsByUser(ctx context.Context, userID int) ([]models.Transaction, error) {
+	return s.Repo.GetTransactionsByUser(ctx, userID)
+}
+
 // UpdateTransaction updates an existing transaction and its expenses.
 func (s *TransactionService) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	return s.Repo.UpdateTransaction(ctx, transaction)

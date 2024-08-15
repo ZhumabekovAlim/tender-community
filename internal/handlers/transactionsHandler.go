@@ -73,6 +73,30 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(transactions)
 }
 
+func (h *TransactionHandler) GetTransactionsByUser(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get(":id")
+
+	if userIDStr == "" {
+		http.Error(w, "Missing user ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	transactions, err := h.Service.GetTransactionsByUser(r.Context(), userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(transactions)
+}
+
 // UpdateTransaction updates an existing transaction and its expenses.
 func (h *TransactionHandler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
@@ -416,6 +440,7 @@ func (h *TransactionHandler) GetTotalAmountByCompanyForUser(w http.ResponseWrite
 	json.NewEncoder(w).Encode(totalAmounts)
 }
 
+// 13
 func (h *TransactionHandler) GetTotalAmountByCompanyForUserAndYear(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get("user_id")
 	yearStr := r.URL.Query().Get("year")
@@ -447,6 +472,7 @@ func (h *TransactionHandler) GetTotalAmountByCompanyForUserAndYear(w http.Respon
 	json.NewEncoder(w).Encode(totalAmounts)
 }
 
+// 14
 func (h *TransactionHandler) GetTotalAmountByCompanyForUserYearAndMonth(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get("user_id")
 	yearStr := r.URL.Query().Get("year")
