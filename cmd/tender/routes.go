@@ -50,5 +50,28 @@ func (app *application) routes() http.Handler {
 	mux.Put("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.UpdatePersonalExpense))  // Update expense by ID
 	mux.Del("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.DeletePersonalExpense))  // Delete expense by ID
 
+	// REPORTS
+	// company month
+	mux.Get("/reports/company/month/global", standardMiddleware.ThenFunc(app.transactionHandler.GetMonthlyAmountsByGlobal))               //global - company - month
+	mux.Get("/reports/company/month/year", standardMiddleware.ThenFunc(app.transactionHandler.GetMonthlyAmountsByYear))                   //year - company - month
+	mux.Get("/reports/company/month/year/company", standardMiddleware.ThenFunc(app.transactionHandler.GetMonthlyAmountsByYearAndCompany)) //year and company - company - month
+
+	// users month
+	mux.Get("/reports/users/month/global", standardMiddleware.ThenFunc(app.transactionHandler.GetMonthlyAmountsGroupedByYear))            //global - users - month
+	mux.Get("/reports/users/month/user", standardMiddleware.ThenFunc(app.transactionHandler.GetMonthlyAmountsGroupedByYearForUser))       //user - users - month
+	mux.Get("/reports/users/month/user/year", standardMiddleware.ThenFunc(app.transactionHandler.GetMonthlyAmountsForUserByYear))         //user and year - users - month
+	mux.Get("/reports/users/month/user/year/company", standardMiddleware.ThenFunc(app.transactionHandler.GetMonthlyAmountsForUserByYear)) //user and year and company - users - month
+
+	// company by company
+	mux.Get("/reports/companies/company/global", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountGroupedByCompany))             //global - company - company
+	mux.Get("/reports/companies/company/year", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForYear))               //year - company - company
+	mux.Get("/reports/companies/company/year/month", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForYearAndMonth)) //year and month - company - company
+
+	//company users
+	mux.Get("/reports/users/company/global", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountGroupedByCompanyForUsers))              //global - users - month
+	mux.Get("/reports/users/company/user", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForUser))                        //user - users - month
+	mux.Get("/reports/users/company/user/year", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForUserAndYear))            //user and year - users - month
+	mux.Get("/reports/users/company/user/year/month", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForUserYearAndMonth)) //user and year and company - users - month
+
 	return standardMiddleware.Then(mux)
 }

@@ -138,8 +138,8 @@ func (h *TransactionHandler) DeleteTransaction(w http.ResponseWriter, r *http.Re
 }
 
 // 1
-func (h *TransactionHandler) GetMonthlyAmountsByYear(w http.ResponseWriter, r *http.Request) {
-	monthlyAmounts, err := h.Service.GetMonthlyAmountsByYear(r.Context())
+func (h *TransactionHandler) GetMonthlyAmountsByGlobal(w http.ResponseWriter, r *http.Request) {
+	monthlyAmounts, err := h.Service.GetMonthlyAmountsByGlobal(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -147,4 +147,340 @@ func (h *TransactionHandler) GetMonthlyAmountsByYear(w http.ResponseWriter, r *h
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(monthlyAmounts)
+}
+
+// 2
+func (h *TransactionHandler) GetMonthlyAmountsByYear(w http.ResponseWriter, r *http.Request) {
+	yearStr := r.URL.Query().Get("year")
+	if yearStr == "" {
+		http.Error(w, "Missing year", http.StatusBadRequest)
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	monthlyAmounts, err := h.Service.GetMonthlyAmountsByYear(r.Context(), year)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(monthlyAmounts)
+}
+
+// 3
+func (h *TransactionHandler) GetMonthlyAmountsByYearAndCompany(w http.ResponseWriter, r *http.Request) {
+	yearStr := r.URL.Query().Get("year")
+	companyIDStr := r.URL.Query().Get("company_id")
+
+	if yearStr == "" || companyIDStr == "" {
+		http.Error(w, "Missing year or company ID", http.StatusBadRequest)
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	companyID, err := strconv.Atoi(companyIDStr)
+	if err != nil {
+		http.Error(w, "Invalid company ID", http.StatusBadRequest)
+		return
+	}
+
+	monthlyAmounts, err := h.Service.GetMonthlyAmountsByYearAndCompany(r.Context(), year, companyID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(monthlyAmounts)
+}
+
+// 4
+func (h *TransactionHandler) GetMonthlyAmountsGroupedByYear(w http.ResponseWriter, r *http.Request) {
+	monthlyAmounts, err := h.Service.GetMonthlyAmountsGroupedByYear(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(monthlyAmounts)
+}
+
+// 5
+func (h *TransactionHandler) GetMonthlyAmountsGroupedByYearForUser(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "Missing user ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	monthlyAmounts, err := h.Service.GetMonthlyAmountsGroupedByYearForUser(r.Context(), userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(monthlyAmounts)
+}
+
+// 6
+func (h *TransactionHandler) GetMonthlyAmountsForUserByYear(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get("user_id")
+	yearStr := r.URL.Query().Get("year")
+
+	if userIDStr == "" || yearStr == "" {
+		http.Error(w, "Missing user ID or year", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	monthlyAmounts, err := h.Service.GetMonthlyAmountsForUserByYear(r.Context(), userID, year)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(monthlyAmounts)
+}
+
+// 7
+func (h *TransactionHandler) GetMonthlyAmountsForUserByYearAndCompany(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get("user_id")
+	yearStr := r.URL.Query().Get("year")
+	companyIDStr := r.URL.Query().Get("company_id")
+
+	if userIDStr == "" || yearStr == "" || companyIDStr == "" {
+		http.Error(w, "Missing user ID, year, or company ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	companyID, err := strconv.Atoi(companyIDStr)
+	if err != nil {
+		http.Error(w, "Invalid company ID", http.StatusBadRequest)
+		return
+	}
+
+	monthlyAmounts, err := h.Service.GetMonthlyAmountsForUserByYearAndCompany(r.Context(), userID, year, companyID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(monthlyAmounts)
+}
+
+// 8
+func (h *TransactionHandler) GetTotalAmountGroupedByCompany(w http.ResponseWriter, r *http.Request) {
+	totalAmounts, err := h.Service.GetTotalAmountGroupedByCompany(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(totalAmounts)
+}
+
+// 9
+func (h *TransactionHandler) GetTotalAmountByCompanyForYear(w http.ResponseWriter, r *http.Request) {
+	yearStr := r.URL.Query().Get("year")
+	if yearStr == "" {
+		http.Error(w, "Missing year", http.StatusBadRequest)
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	totalAmounts, err := h.Service.GetTotalAmountByCompanyForYear(r.Context(), year)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(totalAmounts)
+}
+
+// 10
+func (h *TransactionHandler) GetTotalAmountByCompanyForYearAndMonth(w http.ResponseWriter, r *http.Request) {
+	yearStr := r.URL.Query().Get("year")
+	monthStr := r.URL.Query().Get("month")
+
+	if yearStr == "" || monthStr == "" {
+		http.Error(w, "Missing year or month", http.StatusBadRequest)
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	month, err := strconv.Atoi(monthStr)
+	if err != nil {
+		http.Error(w, "Invalid month", http.StatusBadRequest)
+		return
+	}
+
+	totalAmounts, err := h.Service.GetTotalAmountByCompanyForYearAndMonth(r.Context(), year, month)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(totalAmounts)
+}
+
+// 11
+func (h *TransactionHandler) GetTotalAmountGroupedByCompanyForUsers(w http.ResponseWriter, r *http.Request) {
+	totalAmounts, err := h.Service.GetTotalAmountGroupedByCompanyForUsers(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(totalAmounts)
+}
+
+// 12
+func (h *TransactionHandler) GetTotalAmountByCompanyForUser(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "Missing user ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	totalAmounts, err := h.Service.GetTotalAmountByCompanyForUser(r.Context(), userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(totalAmounts)
+}
+
+func (h *TransactionHandler) GetTotalAmountByCompanyForUserAndYear(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get("user_id")
+	yearStr := r.URL.Query().Get("year")
+
+	if userIDStr == "" || yearStr == "" {
+		http.Error(w, "Missing user ID or year", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	totalAmounts, err := h.Service.GetTotalAmountByCompanyForUserAndYear(r.Context(), userID, year)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(totalAmounts)
+}
+
+func (h *TransactionHandler) GetTotalAmountByCompanyForUserYearAndMonth(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get("user_id")
+	yearStr := r.URL.Query().Get("year")
+	monthStr := r.URL.Query().Get("month")
+
+	if userIDStr == "" || yearStr == "" || monthStr == "" {
+		http.Error(w, "Missing user ID, year, or month", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	month, err := strconv.Atoi(monthStr)
+	if err != nil {
+		http.Error(w, "Invalid month", http.StatusBadRequest)
+		return
+	}
+
+	totalAmounts, err := h.Service.GetTotalAmountByCompanyForUserYearAndMonth(r.Context(), userID, year, month)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(totalAmounts)
 }

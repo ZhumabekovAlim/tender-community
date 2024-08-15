@@ -28,7 +28,7 @@ func (r *PermissionRepository) AddPermission(ctx context.Context, permission mod
 				FROM permissions 
 				    JOIN companies c on permissions.company_id = c.id 
 				    JOIN users u on u.id = permissions.user_id 
-				WHERE id = ?`, id)
+				WHERE id = ?`, int(id))
 
 	var createdPermission models.Permission
 	err = row.Scan(&createdPermission.ID, &createdPermission.UserID, &createdPermission.CompanyID, &createdPermission.Status, &createdPermission.CompanyName, &createdPermission.UserName)

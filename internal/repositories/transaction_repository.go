@@ -10,6 +10,21 @@ type TransactionRepository struct {
 	Db *sql.DB
 }
 
+type MonthlyAmount struct {
+	Month  string  `json:"name"`
+	Amount float64 `json:"amount"`
+}
+
+type YearlyAmounts struct {
+	Year   int             `json:"year"`
+	Months []MonthlyAmount `json:"months"`
+}
+
+type CompanyTotalAmount struct {
+	CompanyName string  `json:"name"`
+	TotalAmount float64 `json:"total_amount"`
+}
+
 func (r *TransactionRepository) CreateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	// Begin a new database transaction
 	tx, err := r.Db.BeginTx(ctx, nil)
@@ -313,17 +328,7 @@ func (r *TransactionRepository) DeleteTransaction(ctx context.Context, id int) e
 	return nil
 }
 
-type MonthlyAmount struct {
-	Month  string  `json:"name"`
-	Amount float64 `json:"amount"`
-}
-
-type YearlyAmounts struct {
-	Year   int             `json:"year"`
-	Months []MonthlyAmount `json:"months"`
-}
-
-func (r *TransactionRepository) GetMonthlyAmountsByYear(ctx context.Context) ([]YearlyAmounts, error) {
+func (r *TransactionRepository) GetMonthlyAmountsByGlobal(ctx context.Context) ([]YearlyAmounts, error) {
 	query := `
 		SELECT 
 			YEAR(date) as year, 
@@ -380,4 +385,601 @@ func (r *TransactionRepository) GetMonthlyAmountsByYear(ctx context.Context) ([]
 	}
 
 	return yearlyAmounts, nil
+}
+
+func (r *TransactionRepository) GetMonthlyAmountsByYear(ctx context.Context, year int) ([]MonthlyAmount, error) {
+	query := `
+		SELECT
+			MONTHNAME(date) as month,
+			SUM(amount) as total_amount
+		FROM
+			transactions
+		WHERE
+			YEAR(date) = ?
+		GROUP BY
+			MONTH(date)
+		ORDER BY
+			MONTH(date) DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, year)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var monthlyAmounts []MonthlyAmount
+
+	for rows.Next() {
+		var month string
+		var totalAmount float64
+
+		if err := rows.Scan(&month, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		monthlyAmount := MonthlyAmount{
+			Month:  month,
+			Amount: totalAmount,
+		}
+		monthlyAmounts = append(monthlyAmounts, monthlyAmount)
+	}
+
+	return monthlyAmounts, nil
+}
+
+func (r *TransactionRepository) GetMonthlyAmountsByYearAndCompany(ctx context.Context, year int, companyID int) ([]MonthlyAmount, error) {
+	query := `
+		SELECT
+			MONTHNAME(t.date) as month,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			companies c on c.id = t.company_id
+		WHERE
+			YEAR(t.date) = ? AND c.id = ?
+		GROUP BY
+			MONTH(t.date)
+		ORDER BY
+			MONTH(t.date) DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, year, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var monthlyAmounts []MonthlyAmount
+
+	for rows.Next() {
+		var month string
+		var totalAmount float64
+
+		if err := rows.Scan(&month, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		monthlyAmount := MonthlyAmount{
+			Month:  month,
+			Amount: totalAmount,
+		}
+		monthlyAmounts = append(monthlyAmounts, monthlyAmount)
+	}
+
+	return monthlyAmounts, nil
+}
+
+func (r *TransactionRepository) GetMonthlyAmountsGroupedByYear(ctx context.Context) ([]YearlyAmounts, error) {
+	query := `
+		SELECT
+			YEAR(date) as year,
+			MONTHNAME(date) as month,
+			SUM(amount) as total_amount
+		FROM
+			transactions
+		GROUP BY
+			year, MONTH(date)
+		ORDER BY
+			year DESC, MONTH(date) DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var yearlyAmounts []YearlyAmounts
+	var currentYear int
+	var yearlyData YearlyAmounts
+	var monthlyData MonthlyAmount
+
+	for rows.Next() {
+		var year int
+		var month string
+		var totalAmount float64
+
+		if err := rows.Scan(&year, &month, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		if currentYear != year {
+			if currentYear != 0 {
+				yearlyAmounts = append(yearlyAmounts, yearlyData)
+			}
+			yearlyData = YearlyAmounts{
+				Year:   year,
+				Months: []MonthlyAmount{},
+			}
+			currentYear = year
+		}
+
+		monthlyData = MonthlyAmount{
+			Month:  month,
+			Amount: totalAmount,
+		}
+		yearlyData.Months = append(yearlyData.Months, monthlyData)
+	}
+
+	if currentYear != 0 {
+		yearlyAmounts = append(yearlyAmounts, yearlyData)
+	}
+
+	return yearlyAmounts, nil
+}
+
+func (r *TransactionRepository) GetMonthlyAmountsGroupedByYearForUser(ctx context.Context, userID int) ([]YearlyAmounts, error) {
+	query := `
+		SELECT
+			YEAR(t.date) as year,
+			MONTHNAME(t.date) as month,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			users u on u.id = t.user_id
+		WHERE 
+			u.id = ?
+		GROUP BY
+			year, MONTH(t.date)
+		ORDER BY
+			year DESC, MONTH(t.date) DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var yearlyAmounts []YearlyAmounts
+	var currentYear int
+	var yearlyData YearlyAmounts
+	var monthlyData MonthlyAmount
+
+	for rows.Next() {
+		var year int
+		var month string
+		var totalAmount float64
+
+		if err := rows.Scan(&year, &month, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		if currentYear != year {
+			if currentYear != 0 {
+				yearlyAmounts = append(yearlyAmounts, yearlyData)
+			}
+			yearlyData = YearlyAmounts{
+				Year:   year,
+				Months: []MonthlyAmount{},
+			}
+			currentYear = year
+		}
+
+		monthlyData = MonthlyAmount{
+			Month:  month,
+			Amount: totalAmount,
+		}
+		yearlyData.Months = append(yearlyData.Months, monthlyData)
+	}
+
+	if currentYear != 0 {
+		yearlyAmounts = append(yearlyAmounts, yearlyData)
+	}
+
+	return yearlyAmounts, nil
+}
+
+func (r *TransactionRepository) GetMonthlyAmountsForUserByYear(ctx context.Context, userID int, year int) ([]MonthlyAmount, error) {
+	query := `
+		SELECT
+			MONTHNAME(t.date) as month,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			users u on u.id = t.user_id
+		WHERE 
+			u.id = ? AND YEAR(t.date) = ?
+		GROUP BY
+			MONTH(t.date)
+		ORDER BY
+			MONTH(t.date) DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID, year)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var monthlyAmounts []MonthlyAmount
+
+	for rows.Next() {
+		var month string
+		var totalAmount float64
+
+		if err := rows.Scan(&month, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		monthlyAmount := MonthlyAmount{
+			Month:  month,
+			Amount: totalAmount,
+		}
+		monthlyAmounts = append(monthlyAmounts, monthlyAmount)
+	}
+
+	return monthlyAmounts, nil
+}
+
+func (r *TransactionRepository) GetMonthlyAmountsForUserByYearAndCompany(ctx context.Context, userID int, year int, companyID int) ([]MonthlyAmount, error) {
+	query := `
+		SELECT
+			MONTHNAME(t.date) as month,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			users u on u.id = t.user_id
+		JOIN
+			companies c on c.id = t.company_id
+		WHERE 
+			u.id = ? AND YEAR(t.date) = ? AND c.id = ?
+		GROUP BY
+			MONTH(t.date)
+		ORDER BY
+			MONTH(t.date) DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID, year, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var monthlyAmounts []MonthlyAmount
+
+	for rows.Next() {
+		var month string
+		var totalAmount float64
+
+		if err := rows.Scan(&month, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		monthlyAmount := MonthlyAmount{
+			Month:  month,
+			Amount: totalAmount,
+		}
+		monthlyAmounts = append(monthlyAmounts, monthlyAmount)
+	}
+
+	return monthlyAmounts, nil
+}
+
+func (r *TransactionRepository) GetTotalAmountGroupedByCompany(ctx context.Context) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			companies c on c.id = t.company_id
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
+}
+
+func (r *TransactionRepository) GetTotalAmountByCompanyForYear(ctx context.Context, year int) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			companies c on c.id = t.company_id
+		WHERE
+			YEAR(t.date) = ?
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, year)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
+}
+
+func (r *TransactionRepository) GetTotalAmountByCompanyForYearAndMonth(ctx context.Context, year int, month int) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			companies c on c.id = t.company_id
+		WHERE
+			YEAR(t.date) = ? AND MONTH(t.date) = ?
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, year, month)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
+}
+
+func (r *TransactionRepository) GetTotalAmountGroupedByCompanyForUsers(ctx context.Context) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			companies c on c.id = t.company_id
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
+}
+
+func (r *TransactionRepository) GetTotalAmountByCompanyForUser(ctx context.Context, userID int) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			companies c on c.id = t.company_id
+		JOIN
+			users u on u.id = t.user_id
+		WHERE 
+			u.id = ?
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
+}
+
+func (r *TransactionRepository) GetTotalAmountByCompanyForUserAndYear(ctx context.Context, userID int, year int) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			companies c on c.id = t.company_id
+		JOIN
+			users u on u.id = t.user_id
+		WHERE 
+			u.id = ? AND YEAR(t.date) = ?
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID, year)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
+}
+
+func (r *TransactionRepository) GetTotalAmountByCompanyForUserYearAndMonth(ctx context.Context, userID int, year int, month int) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN 
+			companies c on c.id = t.company_id
+		JOIN
+			users u on u.id = t.user_id
+		WHERE 
+			u.id = ? AND YEAR(t.date) = ? AND MONTH(t.date) = ?
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID, year, month)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
 }
