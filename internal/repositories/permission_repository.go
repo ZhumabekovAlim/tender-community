@@ -100,7 +100,7 @@ func (r *PermissionRepository) UpdatePermission(ctx context.Context, permission 
 				FROM permissions 
 				    JOIN companies c on permissions.company_id = c.id 
 				    JOIN users u on u.id = permissions.user_id 
-				WHERE id = ?`, permission.ID)
+				WHERE permissions.id = ?`, permission.ID)
 
 	var updatedPermission models.Permission
 	err = row.Scan(&updatedPermission.ID, &updatedPermission.UserID, &updatedPermission.CompanyID, &updatedPermission.Status, &updatedPermission.CompanyName, &updatedPermission.UserName)

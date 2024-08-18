@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"golang.org/x/crypto/bcrypt"
 	"tender/internal/models"
 	"tender/internal/repositories"
 )
@@ -40,4 +41,23 @@ func (s *UserService) DeleteUserByID(ctx context.Context, id int) error {
 
 func (s *UserService) UpdateUser(ctx context.Context, user models.User) (models.User, error) {
 	return s.Repo.UpdateUser(ctx, user)
+}
+
+func (s *UserService) ChangePassword(ctx context.Context, userID int, oldPassword, newPassword string) error {
+	user, err := s.Repo.GetUserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword))
+	if err != nil {
+		return models.ErrInvalidPassword
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
+	if err != nil {
+		return err
+	}
+
+	return s.Repo.UpdatePassword(ctx, userID, string(hashedPassword))
 }

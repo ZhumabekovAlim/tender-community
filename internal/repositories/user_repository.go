@@ -239,3 +239,8 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user models.User) (mode
 
 	return updatedUser, nil
 }
+
+func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, hashedPassword string) error {
+	_, err := r.Db.ExecContext(ctx, "UPDATE users SET password = ? WHERE id = ?", hashedPassword, userID)
+	return err
+}
