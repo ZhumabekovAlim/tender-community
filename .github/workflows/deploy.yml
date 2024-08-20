@@ -19,7 +19,7 @@ jobs:
           go-version: 1.19
 
       - name: Build Go application
-        run: go build -o ./cmd/tender/.
+        run: go build -o /root/go/src/tender/cmd/.
 
       - name: Deploy to server
         env:
