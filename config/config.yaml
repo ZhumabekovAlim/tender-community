@@ -3,4 +3,4 @@ server:
 
 database:
   driver: "mysql"
-  url: "root:@tcp(localhost:3306)/tender?parseTime=true"
+  url: "root:root@tcp(localhost:3306)/tender?parseTime=true"

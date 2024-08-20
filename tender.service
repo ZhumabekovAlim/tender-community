@@ -1,0 +1,17 @@
+[Unit]
+Description=Tender Service
+After=network.target
+
+[Service]
+ExecStart=/root/go/src/tender/cmd/tender/tender
+Restart=on-failure
+RestartSec=30
+User=root
+Group=root
+Environment=PATH=/usr/local/go/bin:/usr/bin:/bin
+Environment=GO_ENV=production
+Environment=MYSQL_USER=root
+Environment=MYSQL_PASSWORD=root
+
+[Install]
+WantedBy=multi-user.target
