@@ -40,7 +40,7 @@ jobs:
             cd /root/go/src/tender/
             tar -xzf tender.tar.gz
             cd cmd/tender/
-            go build -o ./tender .
+            go build -o cmd/tender/.
             sudo systemctl restart tender.service
           EOF
 
