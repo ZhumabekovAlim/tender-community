@@ -25,26 +25,26 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_PORT: ${{ secrets.SERVER_PORT }}
 
-      run: |
-        echo "${SSH_PRIVATE_KEY}" > key.pem
-        chmod 600 key.pem
+        run: |
+          echo "${SSH_PRIVATE_KEY}" > key.pem
+          chmod 600 key.pem
 
-        # Архивируем проект перед передачей
-        tar -czf tender.tar.gz .
+          # Архивируем проект перед передачей
+          tar -czf tender.tar.gz .
 
-        # Передаем архив на сервер
-        scp -i key.pem -P $SERVER_PORT -o StrictHostKeyChecking=no tender.tar.gz $SERVER_USER@$SERVER_HOST:/root/go/src/tender/
+          # Передаем архив на сервер
+          scp -i key.pem -P $SERVER_PORT -o StrictHostKeyChecking=no tender.tar.gz $SERVER_USER@$SERVER_HOST:/root/go/src/tender/
 
-        # Распаковываем и собираем проект на сервере
-        ssh -i key.pem -p $SERVER_PORT -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
-          cd /root/go/src/tender/
-          tar -xzf tender.tar.gz
-          cd cmd/tender/
-          go build -o ./tender .
-          sudo systemctl restart tender.service
-        EOF
+          # Распаковываем и собираем проект на сервере
+          ssh -i key.pem -p $SERVER_PORT -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
+            cd /root/go/src/tender/
+            tar -xzf tender.tar.gz
+            cd cmd/tender/
+            go build -o ./tender .
+            sudo systemctl restart tender.service
+          EOF
 
-        # Удаляем ключ и архив
-        rm key.pem
-        rm tender.tar.gz
-      
+          # Удаляем ключ и архив
+          rm key.pem
+          rm tender.tar.gz
+        
