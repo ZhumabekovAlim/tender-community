@@ -34,5 +34,3 @@ jobs:
           scp -i key.pem -P $SERVER_PORT -o StrictHostKeyChecking=no ./tender $SERVER_USER@$SERVER_HOST:/usr/local/bin/
           ssh -i key.pem -p $SERVER_PORT -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "sudo systemctl restart tender.service"
           rm key.pem
-
-
