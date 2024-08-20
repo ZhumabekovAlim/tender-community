@@ -31,6 +31,7 @@ jobs:
         run: |
           echo "${SSH_PRIVATE_KEY}" > key.pem
           chmod 600 key.pem
+          ssh-keyscan -p $SERVER_PORT $SERVER_HOST >> ~/.ssh/known_hosts
           scp -i key.pem -P $SERVER_PORT ./tender $SERVER_USER@$SERVER_HOST:/usr/local/bin/
           ssh -i key.pem -p $SERVER_PORT $SERVER_USER@$SERVER_HOST "sudo systemctl restart tender.service"
           rm key.pem
