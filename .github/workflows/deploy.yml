@@ -50,11 +50,11 @@ jobs:
           ssh -i key.pem -p $SERVER_PORT -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
             cd /root/go/src/tender/
             tar -xzf tender.tar.gz
-            sudo cd root/go/src/tender/cmd/tender/
+            cd /root/go/src/tender/cmd/tender/
             sudo go build -buildvcs=false -o .
             sudo systemctl restart tender.service
           EOF
 
           # Удаляем ключ и архив
-          sudo rm key.pem
-          sudo rm tender.tar.gz
+          rm key.pem
+          rm tender.tar.gz
