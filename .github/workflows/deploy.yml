@@ -29,8 +29,19 @@ jobs:
           echo "${SSH_PRIVATE_KEY}" > key.pem
           chmod 600 key.pem
 
-          # Архивируем проект перед передачей
-          tar -czf tender.tar.gz .
+          # Создаем временную директорию
+          mkdir temp_build_dir
+
+          # Копируем все файлы в эту директорию, исключая .git и .github
+          rsync -a --exclude='.git' --exclude='.github' ./ temp_build_dir/
+
+          # Переходим в временную директорию и архивируем проект
+          cd temp_build_dir
+          tar -czf ../tender.tar.gz .
+
+          # Возвращаемся в исходную директорию и удаляем временную директорию
+          cd ..
+          rm -rf temp_build_dir
 
           # Передаем архив на сервер
           scp -i key.pem -P $SERVER_PORT -o StrictHostKeyChecking=no tender.tar.gz $SERVER_USER@$SERVER_HOST:/root/go/src/tender/
@@ -39,11 +50,10 @@ jobs:
           ssh -i key.pem -p $SERVER_PORT -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
             cd /root/go/src/tender/
             tar -xzf tender.tar.gz
-            go build -buildvcs=false -o /root/go/src/tender/cmd/tender/.
+            go build -buildvcs=false -o /***/go/src/tender/cmd/tender/.
             sudo systemctl restart tender.service
           EOF
 
           # Удаляем ключ и архив
           sudo rm /root/go/src/tender/key.pem
           sudo rm /root/go/src/tender/tender.tar.gz
-        
