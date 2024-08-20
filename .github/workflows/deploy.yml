@@ -42,8 +42,9 @@ jobs:
             cd cmd/tender/
             go build -o ./tender .
             sudo systemctl restart tender.service
+          EOF
 
-            # Удаляем ключ и архив
-            rm /root/go/src/tender/key.pem
-            rm /root/go/src/tender/tender.tar.gz
-        EOF
+          # Удаляем ключ и архив
+          rm /root/go/src/tender/key.pem
+          rm /root/go/src/tender/tender.tar.gz
+        
