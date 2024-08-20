@@ -16,10 +16,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.19
+          go-version: 1.21
 
       - name: Build Go application
-        run: go build -o /root/go/src/tender/cmd/. ./cmd/tender/.
+        run: go build -o ./tender ./cmd/tender/
 
       - name: Deploy to server
         env:
@@ -31,6 +31,6 @@ jobs:
         run: |
           echo "${SSH_PRIVATE_KEY}" > key.pem
           chmod 600 key.pem
-          scp -i key.pem -P $SERVER_PORT tender $SERVER_USER@$SERVER_HOST:/usr/local/bin/
+          scp -i key.pem -P $SERVER_PORT ./tender $SERVER_USER@$SERVER_HOST:/usr/local/bin/
           ssh -i key.pem -p $SERVER_PORT $SERVER_USER@$SERVER_HOST "sudo systemctl restart tender.service"
           rm key.pem
