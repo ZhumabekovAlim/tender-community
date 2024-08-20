@@ -55,5 +55,5 @@ jobs:
           EOF
 
           # Удаляем ключ и архив
-          sudo rm /root/go/src/tender/key.pem
-          sudo rm /root/go/src/tender/tender.tar.gz
+          sudo rm key.pem
+          sudo rm tender.tar.gz
