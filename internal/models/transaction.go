@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type Transaction struct {
 	ID           int       `json:"id"`
 	Type         string    `json:"type"`
@@ -19,9 +17,9 @@ type Transaction struct {
 }
 
 type Expense struct {
-	ID            int       `json:"id"`
-	Name          string    `json:"name"`
-	Amount        float64   `json:"amount"`
-	TransactionID int       `json:"transaction_id"`
-	Date          time.Time `json:"date"`
+	ID            int     `json:"id"`
+	Name          string  `json:"name"`
+	Amount        float64 `json:"amount"`
+	TransactionID int     `json:"transaction_id"`
+	Date          string  `json:"date"`
 }
