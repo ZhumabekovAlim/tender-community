@@ -166,6 +166,12 @@ func (r *UserRepository) GetBalance(ctx context.Context, id int) (float64, error
 
 // DeleteUserByID removes a user from the database by ID.
 func (r *UserRepository) DeleteUserByID(ctx context.Context, id int) error {
+
+	_, err := r.Db.ExecContext(ctx, "UPDATE transactions SET user_id = NULL WHERE user_id = ?", id)
+	if err != nil {
+		return err
+	}
+
 	result, err := r.Db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", id)
 	if err != nil {
 		return err

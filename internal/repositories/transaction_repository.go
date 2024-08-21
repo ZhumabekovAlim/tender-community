@@ -252,9 +252,6 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	if transaction.Total == 0 {
 		transaction.Total = existingTransaction.Total
 	}
-	if transaction.Status == 0 {
-		transaction.Status = existingTransaction.Status
-	}
 
 	// Update the transaction
 	result, err := tx.ExecContext(ctx, `
