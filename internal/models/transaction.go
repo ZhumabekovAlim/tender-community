@@ -11,7 +11,7 @@ type Transaction struct {
 	Organization *string   `json:"organization,omitempty"`
 	Amount       float64   `json:"amount"`
 	Total        float64   `json:"total"`
-	Date         time.Time `json:"date"`
+	Date         string    `json:"date"`
 	Status       int       `json:"status"`
 	Expenses     []Expense `json:"expenses"`
 	UserName     *string   `json:"username,omitempty"`
