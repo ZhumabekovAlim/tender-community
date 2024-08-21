@@ -301,10 +301,10 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 
 	// Retrieve the updated transaction data including the updated expenses
 	row = r.Db.QueryRowContext(ctx, `
-		SELECT id, type, tender_number, user_id, company_id, organization, amount, total, status 
+		SELECT id, type, tender_number, user_id, company_id, organization, amount, total, date, status 
 		FROM transactions WHERE id = ?`, transaction.ID)
 	err = row.Scan(&transaction.ID, &transaction.Type, &transaction.TenderNumber, &transaction.UserID,
-		&transaction.CompanyID, &transaction.Organization, &transaction.Amount, &transaction.Total, &transaction.Status)
+		&transaction.CompanyID, &transaction.Organization, &transaction.Amount, &transaction.Total, &transaction.Date, &transaction.Status)
 	if err != nil {
 		return models.Transaction{}, err
 	}
