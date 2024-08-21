@@ -64,6 +64,17 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, transacti
 		// Update the transaction ID in the expense
 		transaction.Expenses[i].TransactionID = int(transactionID)
 	}
+	err = tx.QueryRowContext(ctx, `
+    SELECT u.name, c.name 
+    FROM transactions t
+    JOIN users u ON t.user_id = u.id
+    JOIN companies c ON t.company_id = c.id
+    WHERE t.id = ?`,
+		transaction.ID).Scan(&transaction.UserName, &transaction.CompanyName)
+	if err != nil {
+		tx.Rollback() // Rollback the transaction on error
+		return models.Transaction{}, err
+	}
 
 	// Commit the transaction
 	if err := tx.Commit(); err != nil {
@@ -299,12 +310,16 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		return models.Transaction{}, err
 	}
 
-	// Retrieve the updated transaction data including the updated expenses
+	// Retrieve the updated transaction data including the user name, company name, and updated expenses
 	row = r.Db.QueryRowContext(ctx, `
-		SELECT id, type, tender_number, user_id, company_id, organization, amount, total, date, status 
-		FROM transactions WHERE id = ?`, transaction.ID)
+		SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.date, t.status, u.name, c.name 
+		FROM transactions t
+		JOIN users u ON t.user_id = u.id
+		JOIN companies c ON t.company_id = c.id
+		WHERE t.id = ?`, transaction.ID)
 	err = row.Scan(&transaction.ID, &transaction.Type, &transaction.TenderNumber, &transaction.UserID,
-		&transaction.CompanyID, &transaction.Organization, &transaction.Amount, &transaction.Total, &transaction.Date, &transaction.Status)
+		&transaction.CompanyID, &transaction.Organization, &transaction.Amount, &transaction.Total, &transaction.Date, &transaction.Status,
+		&transaction.UserName, &transaction.CompanyName)
 	if err != nil {
 		return models.Transaction{}, err
 	}
