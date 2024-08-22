@@ -146,6 +146,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int) (models.User, 
 
 func (r *UserRepository) UpdateBalance(ctx context.Context, id int, amount float64) error {
 	_, err := r.Db.ExecContext(ctx, "UPDATE users SET balance = balance + ? WHERE id = ?", amount, id)
+	_, err = r.Db.ExecContext(ctx, "UPDATE users SET balance = balance - ? WHERE id = ?", amount, 1)
 	return err
 }
 

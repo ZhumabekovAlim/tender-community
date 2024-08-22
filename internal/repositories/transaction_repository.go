@@ -34,10 +34,10 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, transacti
 
 	// Insert the transaction
 	result, err := tx.ExecContext(ctx, `
-    INSERT INTO transactions (type, tender_number, user_id, company_id, organization, amount, total, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    INSERT INTO transactions (type, tender_number, user_id, company_id, organization, amount, total, date, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
-		transaction.Organization, transaction.Amount, transaction.Total, transaction.Status)
+		transaction.Organization, transaction.Amount, transaction.Total, transaction.Date, transaction.Status)
 	if err != nil {
 		tx.Rollback() // Rollback the transaction on error
 		return models.Transaction{}, err
@@ -129,7 +129,7 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id int) 
 func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]models.Transaction, error) {
 	rows, err := r.Db.QueryContext(ctx, `
 		SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.date, t.status, c.name, u.name
-		FROM transactions t JOIN tender.companies c on c.id = t.company_id JOIN tender.users u on u.id = t.user_id`)
+		FROM transactions t JOIN tender.companies c on c.id = t.company_id JOIN tender.users u on u.id = t.user_id ORDER BY t.date DESC`)
 	if err != nil {
 		return nil, err
 	}
