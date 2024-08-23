@@ -3,7 +3,7 @@ CREATE TABLE transactions
     id            INT AUTO_INCREMENT PRIMARY KEY,
     type          VARCHAR(255)   NOT NULL,
     tender_number VARCHAR(255),
-    user_id       INT            NOT NULL,
+    user_id       INT,
     company_id    INT,
     organization  VARCHAR(255),
     amount        DECIMAL(10, 2) NOT NULL,

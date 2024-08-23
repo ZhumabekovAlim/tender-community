@@ -48,6 +48,10 @@ func (s *TransactionService) GetMonthlyAmountsByYear(ctx context.Context, year i
 	return s.Repo.GetMonthlyAmountsByYear(ctx, year)
 }
 
+func (s *TransactionService) GetMonthlyAmountsByCompany(ctx context.Context, companyID int) ([]repositories.MonthlyAmount, error) {
+	return s.Repo.GetMonthlyAmountsByCompany(ctx, companyID)
+}
+
 func (s *TransactionService) GetMonthlyAmountsByYearAndCompany(ctx context.Context, year int, companyID int) ([]repositories.MonthlyAmount, error) {
 	return s.Repo.GetMonthlyAmountsByYearAndCompany(ctx, year, companyID)
 }
@@ -76,6 +80,10 @@ func (s *TransactionService) GetTotalAmountByCompanyForYear(ctx context.Context,
 	return s.Repo.GetTotalAmountByCompanyForYear(ctx, year)
 }
 
+func (s *TransactionService) GetTotalAmountByCompanyForMonth(ctx context.Context, month int) ([]repositories.CompanyTotalAmount, error) {
+	return s.Repo.GetTotalAmountByCompanyForMonth(ctx, month)
+}
+
 func (s *TransactionService) GetTotalAmountByCompanyForYearAndMonth(ctx context.Context, year int, month int) ([]repositories.CompanyTotalAmount, error) {
 	return s.Repo.GetTotalAmountByCompanyForYearAndMonth(ctx, year, month)
 }
@@ -86,6 +94,10 @@ func (s *TransactionService) GetTotalAmountGroupedByCompanyForUsers(ctx context.
 
 func (s *TransactionService) GetTotalAmountByCompanyForUser(ctx context.Context, userID int) ([]repositories.CompanyTotalAmount, error) {
 	return s.Repo.GetTotalAmountByCompanyForUser(ctx, userID)
+}
+
+func (s *TransactionService) GetTotalAmountByCompanyForUserAndMonth(ctx context.Context, userID int, month int) ([]repositories.CompanyTotalAmount, error) {
+	return s.Repo.GetTotalAmountByCompanyForUserAndMonth(ctx, userID, month)
 }
 
 func (s *TransactionService) GetTotalAmountByCompanyForUserAndYear(ctx context.Context, userID int, year int) ([]repositories.CompanyTotalAmount, error) {

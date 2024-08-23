@@ -484,6 +484,47 @@ func (r *TransactionRepository) GetMonthlyAmountsByYear(ctx context.Context, yea
 	return monthlyAmounts, nil
 }
 
+func (r *TransactionRepository) GetMonthlyAmountsByCompany(ctx context.Context, companyID int) ([]MonthlyAmount, error) {
+	query := `
+		SELECT
+			MONTHNAME(date) as month,
+			SUM(amount) as total_amount
+		FROM
+			transactions
+		WHERE
+			company_id = ?
+		GROUP BY
+			MONTH(date)
+		ORDER BY
+			MONTH(date) DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var monthlyAmounts []MonthlyAmount
+
+	for rows.Next() {
+		var month string
+		var totalAmount float64
+
+		if err := rows.Scan(&month, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		monthlyAmount := MonthlyAmount{
+			Month:  month,
+			Amount: totalAmount,
+		}
+		monthlyAmounts = append(monthlyAmounts, monthlyAmount)
+	}
+
+	return monthlyAmounts, nil
+}
+
 func (r *TransactionRepository) GetMonthlyAmountsByYearAndCompany(ctx context.Context, year int, companyID int) ([]MonthlyAmount, error) {
 	query := `
 		SELECT
@@ -821,6 +862,49 @@ func (r *TransactionRepository) GetTotalAmountByCompanyForYear(ctx context.Conte
 	return totalAmounts, nil
 }
 
+func (r *TransactionRepository) GetTotalAmountByCompanyForMonth(ctx context.Context, month int) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN
+			companies c on c.id = t.company_id
+		WHERE
+			MONTH(t.date) = ?
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, month)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
+}
+
 func (r *TransactionRepository) GetTotalAmountByCompanyForYearAndMonth(ctx context.Context, year int, month int) ([]CompanyTotalAmount, error) {
 	query := `
 		SELECT
@@ -950,6 +1034,51 @@ func (r *TransactionRepository) GetTotalAmountByCompanyForUser(ctx context.Conte
 	return totalAmounts, nil
 }
 
+func (r *TransactionRepository) GetTotalAmountByCompanyForUserAndMonth(ctx context.Context, userID int, month int) ([]CompanyTotalAmount, error) {
+	query := `
+		SELECT
+			c.name,
+			SUM(t.amount) as total_amount
+		FROM
+			transactions t
+		JOIN
+			companies c on c.id = t.company_id
+		JOIN
+			users u on u.id = t.user_id
+		WHERE
+			u.id = ? AND MONTH(t.date) = ?
+		GROUP BY
+			c.id
+		ORDER BY
+			c.id
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID, month)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalAmounts []CompanyTotalAmount
+
+	for rows.Next() {
+		var companyName string
+		var totalAmount float64
+
+		if err := rows.Scan(&companyName, &totalAmount); err != nil {
+			return nil, err
+		}
+
+		companyTotal := CompanyTotalAmount{
+			CompanyName: companyName,
+			TotalAmount: totalAmount,
+		}
+		totalAmounts = append(totalAmounts, companyTotal)
+	}
+
+	return totalAmounts, nil
+}
+
 func (r *TransactionRepository) GetTotalAmountByCompanyForUserAndYear(ctx context.Context, userID int, year int) ([]CompanyTotalAmount, error) {
 	query := `
 		SELECT
@@ -957,7 +1086,7 @@ func (r *TransactionRepository) GetTotalAmountByCompanyForUserAndYear(ctx contex
 			SUM(t.amount) as total_amount
 		FROM
 			transactions t
-		JOIN 
+		JOIN
 			companies c on c.id = t.company_id
 		JOIN
 			users u on u.id = t.user_id
