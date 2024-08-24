@@ -112,7 +112,7 @@ func (r *UserRepository) LogIn(ctx context.Context, user models.User) (models.Us
 	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return 0, models.ErrInvalidPassword
+			return models.User{}, models.ErrInvalidPassword
 		}
 		return models.User{}, err
 	}
