@@ -88,7 +88,7 @@ func (r *UserRepository) SignUp(ctx context.Context, user models.User) (models.U
 	return user, nil
 }
 
-func (r *UserRepository) LogIn(ctx context.Context, user models.User) (int, error) {
+func (r *UserRepository) LogIn(ctx context.Context, user models.User) (models.User, error) {
 	var storedUser models.User
 
 	query := "SELECT id, name, last_name, email, phone, inn, password, balance FROM users WHERE email = ? OR phone = ?"
@@ -104,9 +104,9 @@ func (r *UserRepository) LogIn(ctx context.Context, user models.User) (int, erro
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return 0, models.ErrUserNotFound
+			return models.User{}, models.ErrUserNotFound
 		}
-		return 0, err
+		return models.User{}, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
@@ -114,10 +114,10 @@ func (r *UserRepository) LogIn(ctx context.Context, user models.User) (int, erro
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			return 0, models.ErrInvalidPassword
 		}
-		return 0, err
+		return models.User{}, err
 	}
 
-	return storedUser.ID, nil
+	return storedUser, nil
 }
 
 func (r *UserRepository) GetUserByID(ctx context.Context, id int) (models.User, error) {

@@ -19,7 +19,7 @@ func (s *UserService) SignUp(ctx context.Context, user models.User) (models.User
 	return s.Repo.SignUp(ctx, user)
 }
 
-func (s *UserService) LogIn(ctx context.Context, user models.User) (int, error) {
+func (s *UserService) LogIn(ctx context.Context, user models.User) (models.User, error) {
 	return s.Repo.LogIn(ctx, user)
 }
 

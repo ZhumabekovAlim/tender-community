@@ -59,7 +59,7 @@ func (h *UserHandler) LogIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := h.Service.LogIn(r.Context(), user)
+	userInfo, err := h.Service.LogIn(r.Context(), user)
 	if err != nil {
 		if errors.Is(err, models.ErrUserNotFound) || errors.Is(err, models.ErrInvalidPassword) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -72,8 +72,7 @@ func (h *UserHandler) LogIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	response := map[string]int{"user_id": userID}
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(userInfo)
 }
 
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
