@@ -8,7 +8,7 @@
       <jdbc-url>jdbc:mariadb://localhost:3306/tender</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="tender server" uuid="793a7366-2f61-4b10-9c19-28d26b17d326">
+    <data-source source="LOCAL" name="tender server" uuid="5071ffe6-232b-4c40-bcd2-d13597183387">
       <driver-ref>mariadb</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.mariadb.jdbc.Driver</jdbc-driver>

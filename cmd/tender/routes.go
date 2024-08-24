@@ -45,6 +45,14 @@ func (app *application) routes() http.Handler {
 	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))          // Update transaction by ID
 	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))          // Delete transaction by ID
 
+	// EXTRA TRANSACTIONS
+	mux.Post("/extra_transactions", dynamicMiddleware.ThenFunc(app.extraTransactionHandler.CreateExtraTransaction))              // Create a new extra transaction
+	mux.Get("/extra_transactions", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactions))             // Get all extra transactions
+	mux.Get("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetExtraTransactionByID))         // Get extra transaction by ID
+	mux.Get("/extra_transactions/user/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetExtraTransactionsByUser)) // Get extra transactions by user ID
+	mux.Put("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.UpdateExtraTransaction))          // Update extra transaction by ID
+	mux.Del("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.DeleteExtraTransaction))          // Delete extra transaction by ID
+
 	// PERSONAL EXPENSES
 	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))      // Create a new expense
 	mux.Get("/expenses", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpenses))     // Get all expenses
@@ -77,6 +85,9 @@ func (app *application) routes() http.Handler {
 	mux.Get("/reports/users/company/user/month", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForUserAndMonth))          //user and month - users - month 3
 	mux.Get("/reports/users/company/user/year", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForUserAndYear))            //user and year - users - month
 	mux.Get("/reports/users/company/user/year/month", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForUserYearAndMonth)) //user and year and company - users - month
+
+	// NOTIFY
+	mux.Post("/notify", dynamicMiddleware.ThenFunc(app.fcmHandler.NotifyChange))
 
 	return standardMiddleware.Then(mux)
 }

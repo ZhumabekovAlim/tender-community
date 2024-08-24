@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	firebase "firebase.google.com/go"
 	"fmt"
+	"google.golang.org/api/option"
 	"log"
 	"net/http"
 	"tender/internal/handlers"
@@ -11,16 +14,33 @@ import (
 )
 
 type application struct {
-	errorLog           *log.Logger
-	infoLog            *log.Logger
-	userHandler        *handlers.UserHandler
-	permissionHandler  *handlers.PermissionHandler
-	companyHandler     *handlers.CompanyHandler
-	transactionHandler *handlers.TransactionHandler
-	expenseHandler     *handlers.PersonalExpenseHandler
+	errorLog                *log.Logger
+	infoLog                 *log.Logger
+	userHandler             *handlers.UserHandler
+	permissionHandler       *handlers.PermissionHandler
+	companyHandler          *handlers.CompanyHandler
+	transactionHandler      *handlers.TransactionHandler
+	expenseHandler          *handlers.PersonalExpenseHandler
+	extraTransactionHandler *handlers.ExtraTransactionHandler
+	fcmHandler              *handlers.FCMHandler
 }
 
 func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
+
+	ctx := context.Background()
+	sa := option.WithCredentialsFile("/root/go/src/time-todo/cmd/web/serviceAccountKey.json")
+
+	firebaseApp, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: "time-todo-4b152"}, sa)
+	if err != nil {
+		errorLog.Fatalf("Ошибка в нахождении приложения: %v\n", err)
+	}
+
+	fcmClient, err := firebaseApp.Messaging(ctx)
+	if err != nil {
+		errorLog.Fatalf("Ошибка при не верном id устройства : %v\n", err)
+	}
+
+	fcmHandler := handlers.NewFCMHandler(fcmClient, db)
 
 	userRepo := &repositories.UserRepository{Db: db}
 	userService := &services.UserService{Repo: userRepo}
@@ -42,14 +62,20 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	expenseService := &services.PersonalExpenseService{Repo: expenseRepo}
 	expenseHandler := &handlers.PersonalExpenseHandler{Service: expenseService}
 
+	extraTransactionRepo := &repositories.ExtraTransactionRepository{Db: db}
+	extraTransactionService := &services.ExtraTransactionService{Repo: extraTransactionRepo}
+	extraTransactionHandler := &handlers.ExtraTransactionHandler{Service: extraTransactionService}
+
 	return &application{
-		errorLog:           errorLog,
-		infoLog:            infoLog,
-		userHandler:        userHandler,
-		permissionHandler:  permissionHandler,
-		companyHandler:     companyHandler,
-		transactionHandler: transactionHandler,
-		expenseHandler:     expenseHandler,
+		errorLog:                errorLog,
+		infoLog:                 infoLog,
+		userHandler:             userHandler,
+		permissionHandler:       permissionHandler,
+		companyHandler:          companyHandler,
+		transactionHandler:      transactionHandler,
+		expenseHandler:          expenseHandler,
+		extraTransactionHandler: extraTransactionHandler,
+		fcmHandler:              fcmHandler,
 	}
 
 }
