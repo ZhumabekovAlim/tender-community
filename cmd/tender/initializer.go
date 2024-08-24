@@ -28,9 +28,9 @@ type application struct {
 func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 
 	ctx := context.Background()
-	sa := option.WithCredentialsFile("/root/go/src/time-todo/cmd/web/serviceAccountKey.json")
+	sa := option.WithCredentialsFile("/root/go/src/tender/cmd/tender/serviceAccountKey.json")
 
-	firebaseApp, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: "time-todo-4b152"}, sa)
+	firebaseApp, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: "tender-community-9bb2e"}, sa)
 	if err != nil {
 		errorLog.Fatalf("Ошибка в нахождении приложения: %v\n", err)
 	}
