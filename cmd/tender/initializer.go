@@ -30,7 +30,7 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	ctx := context.Background()
 	sa := option.WithCredentialsFile("/root/go/src/tender/cmd/tender/serviceAccountKey.json")
 
-	firebaseApp, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: "tender-community-9bb2e"}, sa)
+	firebaseApp, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: "tendercommunity-17cd5"}, sa)
 	if err != nil {
 		errorLog.Fatalf("Ошибка в нахождении приложения: %v\n", err)
 	}
