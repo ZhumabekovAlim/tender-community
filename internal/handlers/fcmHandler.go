@@ -82,7 +82,7 @@ func (h *FCMHandler) NotifyChange(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received notification request: %+v", req)
 
 	ctx := r.Context()
-	tokens, err := h.GetTokensByClientID(req.Id)
+	tokens, err := h.GetTokensByClientID(req.UserId)
 	if err != nil {
 		log.Printf("Error fetching tokens: %v", err)
 		http.Error(w, "Failed to fetch tokens", http.StatusInternalServerError)
