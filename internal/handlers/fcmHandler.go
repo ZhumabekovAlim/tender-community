@@ -1,14 +1,18 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"firebase.google.com/go/messaging"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql" // Add the appropriate database driver
+	"io"
 	"log"
 	"net/http"
+	"tender/internal/models"
 )
 
 type FCMHandler struct {
@@ -17,9 +21,11 @@ type FCMHandler struct {
 }
 
 type NotificationRequest struct {
-	Id    int    `json:"id"`
-	Title string `json:"title"`
-	Body  string `json:"body"`
+	Id     int    `json:"id"`
+	UserId int    `json:"user_id"`
+	Token  string `json:"token"`
+	Title  string `json:"title"`
+	Body   string `json:"body"`
 }
 
 func NewFCMHandler(client *messaging.Client, db *sql.DB) *FCMHandler {
@@ -122,4 +128,42 @@ func (h *FCMHandler) GetTokensByClientID(clientID int) ([]string, error) {
 	}
 	fmt.Println("good")
 	return tokens, nil
+}
+
+func (h *FCMHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
+	var newToken NotificationRequest
+
+	body, _ := io.ReadAll(r.Body)
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	err := json.NewDecoder(r.Body).Decode(&newToken)
+	if err != nil {
+		http.Error(w, "Failed to fetch tokens", http.StatusBadRequest)
+		return
+	}
+
+	err = h.InsertToken(newToken.Id, newToken.Token)
+	if err != nil {
+		http.Error(w, "Failed to insert tokens", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *FCMHandler) InsertToken(clientID int, token string) error {
+
+	stmt1 := `
+        INSERT INTO notify_tokens 
+        (user_id, token) 
+        VALUES (?, ?);`
+
+	_, err := h.DB.Exec(stmt1, clientID, token)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+			return models.ErrDuplicateEmail
+		}
+		return err
+	}
+	return nil
 }
