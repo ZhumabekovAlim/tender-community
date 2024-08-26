@@ -87,7 +87,7 @@ func (app *application) routes() http.Handler {
 	mux.Get("/reports/users/company/user/year/month", standardMiddleware.ThenFunc(app.transactionHandler.GetTotalAmountByCompanyForUserYearAndMonth)) //user and year and company - users - month
 
 	// NOTIFY
-	mux.Get("/notify", dynamicMiddleware.ThenFunc(app.fcmHandler.NotifyChange))
+	mux.Post("/kotak", dynamicMiddleware.ThenFunc(app.fcmHandler.NotifyChange))
 	mux.Post("/notify/token/create", dynamicMiddleware.ThenFunc(app.fcmHandler.CreateToken))
 
 	return standardMiddleware.Then(mux)
