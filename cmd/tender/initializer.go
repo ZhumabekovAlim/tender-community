@@ -8,7 +8,6 @@ import (
 	"google.golang.org/api/option"
 	"log"
 	"net/http"
-	"os"
 	"tender/internal/handlers"
 	"tender/internal/repositories"
 	"tender/internal/services"
@@ -77,35 +76,6 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 		expenseHandler:          expenseHandler,
 		extraTransactionHandler: extraTransactionHandler,
 		fcmHandler:              fcmHandler,
-	}
-}
-
-func main() {
-	dsn := os.Getenv("DSN") // Make sure you set this environment variable or replace it with a string.
-	db, err := openDB(dsn)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-
-	app := initializeApp(db, errorLog, infoLog)
-
-	mux := http.NewServeMux()
-
-	// Add your routes here
-	mux.HandleFunc("/notify", app.fcmHandler.NotifyChange)
-	mux.HandleFunc("/register-token", app.fcmHandler.CreateToken)
-
-	// Wrap your mux with security headers middleware
-	secureMux := addSecurityHeaders(mux)
-
-	infoLog.Println("Starting server on :4000")
-	err = http.ListenAndServe(":4000", secureMux)
-	if err != nil {
-		errorLog.Fatal(err)
 	}
 }
 
