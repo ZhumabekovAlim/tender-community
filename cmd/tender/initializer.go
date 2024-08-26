@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"database/sql"
-	firebase "firebase.google.com/go"
+	"firebase.google.com/go"
 	"fmt"
 	"google.golang.org/api/option"
 	"log"
 	"net/http"
+	"os"
 	"tender/internal/handlers"
 	"tender/internal/repositories"
 	"tender/internal/services"
@@ -37,10 +38,10 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 
 	fcmClient, err := firebaseApp.Messaging(ctx)
 	if err != nil {
-		errorLog.Fatalf("Ошибка при не верном id устройства : %v\n", err)
+		errorLog.Fatalf("Ошибка при неверном ID устройства: %v\n", err)
 	}
 
-	fcmHandler := &handlers.FCMHandler{Client: fcmClient, DB: db}
+	fcmHandler := handlers.NewFCMHandler(fcmClient, db)
 
 	userRepo := &repositories.UserRepository{Db: db}
 	userService := &services.UserService{Repo: userRepo}
@@ -77,7 +78,35 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 		extraTransactionHandler: extraTransactionHandler,
 		fcmHandler:              fcmHandler,
 	}
+}
 
+func main() {
+	dsn := os.Getenv("DSN") // Make sure you set this environment variable or replace it with a string.
+	db, err := openDB(dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+
+	app := initializeApp(db, errorLog, infoLog)
+
+	mux := http.NewServeMux()
+
+	// Add your routes here
+	mux.HandleFunc("/notify", app.fcmHandler.NotifyChange)
+	mux.HandleFunc("/register-token", app.fcmHandler.CreateToken)
+
+	// Wrap your mux with security headers middleware
+	secureMux := addSecurityHeaders(mux)
+
+	infoLog.Println("Starting server on :4000")
+	err = http.ListenAndServe(":4000", secureMux)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
 }
 
 func openDB(dsn string) (*sql.DB, error) {
