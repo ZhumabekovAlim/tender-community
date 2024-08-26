@@ -40,7 +40,7 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 		errorLog.Fatalf("Ошибка при не верном id устройства : %v\n", err)
 	}
 
-	fcmHandler := handlers.NewFCMHandler(fcmClient, db)
+	fcmHandler := &handlers.FCMHandler{Client: fcmClient, DB: db}
 
 	userRepo := &repositories.UserRepository{Db: db}
 	userService := &services.UserService{Repo: userRepo}
