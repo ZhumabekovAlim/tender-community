@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 	"tender/internal/models"
@@ -11,8 +10,7 @@ import (
 )
 
 type TransactionHandler struct {
-	Service                 *services.TransactionService
-	ExtraTransactionService *services.ExtraTransactionService
+	Service *services.TransactionService
 }
 
 // CreateTransaction creates a new transaction with expenses.
@@ -65,55 +63,15 @@ func (h *TransactionHandler) GetTransactionByID(w http.ResponseWriter, r *http.R
 
 // GetAllTransactions retrieves all transactions.
 func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.Request) {
-	// Check if Service and ExtraTransactionService are initialized
-	//if h.Service == nil || h.ExtraTransactionService == nil {
-	//	log.Println("Service or ExtraTransactionService is not initialized")
-	//	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	//	return
-	//}
-
-	// Fetch regular transactions
 	transactions, err := h.Service.GetAllTransactions(r.Context())
 	if err != nil {
-		log.Printf("Error fetching transactions: %v", err)
-		http.Error(w, "Failed to fetch transactions", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Fetch extra transactions using the ExtraTransactionService
-	//extraTransactions, err := h.ExtraTransactionService.GetAllExtraTransactions(r.Context())
-	//if err != nil {
-	//	log.Printf("Error fetching extra transactions: %v", err)
-	//	http.Error(w, "Failed to fetch extra transactions", http.StatusInternalServerError)
-	//	return
-	//}
-
-	// Combine and send response
-	//combinedTransactions := combineTransactions(transactions, extraTransactions)
-	//fmt.Println(combinedTransactions)
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(transactions); err != nil {
-		log.Printf("Error encoding response: %v", err)
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	}
+	json.NewEncoder(w).Encode(transactions)
 }
-
-// Helper function to combine regular transactions and extra transactions
-//func combineTransactions(transactions []models.Transaction, extraTransactions []models.ExtraTransaction) []interface{} {
-//	var combined []interface{}
-//
-//	// Add regular transactions to the combined slice
-//	for _, t := range transactions {
-//		combined = append(combined, t)
-//	}
-//
-//	// Add extra transactions to the combined slice
-//	for _, et := range extraTransactions {
-//		combined = append(combined, et)
-//	}
-//
-//	return combined
-//}
 
 func (h *TransactionHandler) GetTransactionsByUser(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get(":id")

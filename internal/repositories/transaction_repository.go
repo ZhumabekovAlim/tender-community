@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"log"
 	"tender/internal/models"
 )
 
@@ -130,12 +129,8 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id int) 
 func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]models.Transaction, error) {
 	rows, err := r.Db.QueryContext(ctx, `
 		SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.date, t.status, c.name, u.name
-		FROM transactions t 
-		JOIN tender.companies c on c.id = t.company_id 
-		JOIN tender.users u on u.id = t.user_id 
-		ORDER BY t.date DESC`)
+		FROM transactions t JOIN tender.companies c on c.id = t.company_id JOIN tender.users u on u.id = t.user_id ORDER BY t.date DESC`)
 	if err != nil {
-		log.Printf("Error querying transactions: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -147,7 +142,6 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 			&transaction.UserID, &transaction.CompanyID, &transaction.Organization,
 			&transaction.Amount, &transaction.Total, &transaction.Date, &transaction.Status, &transaction.CompanyName, &transaction.UserName)
 		if err != nil {
-			log.Printf("Error scanning transaction row: %v", err)
 			return nil, err
 		}
 
@@ -156,7 +150,6 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 			SELECT id, name, amount, transaction_id, date
 			FROM additional_expenses WHERE transaction_id = ?`, transaction.ID)
 		if err != nil {
-			log.Printf("Error querying additional expenses: %v", err)
 			return nil, err
 		}
 		defer expenseRows.Close()
@@ -166,7 +159,6 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 			var expense models.Expense
 			err := expenseRows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID, &expense.Date)
 			if err != nil {
-				log.Printf("Error scanning expense row: %v", err)
 				return nil, err
 			}
 			expenses = append(expenses, expense)
@@ -176,8 +168,8 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 		transactions = append(transactions, transaction)
 	}
 
+	// Check for errors during row iteration
 	if err := rows.Err(); err != nil {
-		log.Printf("Error iterating over transactions rows: %v", err)
 		return nil, err
 	}
 
