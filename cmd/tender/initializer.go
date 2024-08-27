@@ -54,10 +54,6 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	companyService := &services.CompanyService{Repo: companyRepo}
 	companyHandler := &handlers.CompanyHandler{Service: companyService}
 
-	transactionRepo := &repositories.TransactionRepository{Db: db}
-	transactionService := &services.TransactionService{Repo: transactionRepo}
-	transactionHandler := &handlers.TransactionHandler{Service: transactionService}
-
 	expenseRepo := &repositories.PersonalExpenseRepository{Db: db}
 	expenseService := &services.PersonalExpenseService{Repo: expenseRepo}
 	expenseHandler := &handlers.PersonalExpenseHandler{Service: expenseService}
@@ -65,6 +61,13 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	extraTransactionRepo := &repositories.ExtraTransactionRepository{Db: db}
 	extraTransactionService := &services.ExtraTransactionService{Repo: extraTransactionRepo}
 	extraTransactionHandler := &handlers.ExtraTransactionHandler{Service: extraTransactionService}
+
+	transactionRepo := &repositories.TransactionRepository{Db: db}
+	transactionService := &services.TransactionService{Repo: transactionRepo}
+	transactionHandler := &handlers.TransactionHandler{
+		Service:                 transactionService,
+		ExtraTransactionService: extraTransactionService,
+	}
 
 	return &application{
 		errorLog:                errorLog,
