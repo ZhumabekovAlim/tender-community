@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"tender/internal/models"
@@ -67,22 +68,27 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 	// Fetch regular transactions
 	transactions, err := h.Service.GetAllTransactions(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error fetching transactions: %v", err)
+		http.Error(w, "Failed to fetch transactions", http.StatusInternalServerError)
 		return
 	}
 
 	// Fetch extra transactions using the ExtraTransactionService
 	extraTransactions, err := h.ExtraTransactionService.GetAllExtraTransactions(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error fetching extra transactions: %v", err)
+		http.Error(w, "Failed to fetch extra transactions", http.StatusInternalServerError)
 		return
 	}
 
-	// Combine and send response as before
+	// Combine and send response
 	combinedTransactions := combineTransactions(transactions, extraTransactions)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(combinedTransactions)
+	if err := json.NewEncoder(w).Encode(combinedTransactions); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
 
 // Helper function to combine regular transactions and extra transactions

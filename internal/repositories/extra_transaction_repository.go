@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"log"
 	"tender/internal/models"
 )
 
@@ -48,6 +49,7 @@ func (r *ExtraTransactionRepository) GetAllExtraTransactions(ctx context.Context
 		JOIN tender.users u on u.id = et.user_id
 		ORDER BY date DESC`)
 	if err != nil {
+		log.Printf("Error querying extra transactions: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -57,9 +59,15 @@ func (r *ExtraTransactionRepository) GetAllExtraTransactions(ctx context.Context
 		var extraTransaction models.ExtraTransaction
 		err := rows.Scan(&extraTransaction.ID, &extraTransaction.UserID, &extraTransaction.Description, &extraTransaction.Total, &extraTransaction.Date, &extraTransaction.Status, &extraTransaction.UserName)
 		if err != nil {
+			log.Printf("Error scanning extra transaction row: %v", err)
 			return nil, err
 		}
 		extraTransactions = append(extraTransactions, extraTransaction)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Error iterating over extra transactions rows: %v", err)
+		return nil, err
 	}
 
 	return extraTransactions, nil
