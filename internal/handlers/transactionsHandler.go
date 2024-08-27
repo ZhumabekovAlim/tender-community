@@ -10,7 +10,8 @@ import (
 )
 
 type TransactionHandler struct {
-	Service *services.TransactionService
+	Service                 *services.TransactionService
+	ExtraTransactionService *services.ExtraTransactionService
 }
 
 // CreateTransaction creates a new transaction with expenses.
@@ -70,14 +71,14 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	// Fetch extra transactions
-	extraTransactions, err := h.Service.GetAllExtraTransactions(r.Context())
+	// Fetch extra transactions using the ExtraTransactionService
+	extraTransactions, err := h.ExtraTransactionService.GetAllExtraTransactions(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Convert extra transactions to a common format (if necessary)
+	// Combine and send response as before
 	combinedTransactions := combineTransactions(transactions, extraTransactions)
 
 	w.Header().Set("Content-Type", "application/json")

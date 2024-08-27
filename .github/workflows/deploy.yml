@@ -51,7 +51,7 @@ jobs:
             cd /root/go/src/tender/
             tar -xzf tender.tar.gz
             cd /root/go/src/tender/cmd/tender/
-            sudo go build -buildvcs=false -o .
+            sudo go build -o tender -buildvcs=false
             sudo systemctl restart tender.service
           EOF
 
