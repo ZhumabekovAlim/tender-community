@@ -26,6 +26,12 @@ type NotificationRequest struct {
 	Body   string `json:"body"`
 }
 
+type Token struct {
+	Id     int    `json:"id"`
+	UserId int    `json:"user_id"`
+	Token  string `json:"token"`
+}
+
 func NewFCMHandler(client *messaging.Client, db *sql.DB) *FCMHandler {
 	return &FCMHandler{Client: client, DB: db}
 }
@@ -129,7 +135,7 @@ func (h *FCMHandler) GetTokensByClientID(clientID int) ([]string, error) {
 }
 
 func (h *FCMHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	var newToken NotificationRequest
+	var newToken Token
 
 	body, _ := io.ReadAll(r.Body)
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
@@ -140,7 +146,7 @@ func (h *FCMHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.InsertToken(newToken.Id, newToken.UserId, newToken.Token)
+	err = h.InsertToken(newToken.UserId, newToken.Token)
 	if err != nil {
 		http.Error(w, "Failed to insert tokens", http.StatusInternalServerError)
 		return
@@ -149,15 +155,16 @@ func (h *FCMHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *FCMHandler) InsertToken(id int, clientID int, token string) error {
+func (h *FCMHandler) InsertToken(clientID int, token string) error {
 
 	stmt1 := `
         INSERT INTO notify_tokens 
-        (id, user_id, token) 
-        VALUES (?, ?, ?);`
+        ( user_id, token) 
+        VALUES ( ?, ?);`
 
-	_, err := h.DB.Exec(stmt1, id, clientID, token)
+	_, err := h.DB.Exec(stmt1, clientID, token)
 	if err != nil {
+		fmt.Println("safjdajs")
 		return err
 	}
 	return nil

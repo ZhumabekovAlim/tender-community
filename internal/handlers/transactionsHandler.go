@@ -71,7 +71,7 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 	}
 
 	// Fetch extra transactions
-	extraTransactions, err := services.ExtraTransactionService.GetAllExtraTransactions(r.Context())
+	extraTransactions, err := h.Service.GetAllExtraTransactions(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -84,6 +84,7 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(combinedTransactions)
 }
 
+// Helper function to combine regular transactions and extra transactions
 func combineTransactions(transactions []models.Transaction, extraTransactions []models.ExtraTransaction) []interface{} {
 	var combined []interface{}
 
