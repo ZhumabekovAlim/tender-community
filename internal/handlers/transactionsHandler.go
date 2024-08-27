@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -79,6 +80,8 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 		log.Printf("Error fetching extra transactions: %v", err)
 		http.Error(w, "Failed to fetch extra transactions", http.StatusInternalServerError)
 		return
+	} else {
+		fmt.Println("GOOOOOOOD!")
 	}
 
 	// Combine and send response
@@ -103,6 +106,8 @@ func combineTransactions(transactions []models.Transaction, extraTransactions []
 	for _, et := range extraTransactions {
 		combined = append(combined, et)
 	}
+
+	fmt.Println("COOOOMBINE!")
 
 	return combined
 }
