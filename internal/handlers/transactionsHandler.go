@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -90,9 +91,9 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 
 	// Combine and send response
 	combinedTransactions := combineTransactions(transactions, extraTransactions)
-
+	fmt.Println(combinedTransactions)
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(combinedTransactions); err != nil {
+	if err := json.NewEncoder(w).Encode(transactions); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
