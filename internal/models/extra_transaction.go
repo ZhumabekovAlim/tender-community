@@ -7,4 +7,5 @@ type ExtraTransaction struct {
 	Total       float64 `json:"total"`
 	Date        string  `json:"date"`
 	Status      int     `json:"status"`
+	UserName    string  `json:"name"`
 }

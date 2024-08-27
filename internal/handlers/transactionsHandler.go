@@ -63,14 +63,41 @@ func (h *TransactionHandler) GetTransactionByID(w http.ResponseWriter, r *http.R
 
 // GetAllTransactions retrieves all transactions.
 func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.Request) {
+	// Fetch regular transactions
 	transactions, err := h.Service.GetAllTransactions(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// Fetch extra transactions
+	extraTransactions, err := services.ExtraTransactionService.GetAllExtraTransactions(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert extra transactions to a common format (if necessary)
+	combinedTransactions := combineTransactions(transactions, extraTransactions)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(transactions)
+	json.NewEncoder(w).Encode(combinedTransactions)
+}
+
+func combineTransactions(transactions []models.Transaction, extraTransactions []models.ExtraTransaction) []interface{} {
+	var combined []interface{}
+
+	// Add regular transactions to the combined slice
+	for _, t := range transactions {
+		combined = append(combined, t)
+	}
+
+	// Add extra transactions to the combined slice
+	for _, et := range extraTransactions {
+		combined = append(combined, et)
+	}
+
+	return combined
 }
 
 func (h *TransactionHandler) GetTransactionsByUser(w http.ResponseWriter, r *http.Request) {

@@ -18,6 +18,10 @@ func (s *ExtraTransactionService) GetExtraTransactionByID(ctx context.Context, i
 	return s.Repo.GetExtraTransactionByID(ctx, id)
 }
 
+//func (s *ExtraTransactionService) GetAllExtraTransactions(ctx context.Context) ([]models.ExtraTransaction, error) {
+//	return s.Repo.GetAllExtraTransactions(ctx)
+//}
+
 func (s *ExtraTransactionService) GetAllExtraTransactions(ctx context.Context) ([]models.ExtraTransaction, error) {
 	return s.Repo.GetAllExtraTransactions(ctx)
 }

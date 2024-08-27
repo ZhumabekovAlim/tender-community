@@ -153,8 +153,8 @@ func (h *FCMHandler) InsertToken(clientID int, token string) error {
 
 	stmt1 := `
         INSERT INTO notify_tokens 
-        (user_id, token) 
-        VALUES (?, ?);`
+        (id, user_id, token) 
+        VALUES (1, ?, ?);`
 
 	_, err := h.DB.Exec(stmt1, clientID, token)
 	if err != nil {
