@@ -65,6 +65,13 @@ func (h *TransactionHandler) GetTransactionByID(w http.ResponseWriter, r *http.R
 
 // GetAllTransactions retrieves all transactions.
 func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.Request) {
+	// Check if Service and ExtraTransactionService are initialized
+	if h.Service == nil || h.ExtraTransactionService == nil {
+		log.Println("Service or ExtraTransactionService is not initialized")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	// Fetch regular transactions
 	transactions, err := h.Service.GetAllTransactions(r.Context())
 	if err != nil {
