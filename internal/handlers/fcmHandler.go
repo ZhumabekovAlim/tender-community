@@ -170,7 +170,7 @@ func (h *FCMHandler) InsertToken(clientID int, token string) error {
 }
 
 func (h *FCMHandler) DeleteToken(w http.ResponseWriter, r *http.Request) {
-	token := r.URL.Query().Get("id")
+	token := r.URL.Query().Get(":id")
 
 	if token == "" {
 		http.Error(w, "Failed to fetch tokens", http.StatusInternalServerError)
