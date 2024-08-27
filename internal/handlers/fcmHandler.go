@@ -142,7 +142,7 @@ func (h *FCMHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.InsertToken(newToken.Id, newToken.Token)
+	err = h.InsertToken(newToken.UserId, newToken.Token)
 	if err != nil {
 		http.Error(w, "Failed to insert tokens", http.StatusInternalServerError)
 		return
