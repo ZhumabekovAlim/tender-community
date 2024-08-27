@@ -27,7 +27,6 @@ type NotificationRequest struct {
 }
 
 type Token struct {
-	Id     int    `json:"id"`
 	UserId int    `json:"user_id"`
 	Token  string `json:"token"`
 }
