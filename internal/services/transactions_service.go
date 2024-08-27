@@ -108,7 +108,3 @@ func (s *TransactionService) GetTotalAmountByCompanyForUserAndYear(ctx context.C
 func (s *TransactionService) GetTotalAmountByCompanyForUserYearAndMonth(ctx context.Context, userID int, year int, month int) ([]repositories.CompanyTotalAmount, error) {
 	return s.Repo.GetTotalAmountByCompanyForUserYearAndMonth(ctx, userID, year, month)
 }
-
-func (s *TransactionService) GetAllExtraTransactions(ctx context.Context) ([]models.ExtraTransaction, error) {
-	return s.ExtraTransactionRepo.GetAllExtraTransactions(ctx)
-}
