@@ -7,12 +7,10 @@ import (
 	"encoding/json"
 	"firebase.google.com/go/messaging"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql" // Add the appropriate database driver
 	"io"
 	"log"
 	"net/http"
-	"tender/internal/models"
 )
 
 type FCMHandler struct {
@@ -160,9 +158,6 @@ func (h *FCMHandler) InsertToken(clientID int, token string) error {
 
 	_, err := h.DB.Exec(stmt1, clientID, token)
 	if err != nil {
-		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
-			return models.ErrDuplicateEmail
-		}
 		return err
 	}
 	return nil
