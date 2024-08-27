@@ -140,7 +140,7 @@ func (h *FCMHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.InsertToken(newToken.UserId, newToken.Token)
+	err = h.InsertToken(newToken.Id, newToken.UserId, newToken.Token)
 	if err != nil {
 		http.Error(w, "Failed to insert tokens", http.StatusInternalServerError)
 		return
@@ -149,14 +149,14 @@ func (h *FCMHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *FCMHandler) InsertToken(clientID int, token string) error {
+func (h *FCMHandler) InsertToken(id int, clientID int, token string) error {
 
 	stmt1 := `
         INSERT INTO notify_tokens 
         (id, user_id, token) 
-        VALUES (1, ?, ?);`
+        VALUES (?, ?, ?);`
 
-	_, err := h.DB.Exec(stmt1, clientID, token)
+	_, err := h.DB.Exec(stmt1, id, clientID, token)
 	if err != nil {
 		return err
 	}
