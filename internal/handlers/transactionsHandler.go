@@ -76,7 +76,7 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 	transactions, err := h.Service.GetAllTransactions(r.Context())
 	if err != nil {
 		log.Printf("Error fetching transactions: %v", err)
-		http.Error(w, "Failed to fetch transactions", http.StatusInternalServerError)
+		http.Error(w, "Failed to fetch transactions", http.StatusBadRequest)
 		return
 	}
 
