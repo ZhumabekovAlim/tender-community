@@ -89,6 +89,7 @@ func (app *application) routes() http.Handler {
 	// NOTIFY
 	mux.Post("/notify", dynamicMiddleware.ThenFunc(app.fcmHandler.NotifyChange))
 	mux.Post("/notify/token/create", dynamicMiddleware.ThenFunc(app.fcmHandler.CreateToken))
+	mux.Del("/notify/token", dynamicMiddleware.ThenFunc(app.fcmHandler.DeleteToken))
 
 	return standardMiddleware.Then(mux)
 }

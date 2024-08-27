@@ -168,3 +168,30 @@ func (h *FCMHandler) InsertToken(clientID int, token string) error {
 	}
 	return nil
 }
+
+func (h *FCMHandler) DeleteToken(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("id")
+
+	if token == "" {
+		http.Error(w, "Failed to fetch tokens", http.StatusInternalServerError)
+		return
+	}
+
+	err := h.DeleteTokenRep(token)
+	if err != nil {
+		http.Error(w, "Failed to delete tokens", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *FCMHandler) DeleteTokenRep(token string) error {
+	stmt := `DELETE FROM notify_tokens WHERE token = ?`
+	_, err := h.DB.Exec(stmt, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
