@@ -257,3 +257,18 @@ func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, hashedP
 	_, err := r.Db.ExecContext(ctx, "UPDATE users SET password = ? WHERE id = ?", hashedPassword, userID)
 	return err
 }
+
+func (r *UserRepository) FindUserByEmail(ctx context.Context, email string) (int, error) {
+	stmt := `SELECT id FROM users WHERE email = ?`
+	var userId int
+	err := r.Db.QueryRowContext(ctx, stmt, email).Scan(&userId)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return 0, ErrNotFound(email)
+		default:
+			return 0, err
+		}
+	}
+	return userId, nil
+}

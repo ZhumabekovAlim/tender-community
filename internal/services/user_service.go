@@ -61,3 +61,7 @@ func (s *UserService) ChangePassword(ctx context.Context, userID int, oldPasswor
 
 	return s.Repo.UpdatePassword(ctx, userID, string(hashedPassword))
 }
+
+func (s *UserService) FindUserByEmail(ctx context.Context, email string) (int, error) {
+	return s.Repo.FindUserByEmail(ctx, email)
+}

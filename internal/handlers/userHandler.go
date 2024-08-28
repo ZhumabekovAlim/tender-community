@@ -1,10 +1,15 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"net/smtp"
 	"strconv"
+	"strings"
 	"tender/internal/models"
 	"tender/internal/services"
 )
@@ -271,4 +276,97 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Password updated successfully"))
+}
+
+func (h *UserHandler) SendRecoveryHandler(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+
+	{
+		var passwordRecoveryRequest struct {
+			Email string `json:"email"`
+		}
+
+		body, _ := io.ReadAll(r.Body)
+		r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+		err := json.NewDecoder(r.Body).Decode(&user)
+		if err != nil {
+			http.Error(w, "Failed to fetch tokens", http.StatusBadRequest)
+			return
+		}
+
+		user.ID, err = h.Service.FindUserByEmail(r.Context(), passwordRecoveryRequest.Email)
+		if err != nil {
+			switch {
+			case strings.Contains(err.Error(), "no client found"):
+				http.Error(w, err.Error(), http.StatusNotFound)
+				return
+			default:
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	SendRecovery(user.Email, user.ID)
+	h.sendResponseWithMessage(w, fmt.Sprintf("ссылка для восстанавления успешно отправлено в почту пользователя %s", user.Email), http.StatusOK)
+}
+
+func SendRecovery(to string, userId int) {
+	from := "tendercommunitykgz@gmail.com"
+	password := "tendercommunity12"
+	subject := "Восстановление пароля в системе TENDER-COMMUNITY"
+
+	smtpHost := "smtp.gmail.com"
+	smtpPort := "587"
+
+	link := fmt.Sprintf("http://176.126.166.163:4000/password/recovery/mail?user_id=%d", userId)
+
+	body := fmt.Sprintf(`
+		<html>
+		<body>
+			<p>Здравствуйте,</p>
+			<p>Для восстановления пароля, пожалуйста, перейдите по следующей ссылке:</p>
+			<p><a href="%s">Восстановить пароль</a></p>
+			<p>Если вы не запрашивали восстановление пароля, просто игнорируйте это письмо.</p>
+		</body>
+		</html>`, link)
+
+	message := fmt.Sprintf("From: %s\r\n", from) +
+		fmt.Sprintf("To: %s\r\n", to) +
+		fmt.Sprintf("Subject: %s\r\n", subject) +
+		fmt.Sprintf("MIME-Version: 1.0\r\n") +
+		fmt.Sprintf("Content-Type: text/html; charset=\"UTF-8\"\r\n") +
+		"\r\n" + body
+
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, []byte(message))
+
+	if err != nil {
+		fmt.Println("Ошибка отправки письма:", err)
+		return
+	}
+
+	fmt.Println("Письмо успешно отправлено!")
+}
+
+func (h *UserHandler) sendResponseWithMessage(w http.ResponseWriter, message string, status int) {
+	messageResponse := models.MessageResponse{Message: message}
+	w.WriteHeader(status)
+	err := json.NewEncoder(w).Encode(messageResponse)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *UserHandler) PasswordRecoveryHandler(w http.ResponseWriter, r *http.Request) {
+	user_id := r.URL.Query().Get("user_id")
+	if user_id == "" {
+		http.Error(w, "Missing ID", http.StatusBadRequest)
+		return
+	}
+
+	http.Redirect(w, r, "tendercommunity://reset_password?hash="+user_id, http.StatusSeeOther)
 }
