@@ -307,8 +307,8 @@ func (h *UserHandler) SendRecoveryHandler(w http.ResponseWriter, r *http.Request
 }
 
 func SendRecovery(to string, userId int) {
-	from := "tendercommunitykgz@gmail.com"
-	password := "tendercommunity12"
+	from := "alim.zhumabekov@gmail.com"
+	password := "elzv jann gcur cttx"
 	subject := "Восстановление пароля в системе TENDER-COMMUNITY"
 
 	smtpHost := "smtp.gmail.com"
