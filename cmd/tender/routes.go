@@ -90,6 +90,8 @@ func (app *application) routes() http.Handler {
 	mux.Post("/notify", dynamicMiddleware.ThenFunc(app.fcmHandler.NotifyChange))
 	mux.Post("/notify/token/create", dynamicMiddleware.ThenFunc(app.fcmHandler.CreateToken))
 	mux.Del("/notify/token/:id", dynamicMiddleware.ThenFunc(app.fcmHandler.DeleteToken))
+	mux.Get("/notify/history", standardMiddleware.ThenFunc(app.fcmHandler.ShowNotifyHistory))
+	mux.Del("/notify/history/:id", dynamicMiddleware.ThenFunc(app.fcmHandler.DeleteNotifyHistory))
 
 	// PASSWORD RECOVERY
 	mux.Post("/password/recovery", dynamicMiddleware.ThenFunc(app.userHandler.SendRecoveryHandler))
