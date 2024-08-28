@@ -40,6 +40,13 @@ func (s *UserService) DeleteUserByID(ctx context.Context, id int) error {
 }
 
 func (s *UserService) UpdateUser(ctx context.Context, user models.User) (models.User, error) {
+	if user.Password != "" {
+		newPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+		if err != nil {
+			return models.User{}, err
+		}
+		user.Password = string(newPass)
+	}
 	return s.Repo.UpdateUser(ctx, user)
 }
 
