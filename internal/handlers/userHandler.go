@@ -281,30 +281,24 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) SendRecoveryHandler(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
-	{
-		var passwordRecoveryRequest struct {
-			Email string `json:"email"`
-		}
+	body, _ := io.ReadAll(r.Body)
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
-		body, _ := io.ReadAll(r.Body)
-		r.Body = io.NopCloser(bytes.NewBuffer(body))
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, "Failed to fetch tokens", http.StatusBadRequest)
+		return
+	}
 
-		err := json.NewDecoder(r.Body).Decode(&user)
-		if err != nil {
-			http.Error(w, "Failed to fetch tokens", http.StatusBadRequest)
+	user.ID, err = h.Service.FindUserByEmail(r.Context(), user.Email)
+	if err != nil {
+		switch {
+		case strings.Contains(err.Error(), "no client found"):
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
-		}
-
-		user.ID, err = h.Service.FindUserByEmail(r.Context(), passwordRecoveryRequest.Email)
-		if err != nil {
-			switch {
-			case strings.Contains(err.Error(), "no client found"):
-				http.Error(w, err.Error(), http.StatusNotFound)
-				return
-			default:
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+		default:
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
 
