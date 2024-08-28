@@ -362,5 +362,5 @@ func (h *UserHandler) PasswordRecoveryHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	http.Redirect(w, r, "timetodo://reset_password?hash="+user_id, http.StatusSeeOther)
+	http.Redirect(w, r, "tendercommunity://reset_password?hash="+user_id, http.StatusSeeOther)
 }
