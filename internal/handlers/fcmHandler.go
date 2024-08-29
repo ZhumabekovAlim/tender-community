@@ -252,15 +252,13 @@ func (h *FCMHandler) GetNotifyHistory(userId int) ([]models.Notify, error) {
 	query := "SELECT * FROM notify_history WHERE user_id = ?"
 	rows, err := h.DB.Query(query, userId)
 	if err != nil {
-		fmt.Println("tutttt")
 		return []models.Notify{}, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var notification models.Notify
-		if err := rows.Scan(&notification); err != nil {
-			fmt.Println("kjkjjjj")
+		if err := rows.Scan(&notification.ID, &notification.UserID, &notification.Title, &notification.Body); err != nil {
 			return []models.Notify{}, err
 
 		}
