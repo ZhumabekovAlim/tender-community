@@ -143,8 +143,18 @@ func (h *UserHandler) UpdateBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	balanceAdmin, err := h.Service.GetBalance(r.Context(), 1)
+	if err != nil {
+		if errors.Is(err, models.ErrUserNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]float64{"balance": balance})
+	json.NewEncoder(w).Encode(map[string]float64{"balance": balance, "balance_admin": balanceAdmin})
 	w.WriteHeader(http.StatusOK)
 
 }

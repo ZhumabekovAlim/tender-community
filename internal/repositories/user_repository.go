@@ -244,7 +244,7 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user models.User) (mode
 	var updatedUser models.User
 	err = row.Scan(&updatedUser.ID, &updatedUser.Name, &updatedUser.LastName, &updatedUser.Email, &updatedUser.Phone, &updatedUser.INN, &updatedUser.Balance, &updatedUser.Password)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return models.User{}, models.ErrUserNotFound
 		}
 		return models.User{}, err
