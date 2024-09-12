@@ -38,12 +38,13 @@ func (app *application) routes() http.Handler {
 	mux.Del("/companies/:id", standardMiddleware.ThenFunc(app.companyHandler.DeleteCompany))  // Delete company by ID
 
 	// TRANSACTION
-	mux.Post("/transactions", dynamicMiddleware.ThenFunc(app.transactionHandler.CreateTransaction))              // Create a new transaction
-	mux.Get("/transactions", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactions))             // Get all transactions
-	mux.Get("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionByID))         // Get transaction by ID
-	mux.Get("/transactions/user/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByUser)) // Get transaction by user ID
-	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))          // Update transaction by ID
-	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))          // Delete transaction by ID
+	mux.Post("/transactions", dynamicMiddleware.ThenFunc(app.transactionHandler.CreateTransaction))                    // Create a new transaction
+	mux.Get("/transactions", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactions))                   // Get all transactions
+	mux.Get("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionByID))               // Get transaction by ID
+	mux.Get("/transactions/user/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByUser))       // Get transaction by user ID
+	mux.Get("/transactions/company/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByCompany)) // Get transaction by user ID
+	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))                // Update transaction by ID
+	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))                // Delete transaction by ID
 
 	// EXTRA TRANSACTIONS
 	mux.Post("/extra_transactions", dynamicMiddleware.ThenFunc(app.extraTransactionHandler.CreateExtraTransaction))              // Create a new extra transaction
@@ -54,11 +55,12 @@ func (app *application) routes() http.Handler {
 	mux.Del("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.DeleteExtraTransaction))          // Delete extra transaction by ID
 
 	// PERSONAL EXPENSES
-	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))      // Create a new expense
-	mux.Get("/expenses", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpenses))     // Get all expenses
-	mux.Get("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpenseByID)) // Get expense by ID
-	mux.Put("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.UpdatePersonalExpense))  // Update expense by ID
-	mux.Del("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.DeletePersonalExpense))  // Delete expense by ID
+	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))                        // Create a new expense
+	mux.Get("/expenses", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpenses))                       // Get all expenses
+	mux.Get("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpenseByID))                   // Get expense by ID
+	mux.Get("/expenses/category/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpensesByCategoryId)) // Get expense by ID
+	mux.Put("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.UpdatePersonalExpense))                    // Update expense by ID
+	mux.Del("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.DeletePersonalExpense))                    // Delete expense by ID
 
 	// REPORTS
 	// company month
@@ -96,6 +98,20 @@ func (app *application) routes() http.Handler {
 	// PASSWORD RECOVERY
 	mux.Post("/password/recovery", dynamicMiddleware.ThenFunc(app.userHandler.SendRecoveryHandler))
 	mux.Get("/password/recovery/mail", dynamicMiddleware.ThenFunc(app.userHandler.PasswordRecoveryHandler))
+
+	// CATEGORY
+	mux.Post("/categories", dynamicMiddleware.ThenFunc(app.categoryHandler.CreateCategory))      // Create a new category
+	mux.Get("/categories", standardMiddleware.ThenFunc(app.categoryHandler.GetAllCategories))    // Get all categories
+	mux.Get("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.GetCategoryByID)) // Get category by ID
+	mux.Put("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.UpdateCategory))  // Update category by ID
+	mux.Del("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.DeleteCategory))  // Delete category by ID
+
+	// BALANCE HISTORY
+	mux.Post("/balance-history", dynamicMiddleware.ThenFunc(app.balanceHistoryHandler.CreateBalanceHistory))          // Create a new balance history record
+	mux.Get("/balance-history", standardMiddleware.ThenFunc(app.balanceHistoryHandler.GetAllBalanceHistories))        // Get all balance history records
+	mux.Get("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.GetBalanceHistoryByUserID)) // Get balance history record by user ID
+	mux.Put("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.UpdateBalanceHistory))      // Update balance history record by ID
+	mux.Del("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.DeleteBalanceHistory))      // Delete balance history record by ID
 
 	return standardMiddleware.Then(mux)
 }

@@ -4,5 +4,7 @@ CREATE TABLE personal_expenses
     amount      DECIMAL(10, 2) NOT NULL,
     reason      VARCHAR(255)   NOT NULL,
     description TEXT,
-    date        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    category_id INT NOT NULL ,
+    date        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories (id)
 );

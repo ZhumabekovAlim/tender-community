@@ -32,6 +32,11 @@ func (s *PersonalExpenseService) GetAllPersonalExpenses(ctx context.Context) ([]
 	return s.Repo.GetAllPersonalExpenses(ctx)
 }
 
+// GetPersonalExpensesByCategoryId retrieves all personal expenses by category id.
+func (s *PersonalExpenseService) GetPersonalExpensesByCategoryId(ctx context.Context, category_id int) ([]models.PersonalExpense, error) {
+	return s.Repo.GetPersonalExpensesByCategoryId(ctx, category_id)
+}
+
 // UpdatePersonalExpense updates an existing personal expense.
 func (s *PersonalExpenseService) UpdatePersonalExpense(ctx context.Context, expense models.PersonalExpense) (models.PersonalExpense, error) {
 	return s.Repo.UpdatePersonalExpense(ctx, expense)

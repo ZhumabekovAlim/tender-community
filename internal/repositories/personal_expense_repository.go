@@ -13,7 +13,7 @@ type PersonalExpenseRepository struct {
 
 // CreatePersonalExpense inserts a new expense into the database.
 func (r *PersonalExpenseRepository) CreatePersonalExpense(ctx context.Context, expense models.PersonalExpense) (int, error) {
-	result, err := r.Db.ExecContext(ctx, "INSERT INTO personal_expenses (amount, reason, description) VALUES (?, ?, ?)", expense.Amount, expense.Reason, expense.Description)
+	result, err := r.Db.ExecContext(ctx, "INSERT INTO personal_expenses (amount, reason, description, category_id) VALUES (?, ?, ?, ?)", expense.Amount, expense.Reason, expense.Description, expense.CategoryID)
 	if err != nil {
 		return 0, err
 	}
@@ -29,8 +29,8 @@ func (r *PersonalExpenseRepository) CreatePersonalExpense(ctx context.Context, e
 // GetPersonalExpenseByID retrieves an expense by ID from the database.
 func (r *PersonalExpenseRepository) GetPersonalExpenseByID(ctx context.Context, id int) (models.PersonalExpense, error) {
 	var expense models.PersonalExpense
-	err := r.Db.QueryRowContext(ctx, "SELECT id, amount, reason, description, date FROM personal_expenses WHERE id = ?", id).
-		Scan(&expense.ID, &expense.Amount, &expense.Reason, &expense.Description, &expense.Date)
+	err := r.Db.QueryRowContext(ctx, "SELECT id, amount, reason, description, category_id ,date FROM personal_expenses WHERE id = ?", id).
+		Scan(&expense.ID, &expense.Amount, &expense.Reason, &expense.Description, &expense.CategoryID, &expense.Date)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return expense, models.ErrExpenseNotFound
@@ -43,7 +43,7 @@ func (r *PersonalExpenseRepository) GetPersonalExpenseByID(ctx context.Context, 
 
 // GetAllPersonalExpenses retrieves all expenses from the database.
 func (r *PersonalExpenseRepository) GetAllPersonalExpenses(ctx context.Context) ([]models.PersonalExpense, error) {
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, reason, description, date FROM personal_expenses")
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, reason, description, category_id, date FROM personal_expenses")
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,32 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpenses(ctx context.Context) 
 	var expenses []models.PersonalExpense
 	for rows.Next() {
 		var expense models.PersonalExpense
-		err := rows.Scan(&expense.ID, &expense.Amount, &expense.Reason, &expense.Description, &expense.Date)
+		err := rows.Scan(&expense.ID, &expense.Amount, &expense.Reason, &expense.Description, &expense.CategoryID, &expense.Date)
+		if err != nil {
+			return nil, err
+		}
+		expenses = append(expenses, expense)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return expenses, nil
+}
+
+// GetAllPersonalExpenses retrieves all expenses from the database.
+func (r *PersonalExpenseRepository) GetPersonalExpensesByCategoryId(ctx context.Context, category_id int) ([]models.PersonalExpense, error) {
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, reason, description, category_id, date FROM personal_expenses WHERE category_id = ?", category_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var expenses []models.PersonalExpense
+	for rows.Next() {
+		var expense models.PersonalExpense
+		err := rows.Scan(&expense.ID, &expense.Amount, &expense.Reason, &expense.Description, &expense.CategoryID, &expense.Date)
 		if err != nil {
 			return nil, err
 		}
@@ -83,6 +108,10 @@ func (r *PersonalExpenseRepository) UpdatePersonalExpense(ctx context.Context, e
 		query += " description = ?,"
 		params = append(params, expense.Description)
 	}
+	if expense.CategoryID != 0 {
+		query += " category_id = ?,"
+		params = append(params, expense.CategoryID)
+	}
 
 	// Trim the last comma from the query
 	query = query[:len(query)-1]
@@ -95,9 +124,9 @@ func (r *PersonalExpenseRepository) UpdatePersonalExpense(ctx context.Context, e
 	}
 
 	// Retrieve the updated expense data
-	row := r.Db.QueryRowContext(ctx, "SELECT id, amount, reason, description FROM personal_expenses WHERE id = ?", expense.ID)
+	row := r.Db.QueryRowContext(ctx, "SELECT id, amount, reason, description, category_id FROM personal_expenses WHERE id = ?", expense.ID)
 	var updatedExpense models.PersonalExpense
-	err = row.Scan(&updatedExpense.ID, &updatedExpense.Amount, &updatedExpense.Reason, &updatedExpense.Description)
+	err = row.Scan(&updatedExpense.ID, &updatedExpense.Amount, &updatedExpense.Reason, &updatedExpense.Description, &updatedExpense.CategoryID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return models.PersonalExpense{}, models.ErrExpenseNotFound

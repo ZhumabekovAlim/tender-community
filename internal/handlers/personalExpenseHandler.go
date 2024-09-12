@@ -62,6 +62,34 @@ func (h *PersonalExpenseHandler) GetPersonalExpenseByID(w http.ResponseWriter, r
 	json.NewEncoder(w).Encode(expense)
 }
 
+// GetPersonalExpenseByID retrieves a personal expense by ID.
+func (h *PersonalExpenseHandler) GetPersonalExpensesByCategoryId(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get(":id")
+	if idStr == "" {
+		http.Error(w, "Missing expense ID", http.StatusBadRequest)
+		return
+	}
+
+	category_id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid expense ID", http.StatusBadRequest)
+		return
+	}
+
+	expense, err := h.Service.GetPersonalExpensesByCategoryId(r.Context(), category_id)
+	if err != nil {
+		if errors.Is(err, models.ErrExpenseNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(expense)
+}
+
 // GetAllPersonalExpenses retrieves all personal expenses.
 func (h *PersonalExpenseHandler) GetAllPersonalExpenses(w http.ResponseWriter, r *http.Request) {
 	expenses, err := h.Service.GetAllPersonalExpenses(r.Context())
