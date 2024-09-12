@@ -12,12 +12,8 @@ type CategoryService struct {
 
 // CreateCategory creates a new category.
 func (s *CategoryService) CreateCategory(ctx context.Context, category models.Category) (models.Category, error) {
-	id, err := s.Repo.CreateCategory(ctx, category)
-	if err != nil {
-		return models.Category{}, err
-	}
+	category, _ = s.Repo.CreateCategory(ctx, category)
 
-	category.ID = id
 	return category, nil
 }
 

@@ -11,18 +11,29 @@ type CategoryRepository struct {
 }
 
 // CreateCategory inserts a new category into the database.
-func (r *CategoryRepository) CreateCategory(ctx context.Context, category models.Category) (int, error) {
+func (r *CategoryRepository) CreateCategory(ctx context.Context, category models.Category) (models.Category, error) {
+	// Insert the new category into the database
 	result, err := r.Db.ExecContext(ctx, "INSERT INTO categories (category_name) VALUES (?)", category.CategoryName)
 	if err != nil {
-		return 0, err
+		return models.Category{}, err
 	}
 
+	// Get the ID of the inserted record
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, err
+		return models.Category{}, err
 	}
 
-	return int(id), nil
+	// Query the database to get the full category model
+	var createdCategory models.Category
+	err = r.Db.QueryRowContext(ctx, "SELECT id, category_name FROM categories WHERE id = ?", id).
+		Scan(&createdCategory.ID, &createdCategory.CategoryName)
+	if err != nil {
+		return models.Category{}, err
+	}
+
+	// Return the full category model
+	return createdCategory, nil
 }
 
 // DeleteCategory removes a category from the database by ID.
