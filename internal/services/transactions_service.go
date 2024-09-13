@@ -36,6 +36,11 @@ func (s *TransactionService) GetTransactionsByCompany(ctx context.Context, compa
 	return s.Repo.GetTransactionsByCompany(ctx, companyID)
 }
 
+// GetTransactionsByCompany retrieves transactions by company id.
+func (s *TransactionService) GetTransactionsForUserByCompany(ctx context.Context, userID, companyID int) ([]models.Transaction, error) {
+	return s.Repo.GetTransactionsForUserByCompany(ctx, userID, companyID)
+}
+
 // UpdateTransaction updates an existing transaction and its expenses.
 func (s *TransactionService) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	return s.Repo.UpdateTransaction(ctx, transaction)

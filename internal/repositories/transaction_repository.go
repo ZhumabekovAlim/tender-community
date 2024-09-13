@@ -264,6 +264,50 @@ func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, co
 	return transactions, nil
 }
 
+func (r *TransactionRepository) GetTransactionsForUserByCompany(ctx context.Context, userID, companyID int) ([]models.Transaction, error) {
+	query := `
+		SELECT transactions.*, u.name, c.name
+		FROM transactions
+		JOIN tender.users u on u.id = transactions.user_id
+		JOIN tender.companies c on c.id = transactions.company_id
+		WHERE c.id = ? AND u.id = ?
+		ORDER BY transactions.date DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, companyID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []models.Transaction
+
+	for rows.Next() {
+		var transaction models.Transaction
+
+		if err := rows.Scan(
+			&transaction.ID,
+			&transaction.Type,
+			&transaction.TenderNumber,
+			&transaction.UserID,
+			&transaction.CompanyID,
+			&transaction.Organization,
+			&transaction.Amount,
+			&transaction.Total,
+			&transaction.Date,
+			&transaction.Status,
+			&transaction.UserName,
+			&transaction.CompanyName,
+		); err != nil {
+			return nil, err
+		}
+
+		transactions = append(transactions, transaction)
+	}
+
+	return transactions, nil
+}
+
 // UpdateTransaction updates an existing transaction and its expenses in the database.
 func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	// Begin a new database transaction

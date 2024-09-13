@@ -164,6 +164,43 @@ func (h *TransactionHandler) GetTransactionsByCompany(w http.ResponseWriter, r *
 	json.NewEncoder(w).Encode(transactions)
 }
 
+func (h *TransactionHandler) GetTransactionsForUserByCompany(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get(":user_id")
+
+	if userIDStr == "" {
+		http.Error(w, "Missing user ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	companyIDStr := r.URL.Query().Get(":company_id")
+
+	if companyIDStr == "" {
+		http.Error(w, "Missing company ID", http.StatusBadRequest)
+		return
+	}
+
+	companyID, err := strconv.Atoi(companyIDStr)
+	if err != nil {
+		http.Error(w, "Invalid company ID", http.StatusBadRequest)
+		return
+	}
+
+	transactions, err := h.Service.GetTransactionsForUserByCompany(r.Context(), userID, companyID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(transactions)
+}
+
 // UpdateTransaction updates an existing transaction and its expenses.
 func (h *TransactionHandler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
