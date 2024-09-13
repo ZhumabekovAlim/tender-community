@@ -38,14 +38,14 @@ func (app *application) routes() http.Handler {
 	mux.Del("/companies/:id", standardMiddleware.ThenFunc(app.companyHandler.DeleteCompany))  // Delete company by ID
 
 	// TRANSACTION
-	mux.Post("/transactions", dynamicMiddleware.ThenFunc(app.transactionHandler.CreateTransaction))                                          // Create a new transaction
-	mux.Get("/transactions", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactions))                                         // Get all transactions
-	mux.Get("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionByID))                                     // Get transaction by ID
-	mux.Get("/transactions/user/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByUser))                             // Get transaction by user ID
-	mux.Get("/transactions/company/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByCompany))                       // Get transaction by company ID
-	mux.Get("/transactions/user/:user_id/company/:company_id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByCompany)) // Get transaction by company ID
-	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))                                      // Update transaction by ID
-	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))                                      // Delete transaction by ID
+	mux.Post("/transactions", dynamicMiddleware.ThenFunc(app.transactionHandler.CreateTransaction))                                                 // Create a new transaction
+	mux.Get("/transactions", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactions))                                                // Get all transactions
+	mux.Get("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionByID))                                            // Get transaction by ID
+	mux.Get("/transactions/user/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByUser))                                    // Get transaction by user ID
+	mux.Get("/transactions/company/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByCompany))                              // Get transaction by company ID
+	mux.Get("/transactions/user/:user_id/company/:company_id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsForUserByCompany)) // Get transaction by user and company ID
+	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))                                             // Update transaction by ID
+	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))                                             // Delete transaction by ID
 
 	// EXTRA TRANSACTIONS
 	mux.Post("/extra_transactions", dynamicMiddleware.ThenFunc(app.extraTransactionHandler.CreateExtraTransaction))              // Create a new extra transaction
