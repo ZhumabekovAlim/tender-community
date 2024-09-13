@@ -104,7 +104,6 @@ func (h *BalanceHistoryHandler) GetBalanceHistoryByUserID(w http.ResponseWriter,
 
 	history, err := h.Service.GetBalanceHistoryByUserID(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

@@ -20,11 +20,13 @@ type FCMHandler struct {
 }
 
 type NotificationRequest struct {
-	Id     int    `json:"id"`
-	UserId int    `json:"user_id"`
-	Token  string `json:"token"`
-	Title  string `json:"title"`
-	Body   string `json:"body"`
+	Id       int    `json:"id"`
+	UserId   int    `json:"user_id"`
+	Token    string `json:"token"`
+	Title    string `json:"title"`
+	Body     string `json:"body"`
+	Sender   int    `json:"sender"`
+	Receiver int    `json:"receiver"`
 }
 
 type Token struct {
@@ -36,7 +38,7 @@ func NewFCMHandler(client *messaging.Client, db *sql.DB) *FCMHandler {
 	return &FCMHandler{Client: client, DB: db}
 }
 
-func (h *FCMHandler) SendMessage(ctx context.Context, token string, UserId int, title, body string) error {
+func (h *FCMHandler) SendMessage(ctx context.Context, token string, UserId, sender, receiver int, title, body string) error {
 	message := &messaging.Message{
 		Token: token,
 		Notification: &messaging.Notification{
@@ -70,7 +72,7 @@ func (h *FCMHandler) SendMessage(ctx context.Context, token string, UserId int, 
 		log.Printf("Ошибка при отправке уведомления: %v", err)
 		return err
 	} else {
-		err = h.CreateNotify(UserId, title, body)
+		err = h.CreateNotify(UserId, sender, receiver, title, body)
 		if err != nil {
 			log.Printf("Ошибка при отправке уведомления: %v", err)
 			return err
@@ -102,7 +104,7 @@ func (h *FCMHandler) NotifyChange(w http.ResponseWriter, r *http.Request) {
 
 	// Send notifications to each token
 	for _, token := range tokens {
-		err = h.SendMessage(ctx, token, req.UserId, req.Title, req.Body)
+		err = h.SendMessage(ctx, token, req.UserId, req.Sender, req.Receiver, req.Title, req.Body)
 		if err != nil {
 			log.Printf("Error sending notification to token %s: %v", token, err)
 		}
@@ -204,14 +206,14 @@ func (h *FCMHandler) DeleteTokenRep(token string) error {
 	return nil
 }
 
-func (h *FCMHandler) CreateNotify(clientID int, title, body string) error {
+func (h *FCMHandler) CreateNotify(clientID, sender, receiver int, title, body string) error {
 
 	stmt1 := `
         INSERT INTO notify_history 
-        ( user_id, title, body) 
-        VALUES ( ?, ?, ?);`
+        ( user_id, title, body, sender, receiver) 
+        VALUES ( ?, ?, ?, ?, ?);`
 
-	_, err := h.DB.Exec(stmt1, clientID, title, body)
+	_, err := h.DB.Exec(stmt1, clientID, title, body, sender, receiver)
 	if err != nil {
 		return err
 	}
@@ -249,6 +251,7 @@ func (h *FCMHandler) GetNotifyHistory(userId int) ([]models.Notify, error) {
 	}
 
 	var notifications []models.Notify
+
 	query := "SELECT * FROM notify_history WHERE user_id = ?"
 	rows, err := h.DB.Query(query, userId)
 	if err != nil {
@@ -258,7 +261,7 @@ func (h *FCMHandler) GetNotifyHistory(userId int) ([]models.Notify, error) {
 
 	for rows.Next() {
 		var notification models.Notify
-		if err := rows.Scan(&notification.ID, &notification.UserID, &notification.Title, &notification.Body); err != nil {
+		if err := rows.Scan(&notification.ID, &notification.UserID, &notification.Title, &notification.Body, &notification.Sender, &notification.Receiver); err != nil {
 			return []models.Notify{}, err
 
 		}

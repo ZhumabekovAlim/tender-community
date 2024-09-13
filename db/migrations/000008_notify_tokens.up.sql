@@ -12,5 +12,7 @@ CREATE TABLE notify_history
     user_id       INT,
     title  VARCHAR(255),
     body  VARCHAR(255),
+    sender INT ,
+    receiver INT,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
