@@ -31,12 +31,7 @@ func (s *BalanceHistoryService) UpdateBalanceHistory(ctx context.Context, histor
 	return s.Repo.UpdateBalanceHistory(ctx, history)
 }
 
-// GetBalanceHistoryByID retrieves a balance history record by ID.
-func (s *BalanceHistoryService) GetBalanceHistoryByUserID(ctx context.Context, id int) (models.BalanceHistory, error) {
-	return s.Repo.GetBalanceHistoryByUserID(ctx, id)
-}
-
 // GetAllBalanceHistories retrieves all balance history records.
-func (s *BalanceHistoryService) GetAllBalanceHistories(ctx context.Context) ([]models.BalanceHistory, error) {
-	return s.Repo.GetAllBalanceHistories(ctx)
+func (s *BalanceHistoryService) GetBalanceHistoryByUserID(ctx context.Context, id int) ([]models.BalanceHistory, error) {
+	return s.Repo.GetBalanceHistoryByUserID(ctx, id)
 }

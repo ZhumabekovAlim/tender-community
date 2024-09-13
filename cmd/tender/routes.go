@@ -109,7 +109,6 @@ func (app *application) routes() http.Handler {
 
 	// BALANCE HISTORY
 	mux.Post("/balance-history", dynamicMiddleware.ThenFunc(app.balanceHistoryHandler.CreateBalanceHistory))          // Create a new balance history record
-	mux.Get("/balance-history", standardMiddleware.ThenFunc(app.balanceHistoryHandler.GetAllBalanceHistories))        // Get all balance history records
 	mux.Get("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.GetBalanceHistoryByUserID)) // Get balance history record by user ID
 	mux.Put("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.UpdateBalanceHistory))      // Update balance history record by ID
 	mux.Del("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.DeleteBalanceHistory))      // Delete balance history record by ID

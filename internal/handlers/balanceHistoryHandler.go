@@ -88,7 +88,7 @@ func (h *BalanceHistoryHandler) UpdateBalanceHistory(w http.ResponseWriter, r *h
 	json.NewEncoder(w).Encode(updatedHistory)
 }
 
-// GetBalanceHistoryByID retrieves a balance history record by ID.
+// GetAllBalanceHistories retrieves all balance history records by user_id.
 func (h *BalanceHistoryHandler) GetBalanceHistoryByUserID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
 	if idStr == "" {
@@ -102,18 +102,7 @@ func (h *BalanceHistoryHandler) GetBalanceHistoryByUserID(w http.ResponseWriter,
 		return
 	}
 
-	history, err := h.Service.GetBalanceHistoryByUserID(r.Context(), id)
-	if err != nil {
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(history)
-}
-
-// GetAllBalanceHistories retrieves all balance history records.
-func (h *BalanceHistoryHandler) GetAllBalanceHistories(w http.ResponseWriter, r *http.Request) {
-	histories, err := h.Service.GetAllBalanceHistories(r.Context())
+	histories, err := h.Service.GetBalanceHistoryByUserID(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
