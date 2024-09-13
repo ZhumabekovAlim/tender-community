@@ -58,7 +58,7 @@ func (r *BalanceHistoryRepository) UpdateBalanceHistory(ctx context.Context, his
 
 // GetAllBalanceHistories retrieves all balance history records from the database.
 func (r *BalanceHistoryRepository) GetBalanceHistoryByUserID(ctx context.Context, id int) ([]models.BalanceHistory, error) {
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, created_at, updated_at FROM balance_history WHERE user_id = ?")
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, created_at, updated_at FROM balance_history WHERE user_id = ?", id)
 	if err != nil {
 		return nil, err
 	}
