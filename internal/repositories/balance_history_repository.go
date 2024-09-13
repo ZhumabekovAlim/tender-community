@@ -62,9 +62,6 @@ func (r *BalanceHistoryRepository) GetBalanceHistoryByUserID(ctx context.Context
 	err := r.Db.QueryRowContext(ctx, "SELECT id, amount, description, user_id, created_at, updated_at FROM balance_history WHERE user_id = ?", id).
 		Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CreatedAt, &history.UpdatedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return history, models.ErrBalanceHistoryNotFound
-		}
 		return history, err
 	}
 
