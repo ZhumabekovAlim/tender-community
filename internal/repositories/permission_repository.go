@@ -116,7 +116,7 @@ func (r *PermissionRepository) UpdatePermission(ctx context.Context, permission 
 
 // GetPermission retrieves a permission by ID from the database.
 func (r *PermissionRepository) GetPermissionsByUserID(ctx context.Context, userID int) ([]models.Permission, error) {
-	rows, err := r.Db.QueryContext(ctx, "SELECT p.id, p.user_id, p.company_id, p.status, u.name, c.name FROM permissions p JOIN tender.users u on u.id = p.user_id JOIN tender.companies c on c.id = p.company_id WHERE user_id = ?", userID)
+	rows, err := r.Db.QueryContext(ctx, "SELECT p.id, p.user_id, p.company_id, p.status, u.name, c.name, c.description FROM permissions p JOIN tender.users u on u.id = p.user_id JOIN tender.companies c on c.id = p.company_id WHERE user_id = ?", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (r *PermissionRepository) GetPermissionsByUserID(ctx context.Context, userI
 
 	for rows.Next() {
 		var permission models.Permission
-		err := rows.Scan(&permission.ID, &permission.UserID, &permission.CompanyID, &permission.Status, &permission.UserName, &permission.CompanyName)
+		err := rows.Scan(&permission.ID, &permission.UserID, &permission.CompanyID, &permission.Status, &permission.UserName, &permission.CompanyName, &permission.Description)
 		if err != nil {
 			return nil, err
 		}

@@ -7,4 +7,5 @@ type Permission struct {
 	Status      *int    `json:"status"`
 	UserName    *string `json:"username,omitempty"`
 	CompanyName *string `json:"companyname,omitempty"`
+	Description *string `json:"companyname,omitempty"`
 }
