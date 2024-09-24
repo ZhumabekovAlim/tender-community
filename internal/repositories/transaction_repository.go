@@ -34,9 +34,9 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, transacti
 
 	// Insert the transaction
 	result, err := tx.ExecContext(ctx, `
-    INSERT INTO transactions (type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, date, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
+    INSERT INTO transactions (transaction_number, type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, date, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		transaction.TransactionNumber, transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
 		transaction.Organization, transaction.Amount, transaction.Total, transaction.Sell, transaction.ProductName,
 		transaction.CompletedDate, transaction.Date, transaction.Status)
 	if err != nil {
@@ -91,8 +91,8 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id int) 
 
 	// Retrieve the transaction
 	err := r.Db.QueryRowContext(ctx, `
-		SELECT id, type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, date, status
-		FROM transactions WHERE id = ?`, id).Scan(&transaction.ID, &transaction.Type, &transaction.TenderNumber,
+		SELECT id, transaction_number, type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, date, status
+		FROM transactions WHERE id = ?`, id).Scan(&transaction.ID, &transaction.TransactionNumber, &transaction.Type, &transaction.TenderNumber,
 		&transaction.UserID, &transaction.CompanyID, &transaction.Organization, &transaction.Amount,
 		&transaction.Total, &transaction.Sell, &transaction.ProductName, &transaction.CompletedDate,
 		&transaction.Date, &transaction.Status)
@@ -130,7 +130,7 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id int) 
 // GetAllTransactions retrieves all transactions from the database along with their expenses.
 func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]models.Transaction, error) {
 	rows, err := r.Db.QueryContext(ctx, `
-		SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, c.name, u.name
+		SELECT t.id,t.transaction_number, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, c.name, u.name
 		FROM transactions t JOIN tender.companies c on c.id = t.company_id JOIN tender.users u on u.id = t.user_id ORDER BY t.date DESC`)
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 	var transactions []models.Transaction
 	for rows.Next() {
 		var transaction models.Transaction
-		err := rows.Scan(&transaction.ID, &transaction.Type, &transaction.TenderNumber,
+		err := rows.Scan(&transaction.ID, &transaction.TransactionNumber, &transaction.Type, &transaction.TenderNumber,
 			&transaction.UserID, &transaction.CompanyID, &transaction.Organization,
 			&transaction.Amount, &transaction.Total, &transaction.Sell, &transaction.ProductName,
 			&transaction.CompletedDate, &transaction.Date, &transaction.Status, &transaction.CompanyName, &transaction.UserName)
@@ -202,6 +202,7 @@ func (r *TransactionRepository) GetTransactionsByUser(ctx context.Context, userI
 
 		if err := rows.Scan(
 			&transaction.ID,
+			&transaction.TransactionNumber,
 			&transaction.Type,
 			&transaction.TenderNumber,
 			&transaction.UserID,
@@ -249,6 +250,7 @@ func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, co
 
 		if err := rows.Scan(
 			&transaction.ID,
+			&transaction.TransactionNumber,
 			&transaction.Type,
 			&transaction.TenderNumber,
 			&transaction.UserID,
@@ -296,6 +298,7 @@ func (r *TransactionRepository) GetTransactionsForUserByCompany(ctx context.Cont
 
 		if err := rows.Scan(
 			&transaction.ID,
+			&transaction.TransactionNumber,
 			&transaction.Type,
 			&transaction.TenderNumber,
 			&transaction.UserID,
@@ -331,9 +334,9 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	// Retrieve existing transaction data to preserve non-updated fields
 	var existingTransaction models.Transaction
 	row := tx.QueryRowContext(ctx, `
-		SELECT type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, status 
+		SELECT transaction_number,type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, status 
 		FROM transactions WHERE id = ?`, transaction.ID)
-	err = row.Scan(&existingTransaction.Type, &existingTransaction.TenderNumber, &existingTransaction.UserID,
+	err = row.Scan(&existingTransaction.TransactionNumber, &existingTransaction.Type, &existingTransaction.TenderNumber, &existingTransaction.UserID,
 		&existingTransaction.CompanyID, &existingTransaction.Organization, &existingTransaction.Amount,
 		&existingTransaction.Total, &existingTransaction.Sell, &existingTransaction.ProductName,
 		&existingTransaction.CompletedDate, &existingTransaction.Status)
@@ -376,9 +379,9 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 
 	// Update the transaction
 	result, err := tx.ExecContext(ctx, `
-		UPDATE transactions SET type = ?, tender_number = ?, user_id = ?, company_id = ?, 
+		UPDATE transactions SET transaction_number = ?, type = ?, tender_number = ?, user_id = ?, company_id = ?, 
 		organization = ?, amount = ?, total = ?, sell = ?, product_name = ?, completed_date = ?, status = ? WHERE id = ?`,
-		transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
+		transaction.TransactionNumber, transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
 		transaction.Organization, transaction.Amount, transaction.Total, transaction.Sell,
 		transaction.ProductName, transaction.CompletedDate, transaction.Status, transaction.ID)
 	if err != nil {
@@ -423,12 +426,12 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 
 	// Retrieve the updated transaction data including the user name, company name, and updated expenses
 	row = r.Db.QueryRowContext(ctx, `
-		SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, u.name, c.name 
+		SELECT t.id, t.transaction_number, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, u.name, c.name 
 		FROM transactions t
 		JOIN users u ON t.user_id = u.id
 		JOIN companies c ON t.company_id = c.id
 		WHERE t.id = ?`, transaction.ID)
-	err = row.Scan(&transaction.ID, &transaction.Type, &transaction.TenderNumber, &transaction.UserID,
+	err = row.Scan(&transaction.ID, &transaction.TransactionNumber, &transaction.Type, &transaction.TenderNumber, &transaction.UserID,
 		&transaction.CompanyID, &transaction.Organization, &transaction.Amount, &transaction.Total, &transaction.Sell,
 		&transaction.ProductName, &transaction.CompletedDate, &transaction.Date, &transaction.Status,
 		&transaction.UserName, &transaction.CompanyName)

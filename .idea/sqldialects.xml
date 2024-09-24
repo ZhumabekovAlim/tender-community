@@ -5,7 +5,8 @@
     <file url="file://$PROJECT_DIR$/db/migrations/000003_transactions.up.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/db/migrations/000004_permissions.up.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/db/migrations/000005_personal_expenses.up.sql" dialect="MariaDB" />
-    <file url="file://$PROJECT_DIR$/db/migrations/000006_additional_expenses.up.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/db/migrations/000006_additional_expenses.up.sql" dialect="MariaDB" />
+    <file url="file://$PROJECT_DIR$/db/migrations/000007_extra_transactions.up.sql" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/db/migrations/000008_notify_tokens.up.sql" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/db/migrations/000009_categories.up.sql" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/db/migrations/000010_balance_history.up.sql" dialect="MariaDB" />

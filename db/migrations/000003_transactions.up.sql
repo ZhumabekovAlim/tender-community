@@ -12,7 +12,7 @@ CREATE TABLE transactions
     product_name   VARCHAR(255),
     completed_date TIMESTAMP,
     date           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status         TINYINT        NOT NULL CHECK (status IN (0, 1, 2)),
+    status         TINYINT        NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (company_id) REFERENCES companies (id)
 );
