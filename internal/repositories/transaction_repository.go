@@ -128,23 +128,45 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id int) 
 }
 
 // GetAllTransactions retrieves all transactions from the database along with their expenses.
-func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]models.Transaction, error) {
-	rows, err := r.Db.QueryContext(ctx, `
-		SELECT t.id,t.transaction_number, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, c.name, u.name
-		FROM transactions t JOIN tender.companies c on c.id = t.company_id JOIN tender.users u on u.id = t.user_id ORDER BY t.date DESC`)
+func (r *TransactionRepository) GetTransactionsWithExpensesByUser(ctx context.Context, userID int) ([]models.Transaction, error) {
+	query := `
+		SELECT transactions.*, u.name, c.name
+		FROM transactions
+		JOIN tender.users u ON u.id = transactions.user_id
+		JOIN tender.companies c ON c.id = transactions.company_id
+		WHERE u.id = ?
+		ORDER BY transactions.date DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var transactions []models.Transaction
+
 	for rows.Next() {
 		var transaction models.Transaction
-		err := rows.Scan(&transaction.ID, &transaction.TransactionNumber, &transaction.Type, &transaction.TenderNumber,
-			&transaction.UserID, &transaction.CompanyID, &transaction.Organization,
-			&transaction.Amount, &transaction.Total, &transaction.Sell, &transaction.ProductName,
-			&transaction.CompletedDate, &transaction.Date, &transaction.Status, &transaction.CompanyName, &transaction.UserName)
-		if err != nil {
+
+		if err := rows.Scan(
+			&transaction.ID,
+			&transaction.TransactionNumber,
+			&transaction.Type,
+			&transaction.TenderNumber,
+			&transaction.UserID,
+			&transaction.CompanyID,
+			&transaction.Organization,
+			&transaction.Amount,
+			&transaction.Total,
+			&transaction.Sell,
+			&transaction.ProductName,
+			&transaction.CompletedDate,
+			&transaction.Date,
+			&transaction.Status,
+			&transaction.UserName,
+			&transaction.CompanyName,
+		); err != nil {
 			return nil, err
 		}
 
@@ -160,8 +182,7 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 		var expenses []models.Expense
 		for expenseRows.Next() {
 			var expense models.Expense
-			err := expenseRows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID)
-			if err != nil {
+			if err := expenseRows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID); err != nil {
 				return nil, err
 			}
 			expenses = append(expenses, expense)
@@ -171,9 +192,138 @@ func (r *TransactionRepository) GetAllTransactions(ctx context.Context) ([]model
 		transactions = append(transactions, transaction)
 	}
 
-	// Check for errors during row iteration
-	if err := rows.Err(); err != nil {
+	return transactions, nil
+}
+
+func (r *TransactionRepository) GetTransactionsWithExpensesByCompany(ctx context.Context, companyID int) ([]models.Transaction, error) {
+	query := `
+		SELECT transactions.*, u.name, c.name
+		FROM transactions
+		JOIN tender.users u ON u.id = transactions.user_id
+		JOIN tender.companies c ON c.id = transactions.company_id
+		WHERE c.id = ?
+		ORDER BY transactions.date DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, companyID)
+	if err != nil {
 		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []models.Transaction
+
+	for rows.Next() {
+		var transaction models.Transaction
+
+		if err := rows.Scan(
+			&transaction.ID,
+			&transaction.TransactionNumber,
+			&transaction.Type,
+			&transaction.TenderNumber,
+			&transaction.UserID,
+			&transaction.CompanyID,
+			&transaction.Organization,
+			&transaction.Amount,
+			&transaction.Total,
+			&transaction.Sell,
+			&transaction.ProductName,
+			&transaction.CompletedDate,
+			&transaction.Date,
+			&transaction.Status,
+			&transaction.UserName,
+			&transaction.CompanyName,
+		); err != nil {
+			return nil, err
+		}
+
+		// Retrieve associated expenses for each transaction
+		expenseRows, err := r.Db.QueryContext(ctx, `
+			SELECT id, name, amount, transaction_id
+			FROM additional_expenses WHERE transaction_id = ?`, transaction.ID)
+		if err != nil {
+			return nil, err
+		}
+		defer expenseRows.Close()
+
+		var expenses []models.Expense
+		for expenseRows.Next() {
+			var expense models.Expense
+			if err := expenseRows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID); err != nil {
+				return nil, err
+			}
+			expenses = append(expenses, expense)
+		}
+
+		transaction.Expenses = expenses
+		transactions = append(transactions, transaction)
+	}
+
+	return transactions, nil
+}
+
+func (r *TransactionRepository) GetTransactionsForUserByCompanyWithExpenses(ctx context.Context, userID, companyID int) ([]models.Transaction, error) {
+	query := `
+		SELECT transactions.*, u.name, c.name
+		FROM transactions
+		JOIN tender.users u ON u.id = transactions.user_id
+		JOIN tender.companies c ON c.id = transactions.company_id
+		WHERE c.id = ? AND u.id = ?
+		ORDER BY transactions.date DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, companyID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []models.Transaction
+
+	for rows.Next() {
+		var transaction models.Transaction
+
+		if err := rows.Scan(
+			&transaction.ID,
+			&transaction.TransactionNumber,
+			&transaction.Type,
+			&transaction.TenderNumber,
+			&transaction.UserID,
+			&transaction.CompanyID,
+			&transaction.Organization,
+			&transaction.Amount,
+			&transaction.Total,
+			&transaction.Sell,
+			&transaction.ProductName,
+			&transaction.CompletedDate,
+			&transaction.Date,
+			&transaction.Status,
+			&transaction.UserName,
+			&transaction.CompanyName,
+		); err != nil {
+			return nil, err
+		}
+
+		// Retrieve associated expenses for each transaction
+		expenseRows, err := r.Db.QueryContext(ctx, `
+			SELECT id, name, amount, transaction_id
+			FROM additional_expenses WHERE transaction_id = ?`, transaction.ID)
+		if err != nil {
+			return nil, err
+		}
+		defer expenseRows.Close()
+
+		var expenses []models.Expense
+		for expenseRows.Next() {
+			var expense models.Expense
+			if err := expenseRows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID); err != nil {
+				return nil, err
+			}
+			expenses = append(expenses, expense)
+		}
+
+		transaction.Expenses = expenses
+		transactions = append(transactions, transaction)
 	}
 
 	return transactions, nil
