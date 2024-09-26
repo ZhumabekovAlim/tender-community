@@ -41,7 +41,7 @@ func (s *TransactionService) GetTransactionsForUserByCompany(ctx context.Context
 	return s.Repo.GetTransactionsForUserByCompany(ctx, userID, companyID)
 }
 
-func (s *TransactionService) GetTransactionsDebtZakup(ctx context.Context, userID int) (float64, error) {
+func (s *TransactionService) GetTransactionsDebtZakup(ctx context.Context, userID int) (*models.TransactionDebt, error) {
 	return s.Repo.GetTransactionsDebtZakup(ctx, userID)
 }
 

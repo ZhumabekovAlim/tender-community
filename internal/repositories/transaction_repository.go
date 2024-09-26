@@ -380,8 +380,8 @@ func (r *TransactionRepository) GetTransactionsForUserByCompany(ctx context.Cont
 	return transactions, nil
 }
 
-func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, userID int) (float64, error) {
-	query := `
+func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, userID int) (*models.TransactionDebt, error) {
+	queryZakup := `
         SELECT SUM(total) AS total_sum
         FROM tender.transactions
         WHERE status = 2
@@ -389,15 +389,33 @@ func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, us
         AND type = 'Закуп';
     `
 
-	// Execute the query
-	var totalSum float64
-	err := r.Db.QueryRowContext(ctx, query, userID).Scan(&totalSum)
+	// Execute the query for Zakup
+	var totalZakup float64
+	err := r.Db.QueryRowContext(ctx, queryZakup, userID).Scan(&totalZakup)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	// Return the calculated sum
-	return totalSum, nil
+	queryTender := `
+        SELECT SUM(total) AS total_sum
+        FROM tender.transactions
+        WHERE status = 2
+        AND user_id = ?
+        AND (type = 'ГОПП' OR type = 'ГОИК');
+    `
+
+	// Execute the query for Tender
+	var totalTender float64
+	err = r.Db.QueryRowContext(ctx, queryTender, userID).Scan(&totalTender)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the result in a struct
+	return &models.TransactionDebt{
+		Zakup:  totalZakup,
+		Tender: totalTender,
+	}, nil
 }
 
 // UpdateTransaction updates an existing transaction and its expenses in the database.

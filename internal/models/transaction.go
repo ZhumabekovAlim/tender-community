@@ -27,3 +27,8 @@ type Expense struct {
 	TransactionID int     `json:"transaction_id"`
 	Date          string  `json:"date"`
 }
+
+type TransactionDebt struct {
+	Zakup  float64 `json:"zakup"`
+	Tender float64 `json:"tender"`
+}
