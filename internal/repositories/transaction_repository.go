@@ -380,6 +380,26 @@ func (r *TransactionRepository) GetTransactionsForUserByCompany(ctx context.Cont
 	return transactions, nil
 }
 
+func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, userID int) (float64, error) {
+	query := `
+        SELECT SUM(total) AS total_sum
+        FROM tender.transactions
+        WHERE status = 2
+        AND user_id = ?
+        AND type = 'Закуп';
+    `
+
+	// Execute the query
+	var totalSum float64
+	err := r.Db.QueryRowContext(ctx, query, userID).Scan(&totalSum)
+	if err != nil {
+		return 0, err
+	}
+
+	// Return the calculated sum
+	return totalSum, nil
+}
+
 // UpdateTransaction updates an existing transaction and its expenses in the database.
 func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	// Begin a new database transaction

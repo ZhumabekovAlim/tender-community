@@ -41,6 +41,10 @@ func (s *TransactionService) GetTransactionsForUserByCompany(ctx context.Context
 	return s.Repo.GetTransactionsForUserByCompany(ctx, userID, companyID)
 }
 
+func (s *TransactionService) GetTransactionsDebtZakup(ctx context.Context, userID int) (float64, error) {
+	return s.Repo.GetTransactionsDebtZakup(ctx, userID)
+}
+
 // UpdateTransaction updates an existing transaction and its expenses.
 func (s *TransactionService) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	return s.Repo.UpdateTransaction(ctx, transaction)
