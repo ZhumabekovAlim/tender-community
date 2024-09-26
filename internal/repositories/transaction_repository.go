@@ -382,7 +382,7 @@ func (r *TransactionRepository) GetTransactionsForUserByCompany(ctx context.Cont
 
 func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, userID int) (*models.TransactionDebt, error) {
 	queryZakup := `
-        SELECT SUM(total) AS total_sum
+        SELECT COALESCE(SUM(total), 0) AS total_sum
         FROM tender.transactions
         WHERE status = 2
         AND user_id = ?
@@ -397,7 +397,7 @@ func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, us
 	}
 
 	queryTender := `
-        SELECT SUM(total) AS total_sum
+        SELECT COALESCE(SUM(total), 0) AS total_sum
         FROM tender.transactions
         WHERE status = 2
         AND user_id = ?
