@@ -32,7 +32,6 @@ func (r *BalanceHistoryRepository) CreateBalanceHistory(ctx context.Context, his
 	}
 	defer rows.Close()
 
-	// You need to call rows.Next() to move to the first result row
 	if rows.Next() {
 		err = rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CreatedAt, &history.UpdatedAt)
 		if err != nil {
@@ -45,7 +44,6 @@ func (r *BalanceHistoryRepository) CreateBalanceHistory(ctx context.Context, his
 	return history, nil
 }
 
-// DeleteBalanceHistory removes a balance history record from the database by ID.
 func (r *BalanceHistoryRepository) DeleteBalanceHistory(ctx context.Context, id int) error {
 	result, err := r.Db.ExecContext(ctx, "DELETE FROM balance_history WHERE id = ?", id)
 	if err != nil {

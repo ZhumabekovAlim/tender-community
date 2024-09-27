@@ -14,7 +14,7 @@ type PersonalExpenseRepository struct {
 // TODO: add date
 // CreatePersonalExpense inserts a new expense into the database.
 func (r *PersonalExpenseRepository) CreatePersonalExpense(ctx context.Context, expense models.PersonalExpense) (int, error) {
-	result, err := r.Db.ExecContext(ctx, "INSERT INTO personal_expenses (amount, reason, description, category_id) VALUES (?, ?, ?, ?)", expense.Amount, expense.Reason, expense.Description, expense.CategoryID)
+	result, err := r.Db.ExecContext(ctx, "INSERT INTO personal_expenses (amount, reason, description, category_id, date) VALUES (?, ?, ?, ?, ?)", expense.Amount, expense.Reason, expense.Description, expense.CategoryID, expense.Date)
 	if err != nil {
 		return 0, err
 	}
