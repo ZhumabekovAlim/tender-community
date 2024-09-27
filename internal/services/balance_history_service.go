@@ -12,13 +12,7 @@ type BalanceHistoryService struct {
 
 // CreateBalanceHistory creates a new balance history record.
 func (s *BalanceHistoryService) CreateBalanceHistory(ctx context.Context, history models.BalanceHistory) (models.BalanceHistory, error) {
-	id, err := s.Repo.CreateBalanceHistory(ctx, history)
-	if err != nil {
-		return models.BalanceHistory{}, err
-	}
-
-	history.ID = id
-	return history, nil
+	return s.Repo.CreateBalanceHistory(ctx, history)
 }
 
 // DeleteBalanceHistory deletes a balance history record by ID.

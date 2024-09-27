@@ -11,19 +11,30 @@ type BalanceHistoryRepository struct {
 }
 
 // CreateBalanceHistory inserts a new balance history record into the database.
-func (r *BalanceHistoryRepository) CreateBalanceHistory(ctx context.Context, history models.BalanceHistory) (int, error) {
+func (r *BalanceHistoryRepository) CreateBalanceHistory(ctx context.Context, history models.BalanceHistory) (models.BalanceHistory, error) {
 	result, err := r.Db.ExecContext(ctx, "INSERT INTO balance_history (amount, description, user_id) VALUES (?, ?, ?)",
 		history.Amount, history.Description, history.UserID)
 	if err != nil {
-		return 0, err
+		return models.BalanceHistory{}, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, err
+		return models.BalanceHistory{}, err
 	}
 
-	return int(id), nil
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, created_at, updated_at FROM balance_history WHERE id = ?", id)
+	if err != nil {
+		return models.BalanceHistory{}, err
+	}
+	defer rows.Close()
+
+	err = rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CreatedAt, &history.UpdatedAt)
+	if err != nil {
+		return models.BalanceHistory{}, err
+	}
+
+	return history, nil
 }
 
 // DeleteBalanceHistory removes a balance history record from the database by ID.
