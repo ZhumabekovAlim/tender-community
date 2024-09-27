@@ -127,12 +127,14 @@ func (h *UserHandler) UpdateBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Update balance
 	err = h.Service.UpdateBalance(r.Context(), id, balanceUpdate.Amount)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// Fetch user balance
 	balance, err := h.Service.GetBalance(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, models.ErrUserNotFound) {
@@ -143,6 +145,7 @@ func (h *UserHandler) UpdateBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch admin balance
 	balanceAdmin, err := h.Service.GetBalance(r.Context(), 1)
 	if err != nil {
 		if errors.Is(err, models.ErrUserNotFound) {
@@ -153,10 +156,13 @@ func (h *UserHandler) UpdateBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Send successful response only once
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]float64{"balance": balance, "balance_admin": balanceAdmin})
-	w.WriteHeader(http.StatusOK)
-
+	w.WriteHeader(http.StatusOK) // Ensure this is called once
+	json.NewEncoder(w).Encode(map[string]float64{
+		"balance":       balance,
+		"balance_admin": balanceAdmin,
+	})
 }
 
 func (h *UserHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
