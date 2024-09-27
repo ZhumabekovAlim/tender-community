@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"tender/internal/models"
 )
@@ -31,9 +32,14 @@ func (r *BalanceHistoryRepository) CreateBalanceHistory(ctx context.Context, his
 	}
 	defer rows.Close()
 
-	err = rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CreatedAt, &history.UpdatedAt)
-	if err != nil {
-		return models.BalanceHistory{}, err
+	// You need to call rows.Next() to move to the first result row
+	if rows.Next() {
+		err = rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CreatedAt, &history.UpdatedAt)
+		if err != nil {
+			return models.BalanceHistory{}, err
+		}
+	} else {
+		return models.BalanceHistory{}, errors.New("no rows found")
 	}
 
 	return history, nil
