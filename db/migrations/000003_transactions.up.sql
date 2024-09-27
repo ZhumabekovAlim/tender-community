@@ -10,7 +10,7 @@ CREATE TABLE transactions
     total          DECIMAL(10, 2) NOT NULL,
     sell           DECIMAL(10, 2) NOT NULL,
     product_name   VARCHAR(255),
-    completed_date TIMESTAMP,
+    completed_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status         TINYINT        NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id),
