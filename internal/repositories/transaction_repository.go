@@ -475,10 +475,10 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	// Update the transaction
 	result, err := tx.ExecContext(ctx, `
 		UPDATE transactions SET transaction_number = ?, type = ?, tender_number = ?, user_id = ?, company_id = ?, 
-		organization = ?, amount = ?, total = ?, sell = ?, product_name = ?, completed_date = ?, status = ? WHERE id = ?`,
+		organization = ?, amount = ?, total = ?, sell = ?, product_name = ?,  status = ? WHERE id = ?`,
 		transaction.TransactionNumber, transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
 		transaction.Organization, transaction.Amount, transaction.Total, transaction.Sell,
-		transaction.ProductName, transaction.CompletedDate, transaction.Status, transaction.ID)
+		transaction.ProductName, transaction.Status, transaction.ID)
 	if err != nil {
 		tx.Rollback()
 		return models.Transaction{}, err
