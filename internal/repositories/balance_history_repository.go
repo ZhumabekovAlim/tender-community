@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"tender/internal/models"
 )
 
@@ -22,6 +23,7 @@ func (r *BalanceHistoryRepository) CreateBalanceHistory(ctx context.Context, his
 	if err != nil {
 		return models.BalanceHistory{}, err
 	}
+	fmt.Println(id)
 
 	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, created_at, updated_at FROM balance_history WHERE id = ?", id)
 	if err != nil {
