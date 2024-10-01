@@ -441,6 +441,9 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	}
 
 	// Set the values to be updated, preserving existing ones if not provided
+	if transaction.TransactionNumber == 0 {
+		transaction.TransactionNumber = existingTransaction.TransactionNumber
+	}
 	if transaction.Type == "" {
 		transaction.Type = existingTransaction.Type
 	}
