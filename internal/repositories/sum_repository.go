@@ -14,7 +14,7 @@ type SumRepository struct {
 func (r *SumRepository) GetSumsByUserID(ctx context.Context, userID int) (models.Sums, error) {
 	query := `
     SELECT
-        (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE user_id = ? AND status = 2) AS transactions_sum,
+        (SELECT COALESCE(SUM(total), 0) FROM transactions WHERE user_id = ? AND status = 2) AS transactions_sum,
         (SELECT COALESCE(SUM(ae.amount), 0)
          FROM additional_expenses ae
          JOIN transactions t ON ae.transaction_id = t.id
