@@ -25,6 +25,8 @@ type application struct {
 	fcmHandler              *handlers.FCMHandler
 	categoryHandler         *handlers.CategoryHandler
 	balanceHistoryHandler   *handlers.BalanceHistoryHandler
+	tenderHandler           *handlers.TenderHandler
+	sumHandler              *handlers.SumHandler
 }
 
 func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
@@ -79,6 +81,14 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	balanceHistoryService := &services.BalanceHistoryService{Repo: balanceHistoryRepo}
 	balanceHistoryHandler := &handlers.BalanceHistoryHandler{Service: balanceHistoryService}
 
+	tenderRepo := &repositories.TenderRepository{Db: db}
+	tenderService := &services.TenderService{Repo: tenderRepo}
+	tenderHandler := &handlers.TenderHandler{Service: tenderService}
+
+	sumRepo := &repositories.SumRepository{Db: db}
+	sumService := &services.SumService{Repo: sumRepo}
+	sumHandler := &handlers.SumHandler{Service: sumService}
+
 	return &application{
 		errorLog:                errorLog,
 		infoLog:                 infoLog,
@@ -91,6 +101,8 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 		fcmHandler:              fcmHandler,
 		categoryHandler:         categoryHandler,
 		balanceHistoryHandler:   balanceHistoryHandler,
+		tenderHandler:           tenderHandler,
+		sumHandler:              sumHandler,
 	}
 }
 

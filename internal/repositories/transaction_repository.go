@@ -498,14 +498,12 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		return models.Transaction{}, models.ErrTransactionNotFound
 	}
 
-	// Delete existing expenses
 	_, err = tx.ExecContext(ctx, `DELETE FROM additional_expenses WHERE transaction_id = ?`, transaction.ID)
 	if err != nil {
 		tx.Rollback()
 		return models.Transaction{}, err
 	}
 
-	// Insert the updated expenses
 	for _, expense := range transaction.Expenses {
 		_, err := tx.ExecContext(ctx, `
 			INSERT INTO additional_expenses (name, amount, transaction_id)

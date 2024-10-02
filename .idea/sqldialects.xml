@@ -10,5 +10,6 @@
     <file url="file://$PROJECT_DIR$/db/migrations/000008_notify_tokens.up.sql" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/db/migrations/000009_categories.up.sql" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/db/migrations/000010_balance_history.up.sql" dialect="MariaDB" />
+    <file url="file://$PROJECT_DIR$/db/migrations/000011_tenders.up.sql" dialect="MariaDB" />
   </component>
 </project>

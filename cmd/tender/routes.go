@@ -114,5 +114,15 @@ func (app *application) routes() http.Handler {
 	mux.Put("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.UpdateBalanceHistory))      // Update balance history record by ID
 	mux.Del("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.DeleteBalanceHistory))      // Delete balance history record by ID
 
+	// TENDERS ( GOIK and GOPP)
+	mux.Post("/tenders", dynamicMiddleware.ThenFunc(app.tenderHandler.CreateTender))      // Create a new tender
+	mux.Get("/tenders", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTenders))     // Get all tenders
+	mux.Get("/tenders/:id", standardMiddleware.ThenFunc(app.tenderHandler.GetTenderByID)) // Get tender by ID
+	mux.Put("/tenders/:id", standardMiddleware.ThenFunc(app.tenderHandler.UpdateTender))  // Update tender by ID
+	mux.Del("/tenders/:id", standardMiddleware.ThenFunc(app.tenderHandler.DeleteTender))  // Delete tender by ID
+
+	// SUMS ALL TABLES
+	mux.Get("/sums/:id", standardMiddleware.ThenFunc(app.sumHandler.GetSumsByUserID))
+
 	return standardMiddleware.Then(mux)
 }
