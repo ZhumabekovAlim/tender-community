@@ -122,7 +122,9 @@ func (app *application) routes() http.Handler {
 	mux.Del("/tenders/:id", standardMiddleware.ThenFunc(app.tenderHandler.DeleteTender))  // Delete tender by ID
 
 	// SUMS ALL TABLES
-	mux.Get("/sums/:id", standardMiddleware.ThenFunc(app.sumHandler.GetSumsByUserID))
+	//mux.Get("/sums/:id", standardMiddleware.ThenFunc(app.sumHandler.GetSumsByUserID))
+	mux.Get("/debts", standardMiddleware.ThenFunc(app.sumHandler.GetDebtsByAccount))
 
+	mux.Get("/sums/:id", standardMiddleware.ThenFunc(app.clientHandler.GetClientData))
 	return standardMiddleware.Then(mux)
 }

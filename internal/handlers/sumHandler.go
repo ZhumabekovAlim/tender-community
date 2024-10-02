@@ -32,3 +32,14 @@ func (h *SumHandler) GetSumsByUserID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sums)
 }
+
+func (h *SumHandler) GetDebtsByAccount(w http.ResponseWriter, r *http.Request) {
+	debts, err := h.Service.GetDebtsByAccount(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(debts)
+}

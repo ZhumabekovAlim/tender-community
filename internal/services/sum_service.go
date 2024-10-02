@@ -14,3 +14,7 @@ type SumService struct {
 func (s *SumService) GetSumsByUserID(ctx context.Context, userID int) (models.Sums, error) {
 	return s.Repo.GetSumsByUserID(ctx, userID)
 }
+
+func (s *SumService) GetDebtsByAccount(ctx context.Context) ([]models.AccountDebts, error) {
+	return s.Repo.GetDebtsByAccount(ctx)
+}
