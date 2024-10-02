@@ -4,19 +4,19 @@ import "time"
 
 // TransactionData represents data for a single transaction
 type TransactionData struct {
-	TransactionNumber string  `json:"transaction_number"`
+	TransactionNumber *string `json:"transaction_number,omitempty"`
 	Amount            float64 `json:"amount"`
 }
 
 // TenderData represents data for a single tender
 type TenderData struct {
-	TenderNumber string  `json:"tender_number"`
+	TenderNumber *string `json:"tender_number"`
 	Amount       float64 `json:"amount"`
 }
 
 // AdditionalExpenseData represents data for a single additional expense
 type AdditionalExpenseData struct {
-	Date   time.Time `json:"date"`
+	Date   time.Time `json:"date,omitempty"`
 	Amount float64   `json:"amount"`
 }
 
