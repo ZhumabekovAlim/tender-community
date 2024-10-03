@@ -471,7 +471,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	if transaction.ProductName == "" {
 		transaction.ProductName = existingTransaction.ProductName
 	}
-	if transaction.CompletedDate == "" {
+	if transaction.CompletedDate == nil {
 		transaction.CompletedDate = existingTransaction.CompletedDate
 	}
 
