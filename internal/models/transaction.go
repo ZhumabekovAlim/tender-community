@@ -12,7 +12,7 @@ type Transaction struct {
 	Total             float64   `json:"total"`
 	Sell              float64   `json:"sell"`
 	ProductName       string    `json:"product_name"`
-	CompletedDate     string    `json:"completed_date"`
+	CompletedDate     *string   `json:"completed_date,omitempty"`
 	Date              string    `json:"date"`
 	Status            int       `json:"status"`
 	Expenses          []Expense `json:"expenses"`
