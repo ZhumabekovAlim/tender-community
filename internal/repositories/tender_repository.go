@@ -60,7 +60,7 @@ func (r *TenderRepository) UpdateTender(ctx context.Context, tender models.Tende
 		query += " type = ?,"
 		params = append(params, tender.Type)
 	}
-	if tender.TenderNumber != "" {
+	if tender.TenderNumber != nil {
 		query += " tender_number = ?,"
 		params = append(params, tender.TenderNumber)
 	}
@@ -84,7 +84,7 @@ func (r *TenderRepository) UpdateTender(ctx context.Context, tender models.Tende
 		query += " commission = ?,"
 		params = append(params, tender.Commission)
 	}
-	if !tender.CompletedDate.IsZero() {
+	if tender.CompletedDate == nil {
 		query += " completed_date = ?,"
 		params = append(params, tender.CompletedDate)
 	}
