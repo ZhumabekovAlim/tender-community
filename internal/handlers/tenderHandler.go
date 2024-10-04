@@ -135,3 +135,33 @@ func (h *TenderHandler) GetAllTenders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tenders)
 }
+
+func (h *TenderHandler) GetTendersByUserID(w http.ResponseWriter, r *http.Request) {
+	// Extract the user_id from the query parameters or URL (depending on your setup)
+	userIDStr := r.URL.Query().Get(":id")
+	if userIDStr == "" {
+		http.Error(w, "user_id is required", http.StatusBadRequest)
+		return
+	}
+
+	// Convert userIDStr to int
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	// Call the service to get tenders by user_id
+	tenders, err := h.Service.GetTendersByUserID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "Failed to fetch tenders", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the tenders in JSON format
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(tenders); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}

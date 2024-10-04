@@ -174,3 +174,37 @@ func (r *TenderRepository) GetAllTenders(ctx context.Context) ([]models.Tender, 
 
 	return tenders, nil
 }
+
+func (r *TenderRepository) GetTendersByUserID(ctx context.Context, userID int) ([]models.Tender, error) {
+	rows, err := r.Db.QueryContext(ctx, `
+        SELECT tenders.id, type, tender_number, user_id, company_id, organization,
+               total, commission, completed_date, date, status, u.name, c.name
+        FROM tenders
+        JOIN tender.users u ON u.id = tenders.user_id
+        JOIN tender.companies c ON c.id = tenders.company_id
+        WHERE tenders.user_id = ?
+        ORDER BY tenders.date DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tenders []models.Tender
+	for rows.Next() {
+		var tender models.Tender
+		err := rows.Scan(
+			&tender.ID, &tender.Type, &tender.TenderNumber, &tender.UserID, &tender.CompanyID, &tender.Organization,
+			&tender.Total, &tender.Commission, &tender.CompletedDate, &tender.Date, &tender.Status, &tender.UserName, &tender.CompanyName,
+		)
+		if err != nil {
+			return nil, err
+		}
+		tenders = append(tenders, tender)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tenders, nil
+}
