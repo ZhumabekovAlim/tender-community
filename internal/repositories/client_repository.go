@@ -111,7 +111,7 @@ func (r *ClientRepository) GetClientData(ctx context.Context, userID int) (model
 	if err := expenseRows.Err(); err != nil {
 		return clientData, err
 	}
-	a := clientData.Transactions. + clientData.AdditionalExpenses
+	//a := clientData.Transactions. + clientData.AdditionalExpenses
 
 	return clientData, nil
 }
