@@ -20,9 +20,10 @@ func (r *SumRepository) GetSumsByUserID(ctx context.Context, userID int) (models
          JOIN transactions t ON ae.transaction_id = t.id
          WHERE t.user_id = ? AND t.status = 2) AS additional_expenses_sum,
         (SELECT COALESCE(SUM(total), 0) FROM tenders WHERE user_id = ? AND status = 2 AND type = 'ГОИК') AS tenders_goik_sum,
-        (SELECT COALESCE(SUM(total), 0) FROM tenders WHERE user_id = ? AND status = 2 AND type = 'ГОПП') AS tenders_gopp_sum
+        (SELECT COALESCE(SUM(total), 0) FROM tenders WHERE user_id = ? AND status = 2 AND type = 'ГОПП') AS tenders_gopp_sum,
+         (SELECT COALESCE(SUM(total), 0) FROM extra_transactions WHERE user_id = ? AND status = 2) AS extra_sum
     `
-	row := r.Db.QueryRowContext(ctx, query, userID, userID, userID, userID)
+	row := r.Db.QueryRowContext(ctx, query, userID, userID, userID, userID, userID)
 	var sums models.Sums
 	err := row.Scan(&sums.TransactionsSum, &sums.AdditionalExpensesSum, &sums.TendersGoikSum, &sums.TendersGoppSum)
 	if err != nil {
