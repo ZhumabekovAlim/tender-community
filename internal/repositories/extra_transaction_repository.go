@@ -125,7 +125,20 @@ func (r *ExtraTransactionRepository) UpdateExtraTransaction(ctx context.Context,
 		return models.ExtraTransaction{}, err
 	}
 
-	return extraTransaction, nil
+	// Retrieve the updated record from the database
+	var updatedTransaction models.ExtraTransaction
+	err = r.Db.QueryRowContext(ctx, `
+		SELECT id, user_id, description, total, status, date
+		FROM extra_transactions
+		WHERE id = ?`, extraTransaction.ID).
+		Scan(&updatedTransaction.ID, &updatedTransaction.UserID, &updatedTransaction.Description,
+			&updatedTransaction.Total, &updatedTransaction.Status, &updatedTransaction.Date)
+
+	if err != nil {
+		return models.ExtraTransaction{}, err
+	}
+
+	return updatedTransaction, nil
 }
 
 func (r *ExtraTransactionRepository) DeleteExtraTransaction(ctx context.Context, id int) error {
