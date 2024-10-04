@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"log"
 	"tender/internal/models"
 )
 
@@ -435,7 +436,10 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		&existingTransaction.CompanyID, &existingTransaction.Organization, &existingTransaction.Amount,
 		&existingTransaction.Total, &existingTransaction.Sell, &existingTransaction.ProductName,
 		&existingTransaction.CompletedDate, &existingTransaction.Status)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		tx.Rollback()
+		return models.Transaction{}, models.ErrTransactionNotFound
+	} else if err != nil {
 		tx.Rollback()
 		return models.Transaction{}, err
 	}
@@ -495,6 +499,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 
 	if rowsAffected == 0 {
 		tx.Rollback()
+		log.Printf("No rows affected for transaction ID: %d", transaction.ID)
 		return models.Transaction{}, models.ErrTransactionNotFound
 	}
 
