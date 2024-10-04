@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"tender/internal/models"
+	"time"
 )
 
 type TenderRepository struct {
@@ -18,7 +19,7 @@ func (r *TenderRepository) CreateTender(ctx context.Context, tender models.Tende
             total, commission, completed_date, date, status
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		tender.Type, tender.TenderNumber, tender.UserID, tender.CompanyID, tender.Organization,
-		tender.Total, tender.Commission, tender.CompletedDate, tender.Date, tender.Status,
+		tender.Total, tender.Commission, tender.CompletedDate, time.Now(), tender.Status,
 	)
 	if err != nil {
 		return 0, err
@@ -120,11 +121,15 @@ func (r *TenderRepository) UpdateTender(ctx context.Context, tender models.Tende
 func (r *TenderRepository) GetTenderByID(ctx context.Context, id int) (models.Tender, error) {
 	var tender models.Tender
 	err := r.Db.QueryRowContext(ctx, `
-        SELECT id, type, tender_number, user_id, company_id, organization,
-               total, commission, completed_date, date, status
-        FROM tenders WHERE id = ?`, id).Scan(
+        SELECT tenders.id, type, tender_number, user_id, company_id, organization,
+               total, commission, completed_date, date, status, u.name, c.name
+        FROM tenders
+        JOIN tender.users u ON u.id = tenders.user_id
+		JOIN tender.companies c ON c.id = tenders.company_id
+		 WHERE tenders.id = ?
+		ORDER BY tenders.date DESC`, id).Scan(
 		&tender.ID, &tender.Type, &tender.TenderNumber, &tender.UserID, &tender.CompanyID, &tender.Organization,
-		&tender.Total, &tender.Commission, &tender.CompletedDate, &tender.Date, &tender.Status,
+		&tender.Total, &tender.Commission, &tender.CompletedDate, &tender.Date, &tender.Status, &tender.UserName, &tender.CompanyName,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

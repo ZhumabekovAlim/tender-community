@@ -19,4 +19,6 @@ type Tender struct {
 	CompletedDate *string   `json:"completed_date,omitempty"`
 	Date          time.Time `json:"date"`
 	Status        int       `json:"status"`
+	UserName      *string   `json:"username,omitempty"`
+	CompanyName   *string   `json:"companyname,omitempty"`
 }
