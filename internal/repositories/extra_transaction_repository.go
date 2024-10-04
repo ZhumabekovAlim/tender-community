@@ -96,10 +96,31 @@ func (r *ExtraTransactionRepository) GetExtraTransactionsByUser(ctx context.Cont
 }
 
 func (r *ExtraTransactionRepository) UpdateExtraTransaction(ctx context.Context, extraTransaction models.ExtraTransaction) (models.ExtraTransaction, error) {
-	_, err := r.Db.ExecContext(ctx, `
-		UPDATE extra_transactions SET user_id = ?, description = ?, total = ?, status = ? 
-		WHERE id = ?`,
-		extraTransaction.UserID, extraTransaction.Description, extraTransaction.Total, extraTransaction.Status, extraTransaction.ID)
+	query := "UPDATE extra_transactions SET"
+	params := []interface{}{}
+
+	if extraTransaction.UserID != 0 {
+		query += " user_id = ?,"
+		params = append(params, extraTransaction.UserID)
+	}
+	if extraTransaction.Description != "" {
+		query += " description = ?,"
+		params = append(params, extraTransaction.Description)
+	}
+	if extraTransaction.Total != 0 {
+		query += " total = ?,"
+		params = append(params, extraTransaction.Total)
+	}
+	if extraTransaction.Status != 0 {
+		query += " status = ?,"
+		params = append(params, extraTransaction.Status)
+	}
+
+	// Remove the trailing comma and add the WHERE clause
+	query = query[:len(query)-1] + " WHERE id = ?"
+	params = append(params, extraTransaction.ID)
+
+	_, err := r.Db.ExecContext(ctx, query, params...)
 	if err != nil {
 		return models.ExtraTransaction{}, err
 	}

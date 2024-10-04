@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -72,20 +71,14 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 		log.Printf("Error fetching transactions: %v", err)
 		http.Error(w, "Failed to fetch transactions", http.StatusInternalServerError)
 		return
-	} else {
-		fmt.Println("1111111111111")
 	}
-
 	// Fetch extra transactions using the ExtraTransactionService
 	extraTransactions, err := h.ExtraTransactionService.GetAllExtraTransactions(r.Context())
 	if err != nil {
 		log.Printf("Error fetching extra transactions: %v", err)
 		http.Error(w, "Failed to fetch extra transactions", http.StatusInternalServerError)
 		return
-	} else {
-		fmt.Println("222222222222222")
 	}
-
 	// Combine and send response
 	combinedTransactions := combineTransactions(transactions, extraTransactions)
 
@@ -93,8 +86,6 @@ func (h *TransactionHandler) GetAllTransactions(w http.ResponseWriter, r *http.R
 	if err := json.NewEncoder(w).Encode(combinedTransactions); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	} else {
-		fmt.Println("333333333333333")
 	}
 }
 
@@ -110,8 +101,6 @@ func combineTransactions(transactions []models.Transaction, extraTransactions []
 	for _, et := range extraTransactions {
 		combined = append(combined, et)
 	}
-
-	fmt.Println("COOOOMBINE!")
 
 	return combined
 }

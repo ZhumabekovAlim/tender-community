@@ -139,7 +139,6 @@ func (h *FCMHandler) GetTokensByClientID(clientID int) ([]string, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	fmt.Println("good")
 	return tokens, nil
 }
 
@@ -173,7 +172,6 @@ func (h *FCMHandler) InsertToken(clientID int, token string) error {
 
 	_, err := h.DB.Exec(stmt1, clientID, token)
 	if err != nil {
-		fmt.Println("safjdajs")
 		return err
 	}
 	return nil
