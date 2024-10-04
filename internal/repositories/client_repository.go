@@ -43,7 +43,7 @@ func (r *ClientRepository) GetClientData(ctx context.Context, userID int) (model
 	tendersGOIKQuery := `
     SELECT tender_number, total
     FROM tenders
-    WHERE user_id = ? AND status = 2 AND type = 'GOIK'
+    WHERE user_id = ? AND status = 2 AND type = 'ГОИК'
     `
 	goikRows, err := r.Db.QueryContext(ctx, tendersGOIKQuery, userID)
 	if err != nil {
@@ -67,7 +67,7 @@ func (r *ClientRepository) GetClientData(ctx context.Context, userID int) (model
 	tendersGOPPQuery := `
     SELECT tender_number, total
     FROM tenders
-    WHERE user_id = ? AND status = 2 AND type = 'GOPP'
+    WHERE user_id = ? AND status = 2 AND type = 'ГОПП'
     `
 	goppRows, err := r.Db.QueryContext(ctx, tendersGOPPQuery, userID)
 	if err != nil {
@@ -111,6 +111,7 @@ func (r *ClientRepository) GetClientData(ctx context.Context, userID int) (model
 	if err := expenseRows.Err(); err != nil {
 		return clientData, err
 	}
+	a := clientData.Transactions. + clientData.AdditionalExpenses
 
 	return clientData, nil
 }
