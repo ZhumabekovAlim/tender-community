@@ -144,9 +144,12 @@ func (r *TenderRepository) GetTenderByID(ctx context.Context, id int) (models.Te
 // GetAllTenders retrieves all tenders from the database.
 func (r *TenderRepository) GetAllTenders(ctx context.Context) ([]models.Tender, error) {
 	rows, err := r.Db.QueryContext(ctx, `
-        SELECT id, type, tender_number, user_id, company_id, organization,
-               total, commission, completed_date, date, status
-        FROM tenders`)
+        SELECT tenders.id, type, tender_number, user_id, company_id, organization,
+               total, commission, completed_date, date, status, u.name, c.name
+        FROM tenders
+        JOIN tender.users u ON u.id = tenders.user_id
+		JOIN tender.companies c ON c.id = tenders.company_id
+		ORDER BY tenders.date DESC`)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +160,7 @@ func (r *TenderRepository) GetAllTenders(ctx context.Context) ([]models.Tender, 
 		var tender models.Tender
 		err := rows.Scan(
 			&tender.ID, &tender.Type, &tender.TenderNumber, &tender.UserID, &tender.CompanyID, &tender.Organization,
-			&tender.Total, &tender.Commission, &tender.CompletedDate, &tender.Date, &tender.Status,
+			&tender.Total, &tender.Commission, &tender.CompletedDate, &tender.Date, &tender.Status, &tender.UserName, &tender.CompanyName,
 		)
 		if err != nil {
 			return nil, err
