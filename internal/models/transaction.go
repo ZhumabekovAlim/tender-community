@@ -2,7 +2,7 @@ package models
 
 type Transaction struct {
 	ID                int       `json:"id"`
-	TransactionNumber *int      `json:"transaction_number,omitempty"`
+	TransactionNumber *string   `json:"transaction_number,omitempty"`
 	Type              string    `json:"type"`
 	TenderNumber      *string   `json:"tender_number,omitempty"`
 	UserID            int       `json:"user_id"`
