@@ -196,3 +196,28 @@ func (h *ExtraTransactionHandler) GetAllExtraTransactionsByDateRange(w http.Resp
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
+
+func (h *ExtraTransactionHandler) GetAllExtraTransactionsByDateRangeCompany(w http.ResponseWriter, r *http.Request) {
+	var dateRange models.DateRangeRequestCompany
+
+	// Parse request body to get date range and userId
+	if err := json.NewDecoder(r.Body).Decode(&dateRange); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch extra transactions within the date range
+	extraTransactions, err := h.Service.GetAllExtraTransactionsByDateRangeCompany(r.Context(), dateRange.StartDate, dateRange.EndDate, dateRange.UserId, dateRange.CompanyId)
+	if err != nil {
+		log.Printf("Error fetching extra transactions: %v", err)
+		http.Error(w, "Failed to fetch extra transactions", http.StatusInternalServerError)
+		return
+	}
+
+	// Send response as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(extraTransactions); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}

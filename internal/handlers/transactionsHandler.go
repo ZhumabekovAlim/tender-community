@@ -797,3 +797,28 @@ func (h *TransactionHandler) GetAllTransactionsByDateRange(w http.ResponseWriter
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
+
+func (h *TransactionHandler) GetAllTransactionsByDateRangeCompany(w http.ResponseWriter, r *http.Request) {
+	var dateRange models.DateRangeRequestCompany
+
+	// Parse the request body to get the date range
+	if err := json.NewDecoder(r.Body).Decode(&dateRange); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch transactions within the date range
+	transactions, err := h.Service.GetAllTransactionsByDateRangeCompany(r.Context(), dateRange.StartDate, dateRange.EndDate, dateRange.UserId, dateRange.CompanyId)
+	if err != nil {
+		log.Printf("Error fetching transactions: %v", err)
+		http.Error(w, "Failed to fetch transactions", http.StatusInternalServerError)
+		return
+	}
+
+	// Send the response as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(transactions); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}

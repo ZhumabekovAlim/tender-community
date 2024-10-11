@@ -232,3 +232,28 @@ func (h *TenderHandler) GetAllTendersByDateRange(w http.ResponseWriter, r *http.
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
+
+func (h *TenderHandler) GetAllTendersByDateRangeCompany(w http.ResponseWriter, r *http.Request) {
+	var dateRange models.DateRangeRequestCompany
+
+	// Parse request body to get date range and userId
+	if err := json.NewDecoder(r.Body).Decode(&dateRange); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch tenders within the date range
+	tenders, err := h.Service.GetAllTendersByDateRangeCompany(r.Context(), dateRange.StartDate, dateRange.EndDate, dateRange.UserId, dateRange.CompanyId)
+	if err != nil {
+		log.Printf("Error fetching tenders: %v", err)
+		http.Error(w, "Failed to fetch tenders", http.StatusInternalServerError)
+		return
+	}
+
+	// Send response as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(tenders); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}

@@ -138,5 +138,8 @@ func (app *application) routes() http.Handler {
 	mux.Get("/data/transactions/date", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRange))
 	mux.Get("/data/tenders/date", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersByDateRange))
 	mux.Get("/data/extra/date", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactionsByDateRange))
+	mux.Get("/data/transactions/date/company", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRangeCompany))
+	mux.Get("/data/tenders/date/company", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersByDateRangeCompany))
+	mux.Get("/data/extra/date/company", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactionsByDateRangeCompany))
 	return standardMiddleware.Then(mux)
 }

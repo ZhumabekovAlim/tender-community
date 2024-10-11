@@ -59,3 +59,7 @@ func (s *TenderService) GetTenderCountsByUserID(ctx context.Context, userID int)
 func (s *TenderService) GetAllTendersByDateRange(ctx context.Context, startDate, endDate string, userId int) ([]models.Tender, error) {
 	return s.Repo.GetAllTendersByDateRange(ctx, startDate, endDate, userId)
 }
+
+func (s *TenderService) GetAllTendersByDateRangeCompany(ctx context.Context, startDate, endDate string, userId, companyId int) ([]models.Tender, error) {
+	return s.Repo.GetAllTendersByDateRangeCompany(ctx, startDate, endDate, userId, companyId)
+}

@@ -41,3 +41,7 @@ func (s *ExtraTransactionService) GetExtraTransactionCountsByUserID(ctx context.
 func (s *ExtraTransactionService) GetAllExtraTransactionsByDateRange(ctx context.Context, startDate, endDate string, userId int) ([]models.ExtraTransaction, error) {
 	return s.Repo.GetAllExtraTransactionsByDateRange(ctx, startDate, endDate, userId)
 }
+
+func (s *ExtraTransactionService) GetAllExtraTransactionsByDateRangeCompany(ctx context.Context, startDate, endDate string, userId, companyId int) ([]models.ExtraTransaction, error) {
+	return s.Repo.GetAllExtraTransactionsByDateRangeCompany(ctx, startDate, endDate, userId, companyId)
+}
