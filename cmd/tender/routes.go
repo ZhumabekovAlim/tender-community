@@ -133,7 +133,7 @@ func (app *application) routes() http.Handler {
 
 	mux.Get("/sums/:id", standardMiddleware.ThenFunc(app.clientHandler.GetClientData))
 
-	//3 TYPES
+	//REALIZATION
 	mux.Get("/data/user/:user_id/status/:status", standardMiddleware.ThenFunc(app.transactionHandler.GetAllByUserIDAndStatus))
 	mux.Get("/data/transactions/date", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRange))
 	mux.Get("/data/tenders/date", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersByDateRange))
@@ -141,5 +141,13 @@ func (app *application) routes() http.Handler {
 	mux.Get("/data/transactions/date/company", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRangeCompany))
 	mux.Get("/data/tenders/date/company", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersByDateRangeCompany))
 	mux.Get("/data/extra/date/company", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactionsByDateRangeCompany))
+
+	// TRANCHE
+	mux.Post("/tranches", dynamicMiddleware.ThenFunc(app.trancheHandler.CreateTranche))                                             // Create a new tranche
+	mux.Get("/tranches/:id", standardMiddleware.ThenFunc(app.trancheHandler.GetTrancheByID))                                        // Get tranche by ID
+	mux.Put("/tranches/:id", standardMiddleware.ThenFunc(app.trancheHandler.UpdateTranche))                                         // Update tranche by ID
+	mux.Del("/tranches/:id", standardMiddleware.ThenFunc(app.trancheHandler.DeleteTranche))                                         // Delete tranche by ID
+	mux.Get("/tranches/transaction/:transaction_id", standardMiddleware.ThenFunc(app.trancheHandler.GetAllTranchesByTransactionID)) // Get all tranches by transaction_id
+
 	return standardMiddleware.Then(mux)
 }

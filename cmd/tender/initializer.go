@@ -28,6 +28,7 @@ type application struct {
 	tenderHandler           *handlers.TenderHandler
 	sumHandler              *handlers.SumHandler
 	clientHandler           *handlers.ClientHandler
+	trancheHandler          *handlers.TrancheHandler
 }
 
 func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
@@ -94,6 +95,10 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	clientService := &services.ClientService{Repo: clientRepo}
 	clientHandler := &handlers.ClientHandler{Service: clientService}
 
+	trancheRepo := &repositories.TrancheRepository{Db: db}
+	trancheService := &services.TrancheService{Repo: trancheRepo}
+	trancheHandler := &handlers.TrancheHandler{Service: trancheService}
+
 	return &application{
 		errorLog:                errorLog,
 		infoLog:                 infoLog,
@@ -109,6 +114,7 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 		tenderHandler:           tenderHandler,
 		sumHandler:              sumHandler,
 		clientHandler:           clientHandler,
+		trancheHandler:          trancheHandler,
 	}
 }
 
