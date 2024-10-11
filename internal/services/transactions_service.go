@@ -60,6 +60,10 @@ func (s *TransactionService) GetTransactionsDebtZakup(ctx context.Context, userI
 	return s.Repo.GetTransactionsDebtZakup(ctx, userID)
 }
 
+func (s *TransactionService) GetTransactionsDebt(ctx context.Context, transactionID int) (*models.TransactionDebtId, error) {
+	return s.Repo.GetTransactionsDebt(ctx, transactionID)
+}
+
 // UpdateTransaction updates an existing transaction and its expenses.
 func (s *TransactionService) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	return s.Repo.UpdateTransaction(ctx, transaction)

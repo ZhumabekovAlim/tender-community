@@ -45,6 +45,7 @@ func (app *application) routes() http.Handler {
 	mux.Get("/transactions/company/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsByCompany))                              // Get transaction by company ID
 	mux.Get("/transactions/user/:user_id/company/:company_id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsForUserByCompany)) // Get transaction by user and company ID
 	mux.Get("/transactions/user/zakup/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsDebtZakup))                           // Get transaction by user and company ID
+	mux.Get("/transactions/user/debt/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsDebt))                                 // Get transaction by user and company ID
 	mux.Get("/transactions/realization/sum", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsSum))                             // Get transaction by user and company ID
 	mux.Get("/transactions/realization/count/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionCountsByUserID))                // Get transaction by user and company ID
 	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))                                             // Update transaction by ID

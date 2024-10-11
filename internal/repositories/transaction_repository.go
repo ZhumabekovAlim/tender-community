@@ -458,6 +458,28 @@ func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, us
 	}, nil
 }
 
+func (r *TransactionRepository) GetTransactionsDebt(ctx context.Context, transactionID int) (*models.TransactionDebtId, error) {
+	queryZakup := `
+        SELECT total AS total_sum
+        FROM tender.transactions
+        WHERE status = 2
+        AND id = ?
+        AND type = 'Закуп';
+    `
+
+	// Execute the query for Zakup
+	var totalZakup float64
+	err := r.Db.QueryRowContext(ctx, queryZakup, transactionID).Scan(&totalZakup)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the result in a struct
+	return &models.TransactionDebtId{
+		Debt: totalZakup,
+	}, nil
+}
+
 // UpdateTransaction updates an existing transaction and its expenses in the database.
 func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	// Begin a new database transaction

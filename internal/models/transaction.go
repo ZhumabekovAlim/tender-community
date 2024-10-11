@@ -32,6 +32,10 @@ type TransactionDebt struct {
 	Zakup float64 `json:"zakup"`
 }
 
+type TransactionDebtId struct {
+	Debt float64 `json:"debt"`
+}
+
 type TransactionCount struct {
 	TotalTransactions int
 	Status0           int

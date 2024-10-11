@@ -251,6 +251,30 @@ func (h *TransactionHandler) GetTransactionsDebtZakup(w http.ResponseWriter, r *
 	json.NewEncoder(w).Encode(transactions)
 }
 
+func (h *TransactionHandler) GetTransactionsDebt(w http.ResponseWriter, r *http.Request) {
+	transactionIDStr := r.URL.Query().Get(":id")
+
+	if transactionIDStr == "" {
+		http.Error(w, "Missing user ID", http.StatusBadRequest)
+		return
+	}
+
+	transactionID, err := strconv.Atoi(transactionIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	transactions, err := h.Service.GetTransactionsDebt(r.Context(), transactionID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(transactions)
+}
+
 // UpdateTransaction updates an existing transaction and its expenses.
 func (h *TransactionHandler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
