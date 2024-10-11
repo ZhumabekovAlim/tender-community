@@ -190,6 +190,18 @@ func (h *TransactionHandler) GetTransactionsForUserByCompany(w http.ResponseWrit
 	json.NewEncoder(w).Encode(transactions)
 }
 
+func (h *TransactionHandler) GetAllTransactionsSum(w http.ResponseWriter, r *http.Request) {
+
+	transactions, err := h.Service.GetAllTransactionsSum(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(transactions)
+}
+
 func (h *TransactionHandler) GetTransactionsDebtZakup(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get(":id")
 

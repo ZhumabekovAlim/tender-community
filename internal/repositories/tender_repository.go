@@ -13,13 +13,16 @@ type TenderRepository struct {
 
 // CreateTender inserts a new tender into the database.
 func (r *TenderRepository) CreateTender(ctx context.Context, tender models.Tender) (int, error) {
+	now := time.Now()
+	formattedTime := now.Format("2006-01-02 15:04:05")
+
 	result, err := r.Db.ExecContext(ctx, `
         INSERT INTO tenders (
             type, tender_number, user_id, company_id, organization,
             total, commission, completed_date, date, status
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		tender.Type, tender.TenderNumber, tender.UserID, tender.CompanyID, tender.Organization,
-		tender.Total, tender.Commission, tender.CompletedDate, time.Now(), tender.Status,
+		tender.Total, tender.Commission, tender.CompletedDate, formattedTime, tender.Status,
 	)
 	if err != nil {
 		return 0, err

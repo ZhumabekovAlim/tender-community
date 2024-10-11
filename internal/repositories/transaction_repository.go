@@ -381,6 +381,27 @@ func (r *TransactionRepository) GetTransactionsForUserByCompany(ctx context.Cont
 	return transactions, nil
 }
 
+func (r *TransactionRepository) GetAllTransactionsSum(ctx context.Context) (*models.TransactionDebt, error) {
+	queryZakup := `
+        SELECT COALESCE(SUM(total), 0) AS total_sum
+        FROM tender.transactions
+        WHERE status = 3
+        AND type = 'Закуп';
+    `
+
+	// Execute the query for Zakup
+	var totalZakup float64
+	err := r.Db.QueryRowContext(ctx, queryZakup).Scan(&totalZakup)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the result in a struct
+	return &models.TransactionDebt{
+		Zakup: totalZakup,
+	}, nil
+}
+
 func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, userID int) (*models.TransactionDebt, error) {
 	queryZakup := `
         SELECT COALESCE(SUM(total), 0) AS total_sum

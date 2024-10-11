@@ -41,6 +41,10 @@ func (s *TransactionService) GetTransactionsForUserByCompany(ctx context.Context
 	return s.Repo.GetTransactionsForUserByCompany(ctx, userID, companyID)
 }
 
+func (s *TransactionService) GetAllTransactionsSum(ctx context.Context) (*models.TransactionDebt, error) {
+	return s.Repo.GetAllTransactionsSum(ctx)
+}
+
 func (s *TransactionService) GetTransactionsDebtZakup(ctx context.Context, userID int) (*models.TransactionDebt, error) {
 	return s.Repo.GetTransactionsDebtZakup(ctx, userID)
 }
