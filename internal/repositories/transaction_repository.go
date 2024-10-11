@@ -384,7 +384,7 @@ func (r *TransactionRepository) GetTransactionsForUserByCompany(ctx context.Cont
 
 func (r *TransactionRepository) GetAllTransactionsSum(ctx context.Context) (*models.TransactionDebt, error) {
 	queryZakup := `
-        SELECT COALESCE(SUM(total), 0) AS total_sum
+        SELECT COALESCE(SUM(sell), 0) AS total_sum
         FROM tender.transactions
         WHERE status = 3
         AND type = 'Закуп';
@@ -1528,4 +1528,66 @@ func (r *TransactionRepository) FindAllExtraTransactionsByUserIDAndStatus(ctx co
 		extraTransactions = append(extraTransactions, et)
 	}
 	return extraTransactions, nil
+}
+
+func (r *TransactionRepository) GetAllTransactionsByDateRange(ctx context.Context, startDate, endDate string) ([]models.Transaction, error) {
+	query := `
+		SELECT t.id, t.transaction_number, t.type, t.tender_number, t.user_id, t.company_id, t.organization, 
+		       t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, 
+		       c.name AS companyname, u.name AS username
+		FROM transactions t 
+		JOIN tender.companies c ON c.id = t.company_id 
+		JOIN tender.users u ON u.id = t.user_id 
+		WHERE t.date BETWEEN ? AND ? 
+		ORDER BY t.date DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transactions: %w", err)
+	}
+	defer rows.Close()
+
+	var transactions []models.Transaction
+	for rows.Next() {
+		var transaction models.Transaction
+		err := rows.Scan(&transaction.ID, &transaction.TransactionNumber, &transaction.Type, &transaction.TenderNumber,
+			&transaction.UserID, &transaction.CompanyID, &transaction.Organization,
+			&transaction.Amount, &transaction.Total, &transaction.Sell, &transaction.ProductName,
+			&transaction.CompletedDate, &transaction.Date, &transaction.Status, &transaction.CompanyName, &transaction.UserName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan transaction: %w", err)
+		}
+
+		// Retrieve associated expenses for each transaction
+		expenseRows, err := r.Db.QueryContext(ctx, `
+			SELECT id, name, amount, transaction_id, date
+			FROM additional_expenses 
+			WHERE transaction_id = ?`, transaction.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to query expenses for transaction %d: %w", transaction.ID, err)
+		}
+		defer expenseRows.Close()
+
+		var expenses []models.Expense
+		for expenseRows.Next() {
+			var expense models.Expense
+			err := expenseRows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID, &expense.Date)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan expense: %w", err)
+			}
+			expenses = append(expenses, expense)
+		}
+		expenseRows.Close() // Close after processing expenses for each transaction
+
+		transaction.Expenses = expenses
+		transactions = append(transactions, transaction)
+	}
+
+	// Check for errors during row iteration
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return transactions, nil
 }

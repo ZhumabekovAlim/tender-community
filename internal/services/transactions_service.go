@@ -162,3 +162,7 @@ func (s *TransactionService) GetAllByUserIDAndStatus(ctx context.Context, userID
 		ExtraTransactions: extraTransactions,
 	}, nil
 }
+
+func (s *TransactionService) GetAllTransactionsByDateRange(ctx context.Context, startDate, endDate string) ([]models.Transaction, error) {
+	return s.Repo.GetAllTransactionsByDateRange(ctx, startDate, endDate)
+}
