@@ -1423,3 +1423,84 @@ func (r *TransactionRepository) GetTotalAmountByCompanyForUserYearAndMonth(ctx c
 
 	return totalAmounts, nil
 }
+
+func (r *TransactionRepository) FindAllTransactionsByUserIDAndStatus(ctx context.Context, userID, status int) ([]models.Transaction, error) {
+	query := `
+		SELECT t.id, t.transaction_number, t.type, t.tender_number, t.user_id, t.company_id, 
+		       t.organization, t.amount, t.total, t.sell, t.product_name, t.completed_date, 
+		       t.date, t.status, u.name as username, c.name as companyname
+		FROM transactions t
+		LEFT JOIN users u ON t.user_id = u.id
+		LEFT JOIN companies c ON t.company_id = c.id
+		WHERE t.user_id = ? AND t.status = ?;
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID, status)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transactions: %w", err)
+	}
+	defer rows.Close()
+
+	var transactions []models.Transaction
+	for rows.Next() {
+		var t models.Transaction
+		if err := rows.Scan(&t.ID, &t.TransactionNumber, &t.Type, &t.TenderNumber, &t.UserID, &t.CompanyID, &t.Organization,
+			&t.Amount, &t.Total, &t.Sell, &t.ProductName, &t.CompletedDate, &t.Date, &t.Status, &t.UserName, &t.CompanyName); err != nil {
+			return nil, fmt.Errorf("failed to scan transaction: %w", err)
+		}
+		transactions = append(transactions, t)
+	}
+	return transactions, nil
+}
+
+func (r *TransactionRepository) FindAllTendersByUserIDAndStatus(ctx context.Context, userID, status int) ([]models.Tender, error) {
+	query := `
+		SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.total, 
+		       t.commission, t.completed_date, t.date, t.status, u.name as username, c.name as companyname
+		FROM tenders t
+		LEFT JOIN users u ON t.user_id = u.id
+		LEFT JOIN companies c ON t.company_id = c.id
+		WHERE t.user_id = ? AND t.status = ?;
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID, status)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query tenders: %w", err)
+	}
+	defer rows.Close()
+
+	var tenders []models.Tender
+	for rows.Next() {
+		var t models.Tender
+		if err := rows.Scan(&t.ID, &t.Type, &t.TenderNumber, &t.UserID, &t.CompanyID, &t.Organization, &t.Total, &t.Commission, &t.CompletedDate, &t.Date, &t.Status, &t.UserName, &t.CompanyName); err != nil {
+			return nil, fmt.Errorf("failed to scan tender: %w", err)
+		}
+		tenders = append(tenders, t)
+	}
+	return tenders, nil
+}
+
+func (r *TransactionRepository) FindAllExtraTransactionsByUserIDAndStatus(ctx context.Context, userID, status int) ([]models.ExtraTransaction, error) {
+	query := `
+		SELECT e.id, e.user_id, e.description, e.total, e.date, e.status, u.name as username
+		FROM extra_transactions e
+		LEFT JOIN users u ON e.user_id = u.id
+		WHERE e.user_id = ? AND e.status = ?;
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, userID, status)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query extra transactions: %w", err)
+	}
+	defer rows.Close()
+
+	var extraTransactions []models.ExtraTransaction
+	for rows.Next() {
+		var et models.ExtraTransaction
+		if err := rows.Scan(&et.ID, &et.UserID, &et.Description, &et.Total, &et.Date, &et.Status, &et.UserName); err != nil {
+			return nil, fmt.Errorf("failed to scan extra transaction: %w", err)
+		}
+		extraTransactions = append(extraTransactions, et)
+	}
+	return extraTransactions, nil
+}

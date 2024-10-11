@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -741,4 +742,33 @@ func (h *TransactionHandler) GetTotalAmountByCompanyForUserYearAndMonth(w http.R
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(totalAmounts)
+}
+
+func (h *TransactionHandler) GetAllByUserIDAndStatus(w http.ResponseWriter, r *http.Request) {
+	// Extract user_id and status from the query parameters
+	userIDStr := r.URL.Query().Get(":user_id")
+	statusStr := r.URL.Query().Get(":status")
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil || userIDStr == "" {
+		http.Error(w, "Invalid or missing user_id", http.StatusBadRequest)
+		return
+	}
+
+	status, err := strconv.Atoi(statusStr)
+	if err != nil || statusStr == "" {
+		http.Error(w, "Invalid or missing status", http.StatusBadRequest)
+		return
+	}
+
+	// Call the service to get all data by user ID and status
+	allData, err := h.Service.GetAllByUserIDAndStatus(r.Context(), userID, status)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error fetching data: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Write the combined result as JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(allData)
 }

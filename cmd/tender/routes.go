@@ -51,12 +51,13 @@ func (app *application) routes() http.Handler {
 	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))                                             // Delete transaction by ID
 
 	// EXTRA TRANSACTIONS
-	mux.Post("/extra_transactions", dynamicMiddleware.ThenFunc(app.extraTransactionHandler.CreateExtraTransaction))              // Create a new extra transaction
-	mux.Get("/extra_transactions", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactions))             // Get all extra transactions
-	mux.Get("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetExtraTransactionByID))         // Get extra transaction by ID
-	mux.Get("/extra_transactions/user/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetExtraTransactionsByUser)) // Get extra transactions by user ID
-	mux.Put("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.UpdateExtraTransaction))          // Update extra transaction by ID
-	mux.Del("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.DeleteExtraTransaction))          // Delete extra transaction by ID
+	mux.Post("/extra_transactions", dynamicMiddleware.ThenFunc(app.extraTransactionHandler.CreateExtraTransaction))                            // Create a new extra transaction
+	mux.Get("/extra_transactions", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactions))                           // Get all extra transactions
+	mux.Get("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetExtraTransactionByID))                       // Get extra transaction by ID
+	mux.Get("/extra_transactions/user/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetExtraTransactionsByUser))               // Get extra transactions by user ID
+	mux.Put("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.UpdateExtraTransaction))                        // Update extra transaction by ID
+	mux.Del("/extra_transactions/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.DeleteExtraTransaction))                        // Delete extra transaction by ID
+	mux.Get("/extra_transactions/realization/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetExtraTransactionCountsByUserID)) // Get extra transactions by user ID
 
 	// PERSONAL EXPENSES
 	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))                        // Create a new expense
@@ -131,5 +132,8 @@ func (app *application) routes() http.Handler {
 	mux.Get("/debts", standardMiddleware.ThenFunc(app.sumHandler.GetDebtsByAccount))
 
 	mux.Get("/sums/:id", standardMiddleware.ThenFunc(app.clientHandler.GetClientData))
+
+	//3 TYPES
+	mux.Get("/data/user/:user_id/status/:status", standardMiddleware.ThenFunc(app.transactionHandler.GetAllByUserIDAndStatus))
 	return standardMiddleware.Then(mux)
 }

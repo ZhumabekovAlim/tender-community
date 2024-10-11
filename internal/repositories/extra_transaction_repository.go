@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"tender/internal/models"
 )
@@ -144,4 +145,39 @@ func (r *ExtraTransactionRepository) UpdateExtraTransaction(ctx context.Context,
 func (r *ExtraTransactionRepository) DeleteExtraTransaction(ctx context.Context, id int) error {
 	_, err := r.Db.ExecContext(ctx, `DELETE FROM extra_transactions WHERE id = ?`, id)
 	return err
+}
+
+func (r *ExtraTransactionRepository) GetExtraTransactionCountsByUserID(ctx context.Context, userID int) (*models.ExtraTransactionCount, error) {
+	// Query to count total extra transactions by user ID
+	queryTotal := `
+        SELECT COUNT(*) 
+        FROM extra_transactions 
+        WHERE user_id = ?;
+    `
+
+	// Query to count extra transactions by user ID and status
+	queryStatus := `
+        SELECT COUNT(*) 
+        FROM extra_transactions 
+        WHERE user_id = ? AND status = ?;
+    `
+
+	counts := &models.ExtraTransactionCount{}
+
+	// Execute total transactions query
+	err := r.Db.QueryRowContext(ctx, queryTotal, userID).Scan(&counts.Total)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count total extra transactions: %w", err)
+	}
+
+	// Execute queries for each status
+	statusCounts := []*int{&counts.Status0, &counts.Status1, &counts.Status2, &counts.Status3}
+	for i := 0; i < 4; i++ {
+		err = r.Db.QueryRowContext(ctx, queryStatus, userID, i).Scan(statusCounts[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to count status %d extra transactions: %w", i, err)
+		}
+	}
+
+	return counts, nil
 }

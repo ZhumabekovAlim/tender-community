@@ -33,3 +33,7 @@ func (s *ExtraTransactionService) UpdateExtraTransaction(ctx context.Context, ex
 func (s *ExtraTransactionService) DeleteExtraTransaction(ctx context.Context, id int) error {
 	return s.Repo.DeleteExtraTransaction(ctx, id)
 }
+
+func (s *ExtraTransactionService) GetExtraTransactionCountsByUserID(ctx context.Context, userID int) (*models.ExtraTransactionCount, error) {
+	return s.Repo.GetExtraTransactionCountsByUserID(ctx, userID)
+}

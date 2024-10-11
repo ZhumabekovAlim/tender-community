@@ -11,6 +11,12 @@ type TransactionService struct {
 	ExtraTransactionRepo *repositories.ExtraTransactionRepository
 }
 
+type CombinedTransactions struct {
+	Transactions      []models.Transaction      `json:"transactions"`
+	Tenders           []models.Tender           `json:"tenders"`
+	ExtraTransactions []models.ExtraTransaction `json:"extra_transactions"`
+}
+
 // CreateTransaction creates a new transaction with expenses.
 func (s *TransactionService) CreateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	return s.Repo.CreateTransaction(ctx, transaction)
@@ -130,4 +136,29 @@ func (s *TransactionService) GetTotalAmountByCompanyForUserAndYear(ctx context.C
 
 func (s *TransactionService) GetTotalAmountByCompanyForUserYearAndMonth(ctx context.Context, userID int, year int, month int) ([]repositories.CompanyTotalAmount, error) {
 	return s.Repo.GetTotalAmountByCompanyForUserYearAndMonth(ctx, userID, year, month)
+}
+
+func (s *TransactionService) GetAllByUserIDAndStatus(ctx context.Context, userID, status int) (*CombinedTransactions, error) {
+	// Fetch transactions, tenders, and extra_transactions
+	transactions, err := s.Repo.FindAllTransactionsByUserIDAndStatus(ctx, userID, status)
+	if err != nil {
+		return nil, err
+	}
+
+	tenders, err := s.Repo.FindAllTendersByUserIDAndStatus(ctx, userID, status)
+	if err != nil {
+		return nil, err
+	}
+
+	extraTransactions, err := s.Repo.FindAllExtraTransactionsByUserIDAndStatus(ctx, userID, status)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return all data in a single struct
+	return &CombinedTransactions{
+		Transactions:      transactions,
+		Tenders:           tenders,
+		ExtraTransactions: extraTransactions,
+	}, nil
 }

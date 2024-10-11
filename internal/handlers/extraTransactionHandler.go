@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"tender/internal/models"
@@ -141,4 +142,31 @@ func (h *ExtraTransactionHandler) DeleteExtraTransaction(w http.ResponseWriter, 
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *ExtraTransactionHandler) GetExtraTransactionCountsByUserID(w http.ResponseWriter, r *http.Request) {
+	// Get user_id from the URL query parameters
+	userIDStr := r.URL.Query().Get(":id")
+	if userIDStr == "" {
+		http.Error(w, "user_id is required", http.StatusBadRequest)
+		return
+	}
+
+	// Convert user_id to an integer
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	// Call the service to get the counts by user ID
+	counts, err := h.Service.GetExtraTransactionCountsByUserID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error fetching extra transaction counts: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Return the results as JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(counts)
 }
