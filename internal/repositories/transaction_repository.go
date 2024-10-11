@@ -1448,6 +1448,31 @@ func (r *TransactionRepository) FindAllTransactionsByUserIDAndStatus(ctx context
 			&t.Amount, &t.Total, &t.Sell, &t.ProductName, &t.CompletedDate, &t.Date, &t.Status, &t.UserName, &t.CompanyName); err != nil {
 			return nil, fmt.Errorf("failed to scan transaction: %w", err)
 		}
+
+		// Retrieve associated expenses for each transaction
+		expenseQuery := `
+			SELECT id, name, amount, transaction_id, date
+			FROM additional_expenses 
+			WHERE transaction_id = ?
+		`
+		expenseRows, err := r.Db.QueryContext(ctx, expenseQuery, t.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to query expenses for transaction %d: %w", t.ID, err)
+		}
+		defer expenseRows.Close()
+
+		var expenses []models.Expense
+		for expenseRows.Next() {
+			var expense models.Expense
+			if err := expenseRows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID, &expense.Date); err != nil {
+				return nil, fmt.Errorf("failed to scan expense: %w", err)
+			}
+			expenses = append(expenses, expense)
+		}
+		expenseRows.Close() // Close this set after processing expenses for each transaction
+
+		// Assign the expenses to the transaction
+		t.Expenses = expenses
 		transactions = append(transactions, t)
 	}
 	return transactions, nil
