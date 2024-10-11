@@ -163,6 +163,6 @@ func (s *TransactionService) GetAllByUserIDAndStatus(ctx context.Context, userID
 	}, nil
 }
 
-func (s *TransactionService) GetAllTransactionsByDateRange(ctx context.Context, startDate, endDate string) ([]models.Transaction, error) {
-	return s.Repo.GetAllTransactionsByDateRange(ctx, startDate, endDate)
+func (s *TransactionService) GetAllTransactionsByDateRange(ctx context.Context, startDate, endDate string, userId int) ([]models.Transaction, error) {
+	return s.Repo.GetAllTransactionsByDateRange(ctx, startDate, endDate, userId)
 }

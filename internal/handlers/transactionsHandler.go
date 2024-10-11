@@ -783,7 +783,7 @@ func (h *TransactionHandler) GetAllTransactionsByDateRange(w http.ResponseWriter
 	}
 
 	// Fetch transactions within the date range
-	transactions, err := h.Service.GetAllTransactionsByDateRange(r.Context(), dateRange.StartDate, dateRange.EndDate)
+	transactions, err := h.Service.GetAllTransactionsByDateRange(r.Context(), dateRange.StartDate, dateRange.EndDate, dateRange.UserId)
 	if err != nil {
 		log.Printf("Error fetching transactions: %v", err)
 		http.Error(w, "Failed to fetch transactions", http.StatusInternalServerError)
