@@ -135,5 +135,6 @@ func (app *application) routes() http.Handler {
 
 	//3 TYPES
 	mux.Get("/data/user/:user_id/status/:status", standardMiddleware.ThenFunc(app.transactionHandler.GetAllByUserIDAndStatus))
+	mux.Get("/data/transactions/date", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRange))
 	return standardMiddleware.Then(mux)
 }
