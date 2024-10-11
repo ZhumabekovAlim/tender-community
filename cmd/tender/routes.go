@@ -146,7 +146,7 @@ func (app *application) routes() http.Handler {
 	// TRANCHE
 	mux.Post("/tranches", dynamicMiddleware.ThenFunc(app.trancheHandler.CreateTranche))                                             // Create a new tranche
 	mux.Get("/tranches/:id", standardMiddleware.ThenFunc(app.trancheHandler.GetTrancheByID))                                        // Get tranche by ID
-	mux.Put("/tranches/:id", standardMiddleware.ThenFunc(app.trancheHandler.UpdateTranche))                                         // Update tranche by ID
+	mux.Put("/tranches", standardMiddleware.ThenFunc(app.trancheHandler.UpdateTranche))                                             // Update tranche by ID
 	mux.Del("/tranches/:id", standardMiddleware.ThenFunc(app.trancheHandler.DeleteTranche))                                         // Delete tranche by ID
 	mux.Get("/tranches/transaction/:transaction_id", standardMiddleware.ThenFunc(app.trancheHandler.GetAllTranchesByTransactionID)) // Get all tranches by transaction_id
 

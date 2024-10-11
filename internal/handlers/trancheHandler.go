@@ -39,7 +39,7 @@ func (h *TrancheHandler) CreateTranche(w http.ResponseWriter, r *http.Request) {
 
 // Get a tranche by ID
 func (h *TrancheHandler) GetTrancheByID(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
+	idStr := r.URL.Query().Get(":id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil || idStr == "" {
 		http.Error(w, "Invalid or missing tranche ID", http.StatusBadRequest)
@@ -81,7 +81,7 @@ func (h *TrancheHandler) UpdateTranche(w http.ResponseWriter, r *http.Request) {
 
 // Delete a tranche by ID
 func (h *TrancheHandler) DeleteTranche(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
+	idStr := r.URL.Query().Get(":id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil || idStr == "" {
 		http.Error(w, "Invalid or missing tranche ID", http.StatusBadRequest)
@@ -99,7 +99,7 @@ func (h *TrancheHandler) DeleteTranche(w http.ResponseWriter, r *http.Request) {
 
 func (h *TrancheHandler) GetAllTranchesByTransactionID(w http.ResponseWriter, r *http.Request) {
 	// Extract transaction_id from query parameters
-	transactionIDStr := r.URL.Query().Get("transaction_id")
+	transactionIDStr := r.URL.Query().Get(":transaction_id")
 	transactionID, err := strconv.Atoi(transactionIDStr)
 	if err != nil || transactionIDStr == "" {
 		http.Error(w, "Invalid or missing transaction_id", http.StatusBadRequest)
