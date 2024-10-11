@@ -1537,8 +1537,8 @@ func (r *TransactionRepository) GetAllTransactionsByDateRange(ctx context.Contex
 		       t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, 
 		       c.name AS companyname, u.name AS username
 		FROM transactions t 
-		JOIN tender.companies c ON c.id = t.company_id 
-		JOIN tender.users u ON u.id = t.user_id 
+		JOIN companies c ON c.id = t.company_id 
+		JOIN users u ON u.id = t.user_id 
 		WHERE t.completed_date BETWEEN ? AND ? 
 		ORDER BY t.completed_date DESC
 	`
@@ -1597,12 +1597,12 @@ func (r *TransactionRepository) GetAllTransactionsByDateRange(ctx context.Contex
 		       t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, 
 		       c.name AS companyname, u.name AS username
 		FROM transactions t 
-		JOIN tender.companies c ON c.id = t.company_id 
-		JOIN tender.users u ON u.id = t.user_id 
-		WHERE t.completed_date BETWEEN ? AND ? 
+		JOIN companies c ON c.id = t.company_id 
+		JOIN users u ON u.id = t.user_id 
+		WHERE t.user_id = ? AND t.completed_date BETWEEN ? AND ? 
 		ORDER BY t.completed_date DESC
 	`
-		rows, err := r.Db.QueryContext(ctx, query, startDate, endDate)
+		rows, err := r.Db.QueryContext(ctx, query, userId, startDate, endDate)
 		if err != nil {
 			return nil, fmt.Errorf("failed to query transactions: %w", err)
 		}
