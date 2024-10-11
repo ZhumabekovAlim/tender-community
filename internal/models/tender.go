@@ -22,3 +22,16 @@ type Tender struct {
 	UserName      *string   `json:"username,omitempty"`
 	CompanyName   *string   `json:"companyname,omitempty"`
 }
+
+type TenderDebt struct {
+	GOIK float64 `json:"goik"`
+	GOPP float64 `json:"gopp"`
+}
+
+type TenderCount struct {
+	Total   int `json:"total"`
+	Status0 int `json:"status_0"`
+	Status1 int `json:"status_1"`
+	Status2 int `json:"status_2"`
+	Status3 int `json:"status_3"`
+}

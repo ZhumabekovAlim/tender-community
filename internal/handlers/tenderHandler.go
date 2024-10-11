@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"tender/internal/models"
@@ -164,4 +165,44 @@ func (h *TenderHandler) GetTendersByUserID(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *TenderHandler) GetAllTendersSum(w http.ResponseWriter, r *http.Request) {
+	// Call the service to get the total sums for "ГОИК" and "ГОПП"
+	tenderDebt, err := h.Service.GetAllTendersSum(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return the results as JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tenderDebt)
+}
+
+func (h *TenderHandler) GetTenderCountsByUserID(w http.ResponseWriter, r *http.Request) {
+	// Get user_id from the URL query parameters
+	userIDStr := r.URL.Query().Get(":id")
+	if userIDStr == "" {
+		http.Error(w, "user_id is required", http.StatusBadRequest)
+		return
+	}
+
+	// Convert user_id to an integer
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	// Call the service to get the counts by user ID
+	counts, err := h.Service.GetTenderCountsByUserID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error fetching tender counts: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Return the results as JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(counts)
 }

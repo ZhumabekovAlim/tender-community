@@ -45,3 +45,13 @@ func (s *TenderService) GetTendersByUserID(ctx context.Context, userID int) ([]m
 	// Add any business logic here (e.g., validation) if needed before calling the repository.
 	return s.Repo.GetTendersByUserID(ctx, userID)
 }
+
+func (s *TenderService) GetAllTendersSum(ctx context.Context) (*models.TenderDebt, error) {
+	// Call the repository function to get the sums
+	return s.Repo.GetAllTendersSum(ctx)
+}
+
+func (s *TenderService) GetTenderCountsByUserID(ctx context.Context, userID int) (*models.TenderCount, error) {
+	// Call the repository function to get the counts by user ID
+	return s.Repo.GetTenderCountsByUserID(ctx, userID)
+}

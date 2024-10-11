@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"tender/internal/models"
 	"time"
 )
@@ -210,4 +211,74 @@ func (r *TenderRepository) GetTendersByUserID(ctx context.Context, userID int) (
 	}
 
 	return tenders, nil
+}
+
+func (r *TenderRepository) GetAllTendersSum(ctx context.Context) (*models.TenderDebt, error) {
+	queryGOIK := `
+        SELECT COALESCE(SUM(total-commission), 0) AS total_sum
+        FROM tenders
+        WHERE status = 3
+        AND type = 'ГОИК';
+    `
+
+	// Execute the query for Zakup
+	var totalGOIK float64
+	err := r.Db.QueryRowContext(ctx, queryGOIK).Scan(&totalGOIK)
+	if err != nil {
+		return nil, err
+	}
+
+	queryGOPP := `
+        SELECT COALESCE(SUM(total-commission), 0) AS total_sum
+        FROM tenders
+        WHERE status = 3
+        AND type = 'ГОПП';
+    `
+
+	// Execute the query for Zakup
+	var totalGOPP float64
+	err = r.Db.QueryRowContext(ctx, queryGOPP).Scan(&totalGOPP)
+	if err != nil {
+		return nil, err
+	}
+	// Return the result in a struct
+	return &models.TenderDebt{
+		GOIK: totalGOIK,
+		GOPP: totalGOPP,
+	}, nil
+}
+
+func (r *TenderRepository) GetTenderCountsByUserID(ctx context.Context, userID int) (*models.TenderCount, error) {
+	// Query to count total tenders by user ID
+	queryTotal := `
+        SELECT COUNT(*) 
+        FROM tenders 
+        WHERE user_id = ?;
+    `
+
+	// Query to count tenders by user ID and status
+	queryStatus := `
+        SELECT COUNT(*) 
+        FROM tenders 
+        WHERE user_id = ? AND status = ?;
+    `
+
+	counts := &models.TenderCount{}
+
+	// Execute total tenders query
+	err := r.Db.QueryRowContext(ctx, queryTotal, userID).Scan(&counts.Total)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count total tenders: %w", err)
+	}
+
+	// Execute queries for each status
+	statusCounts := []*int{&counts.Status0, &counts.Status1, &counts.Status2, &counts.Status3}
+	for i := 0; i < 4; i++ {
+		err = r.Db.QueryRowContext(ctx, queryStatus, userID, i).Scan(statusCounts[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to count status %d tenders: %w", i, err)
+		}
+	}
+
+	return counts, nil
 }

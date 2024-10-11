@@ -452,25 +452,9 @@ func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, us
 		return nil, err
 	}
 
-	queryTender := `
-        SELECT COALESCE(SUM(total), 0) AS total_sum
-        FROM tender.transactions
-        WHERE status = 2
-        AND user_id = ?
-        AND (type = 'ГОПП' OR type = 'ГОИК');
-    `
-
-	// Execute the query for Tender
-	var totalTender float64
-	err = r.Db.QueryRowContext(ctx, queryTender, userID).Scan(&totalTender)
-	if err != nil {
-		return nil, err
-	}
-
 	// Return the result in a struct
 	return &models.TransactionDebt{
-		Zakup:  totalZakup,
-		Tender: totalTender,
+		Zakup: totalZakup,
 	}, nil
 }
 

@@ -29,8 +29,7 @@ type Expense struct {
 }
 
 type TransactionDebt struct {
-	Zakup  float64 `json:"zakup"`
-	Tender float64 `json:"tender"`
+	Zakup float64 `json:"zakup"`
 }
 
 type TransactionCount struct {
