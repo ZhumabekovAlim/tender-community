@@ -55,3 +55,7 @@ func (s *TenderService) GetTenderCountsByUserID(ctx context.Context, userID int)
 	// Call the repository function to get the counts by user ID
 	return s.Repo.GetTenderCountsByUserID(ctx, userID)
 }
+
+func (s *TenderService) GetAllTendersByDateRange(ctx context.Context, startDate, endDate string, userId int) ([]models.Tender, error) {
+	return s.Repo.GetAllTendersByDateRange(ctx, startDate, endDate, userId)
+}

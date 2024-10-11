@@ -37,3 +37,7 @@ func (s *ExtraTransactionService) DeleteExtraTransaction(ctx context.Context, id
 func (s *ExtraTransactionService) GetExtraTransactionCountsByUserID(ctx context.Context, userID int) (*models.ExtraTransactionCount, error) {
 	return s.Repo.GetExtraTransactionCountsByUserID(ctx, userID)
 }
+
+func (s *ExtraTransactionService) GetAllExtraTransactionsByDateRange(ctx context.Context, startDate, endDate string, userId int) ([]models.ExtraTransaction, error) {
+	return s.Repo.GetAllExtraTransactionsByDateRange(ctx, startDate, endDate, userId)
+}

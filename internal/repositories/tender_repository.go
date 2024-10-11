@@ -282,3 +282,56 @@ func (r *TenderRepository) GetTenderCountsByUserID(ctx context.Context, userID i
 
 	return counts, nil
 }
+
+func (r *TenderRepository) GetAllTendersByDateRange(ctx context.Context, startDate, endDate string, userId int) ([]models.Tender, error) {
+	var query string
+	var rows *sql.Rows
+	var err error
+
+	if userId == 1 {
+		query = `
+			SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, 
+			       t.total, t.commission, t.completed_date, t.date, t.status, 
+			       u.name as username, c.name as companyname
+			FROM tenders t 
+			JOIN users u ON u.id = t.user_id
+			JOIN companies c ON c.id = t.company_id
+			WHERE t.completed_date BETWEEN ? AND ?
+			ORDER BY t.completed_date DESC
+		`
+		rows, err = r.Db.QueryContext(ctx, query, startDate, endDate)
+	} else {
+		query = `
+			SELECT t.id, t.type, t.tender_number, t.user_id, t.company_id, t.organization, 
+			       t.total, t.commission, t.completed_date, t.date, t.status, 
+			       u.name as username, c.name as companyname
+			FROM tenders t 
+			JOIN users u ON u.id = t.user_id
+			JOIN companies c ON c.id = t.company_id
+			WHERE t.user_id = ? AND t.completed_date BETWEEN ? AND ?
+			ORDER BY t.completed_date DESC
+		`
+		rows, err = r.Db.QueryContext(ctx, query, userId, startDate, endDate)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to query tenders: %w", err)
+	}
+	defer rows.Close()
+
+	var tenders []models.Tender
+	for rows.Next() {
+		var tender models.Tender
+		if err := rows.Scan(&tender.ID, &tender.Type, &tender.TenderNumber, &tender.UserID, &tender.CompanyID,
+			&tender.Organization, &tender.Total, &tender.Commission, &tender.CompletedDate, &tender.Date,
+			&tender.Status, &tender.UserName, &tender.CompanyName); err != nil {
+			return nil, fmt.Errorf("failed to scan tender: %w", err)
+		}
+		tenders = append(tenders, tender)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tenders, nil
+}

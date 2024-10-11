@@ -181,3 +181,49 @@ func (r *ExtraTransactionRepository) GetExtraTransactionCountsByUserID(ctx conte
 
 	return counts, nil
 }
+
+func (r *ExtraTransactionRepository) GetAllExtraTransactionsByDateRange(ctx context.Context, startDate, endDate string, userId int) ([]models.ExtraTransaction, error) {
+	var query string
+	var rows *sql.Rows
+	var err error
+
+	if userId == 1 {
+		query = `
+			SELECT e.id, e.user_id, e.description, e.total, e.date, e.status, u.name as username
+			FROM extra_transactions e 
+			JOIN users u ON u.id = e.user_id
+			WHERE e.date BETWEEN ? AND ?
+			ORDER BY e.date DESC
+		`
+		rows, err = r.Db.QueryContext(ctx, query, startDate, endDate)
+	} else {
+		query = `
+			SELECT e.id, e.user_id, e.description, e.total, e.date, e.status, u.name as username
+			FROM extra_transactions e 
+			JOIN users u ON u.id = e.user_id
+			WHERE e.user_id = ? AND e.date BETWEEN ? AND ?
+			ORDER BY e.date DESC
+		`
+		rows, err = r.Db.QueryContext(ctx, query, userId, startDate, endDate)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to query extra transactions: %w", err)
+	}
+	defer rows.Close()
+
+	var extraTransactions []models.ExtraTransaction
+	for rows.Next() {
+		var extra models.ExtraTransaction
+		if err := rows.Scan(&extra.ID, &extra.UserID, &extra.Description, &extra.Total, &extra.Date,
+			&extra.Status, &extra.UserName); err != nil {
+			return nil, fmt.Errorf("failed to scan extra transaction: %w", err)
+		}
+		extraTransactions = append(extraTransactions, extra)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return extraTransactions, nil
+}

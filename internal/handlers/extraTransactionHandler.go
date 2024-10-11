@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"tender/internal/models"
@@ -169,4 +170,29 @@ func (h *ExtraTransactionHandler) GetExtraTransactionCountsByUserID(w http.Respo
 	// Return the results as JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(counts)
+}
+
+func (h *ExtraTransactionHandler) GetAllExtraTransactionsByDateRange(w http.ResponseWriter, r *http.Request) {
+	var dateRange models.DateRangeRequest
+
+	// Parse request body to get date range and userId
+	if err := json.NewDecoder(r.Body).Decode(&dateRange); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch extra transactions within the date range
+	extraTransactions, err := h.Service.GetAllExtraTransactionsByDateRange(r.Context(), dateRange.StartDate, dateRange.EndDate, dateRange.UserId)
+	if err != nil {
+		log.Printf("Error fetching extra transactions: %v", err)
+		http.Error(w, "Failed to fetch extra transactions", http.StatusInternalServerError)
+		return
+	}
+
+	// Send response as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(extraTransactions); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
