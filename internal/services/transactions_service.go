@@ -45,6 +45,11 @@ func (s *TransactionService) GetAllTransactionsSum(ctx context.Context) (*models
 	return s.Repo.GetAllTransactionsSum(ctx)
 }
 
+func (s *TransactionService) GetTransactionCountsByUserID(ctx context.Context, userID int) (*models.TransactionCount, error) {
+	// Call the repository function to get transaction counts by user ID
+	return s.Repo.GetTransactionCountsByUserID(ctx, userID)
+}
+
 func (s *TransactionService) GetTransactionsDebtZakup(ctx context.Context, userID int) (*models.TransactionDebt, error) {
 	return s.Repo.GetTransactionsDebtZakup(ctx, userID)
 }

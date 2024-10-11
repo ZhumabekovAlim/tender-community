@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"tender/internal/models"
 )
@@ -400,6 +401,39 @@ func (r *TransactionRepository) GetAllTransactionsSum(ctx context.Context) (*mod
 	return &models.TransactionDebt{
 		Zakup: totalZakup,
 	}, nil
+}
+
+func (r *TransactionRepository) GetTransactionCountsByUserID(ctx context.Context, userID int) (*models.TransactionCount, error) {
+
+	queryTotal := `
+        SELECT COUNT(*) 
+        FROM tender.transactions 
+        WHERE user_id = ?;
+    `
+
+	queryStatus := `
+        SELECT COUNT(*) 
+        FROM tender.transactions 
+        WHERE user_id = ? AND status = ?;
+    `
+
+	counts := &models.TransactionCount{}
+
+	err := r.Db.QueryRowContext(ctx, queryTotal, userID).Scan(&counts.TotalTransactions)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count total transactions: %w", err)
+	}
+
+	// Execute queries for each status
+	statusCounts := []*int{&counts.Status0, &counts.Status1, &counts.Status2, &counts.Status3}
+	for i := 0; i < 4; i++ {
+		err = r.Db.QueryRowContext(ctx, queryStatus, userID, i).Scan(statusCounts[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to count status %d transactions: %w", i, err)
+		}
+	}
+
+	return counts, nil
 }
 
 func (r *TransactionRepository) GetTransactionsDebtZakup(ctx context.Context, userID int) (*models.TransactionDebt, error) {
