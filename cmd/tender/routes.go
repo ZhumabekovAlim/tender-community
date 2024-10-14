@@ -48,6 +48,7 @@ func (app *application) routes() http.Handler {
 	mux.Get("/transactions/user/debt/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionsDebt))                                 // Get transaction by user and company ID
 	mux.Get("/transactions/realization/sum", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsSum))                             // Get transaction by user and company ID
 	mux.Get("/transactions/realization/count/:id", standardMiddleware.ThenFunc(app.transactionHandler.GetTransactionCountsByUserID))                // Get transaction by user and company ID
+	mux.Get("/transactions/tranches/debt", standardMiddleware.ThenFunc(app.transactionHandler.GetCompanyDebt))                                      // Get transaction by user and company ID
 	mux.Put("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.UpdateTransaction))                                             // Update transaction by ID
 	mux.Del("/transactions/:id", standardMiddleware.ThenFunc(app.transactionHandler.DeleteTransaction))                                             // Delete transaction by ID
 
@@ -121,6 +122,7 @@ func (app *application) routes() http.Handler {
 	// TENDERS ( GOIK and GOPP)
 	mux.Post("/tenders", dynamicMiddleware.ThenFunc(app.tenderHandler.CreateTender))                                  // Create a new tender
 	mux.Get("/tenders", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTenders))                                 // Get all tenders
+	mux.Get("/tenders/debt/company", standardMiddleware.ThenFunc(app.tenderHandler.GetTotalNetByCompany))             // Get all tenders
 	mux.Get("/tenders/:id", standardMiddleware.ThenFunc(app.tenderHandler.GetTenderByID))                             // Get tender by ID
 	mux.Get("/tenders/user/:id", standardMiddleware.ThenFunc(app.tenderHandler.GetTendersByUserID))                   // Get tender by user ID
 	mux.Get("/tenders/realization/sum", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersSum))              // Get tender by user ID
@@ -135,13 +137,13 @@ func (app *application) routes() http.Handler {
 	mux.Get("/sums/:id", standardMiddleware.ThenFunc(app.clientHandler.GetClientData))
 
 	//REALIZATION
-	mux.Get("/data/user/:user_id/status/:status", standardMiddleware.ThenFunc(app.transactionHandler.GetAllByUserIDAndStatus))
-	mux.Get("/data/transactions/date", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRange))
-	mux.Get("/data/tenders/date", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersByDateRange))
-	mux.Get("/data/extra/date", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactionsByDateRange))
-	mux.Get("/data/transactions/date/company", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRangeCompany))
-	mux.Get("/data/tenders/date/company", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersByDateRangeCompany))
-	mux.Get("/data/extra/date/company", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactionsByDateRangeCompany))
+	mux.Post("/data/user/:user_id/status/:status", standardMiddleware.ThenFunc(app.transactionHandler.GetAllByUserIDAndStatus))
+	mux.Post("/data/transactions/date", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRange))
+	mux.Post("/data/tenders/date", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersByDateRange))
+	mux.Post("/data/extra/date", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactionsByDateRange))
+	mux.Post("/data/transactions/date/company", standardMiddleware.ThenFunc(app.transactionHandler.GetAllTransactionsByDateRangeCompany))
+	mux.Post("/data/tenders/date/company", standardMiddleware.ThenFunc(app.tenderHandler.GetAllTendersByDateRangeCompany))
+	mux.Post("/data/extra/date/company", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetAllExtraTransactionsByDateRangeCompany))
 
 	// TRANCHE
 	mux.Post("/tranches", dynamicMiddleware.ThenFunc(app.trancheHandler.CreateTranche))                                             // Create a new tranche

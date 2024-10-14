@@ -138,6 +138,20 @@ func (h *TenderHandler) GetAllTenders(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tenders)
 }
 
+func (h *TenderHandler) GetTotalNetByCompany(w http.ResponseWriter, r *http.Request) {
+	results, err := h.Service.GetTotalNetByCompany(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(results)
+	if err != nil {
+		return
+	}
+}
+
 func (h *TenderHandler) GetTendersByUserID(w http.ResponseWriter, r *http.Request) {
 	// Extract the user_id from the query parameters or URL (depending on your setup)
 	userIDStr := r.URL.Query().Get(":id")

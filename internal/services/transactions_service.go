@@ -174,3 +174,7 @@ func (s *TransactionService) GetAllTransactionsByDateRange(ctx context.Context, 
 func (s *TransactionService) GetAllTransactionsByDateRangeCompany(ctx context.Context, startDate, endDate string, userId, companyId int) ([]models.Transaction, error) {
 	return s.Repo.GetAllTransactionsByDateRangeCompany(ctx, startDate, endDate, userId, companyId)
 }
+
+func (s *TransactionService) GetCompanyDebt(ctx context.Context) ([]repositories.DebtResult, error) {
+	return s.Repo.GetCompanyDebt(ctx)
+}

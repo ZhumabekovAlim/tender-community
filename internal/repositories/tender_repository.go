@@ -179,6 +179,44 @@ func (r *TenderRepository) GetAllTenders(ctx context.Context) ([]models.Tender, 
 	return tenders, nil
 }
 
+// GetTendersDebtByCompanyId retrieves debt sum by company id from the database.
+func (r *TenderRepository) GetTotalNetByCompany(ctx context.Context) ([]struct {
+	CompanyID int
+	TotalNet  float64
+}, error) {
+	rows, err := r.Db.QueryContext(ctx, `
+		SELECT company_id, SUM(total - commission) AS total_net
+		FROM tenders
+		GROUP BY company_id
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []struct {
+		CompanyID int
+		TotalNet  float64
+	}
+	for rows.Next() {
+		var result struct {
+			CompanyID int
+			TotalNet  float64
+		}
+		err := rows.Scan(&result.CompanyID, &result.TotalNet)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
 func (r *TenderRepository) GetTendersByUserID(ctx context.Context, userID int) ([]models.Tender, error) {
 	rows, err := r.Db.QueryContext(ctx, `
         SELECT tenders.id, type, tender_number, user_id, company_id, organization,

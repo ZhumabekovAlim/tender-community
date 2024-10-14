@@ -41,6 +41,13 @@ func (s *TenderService) GetAllTenders(ctx context.Context) ([]models.Tender, err
 	return s.Repo.GetAllTenders(ctx)
 }
 
+func (s *TenderService) GetTotalNetByCompany(ctx context.Context) ([]struct {
+	CompanyID int
+	TotalNet  float64
+}, error) {
+	return s.Repo.GetTotalNetByCompany(ctx)
+}
+
 func (s *TenderService) GetTendersByUserID(ctx context.Context, userID int) ([]models.Tender, error) {
 	// Add any business logic here (e.g., validation) if needed before calling the repository.
 	return s.Repo.GetTendersByUserID(ctx, userID)
