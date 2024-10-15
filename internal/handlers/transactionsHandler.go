@@ -863,3 +863,20 @@ func (h *TransactionHandler) GetCompanyDebt(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
+
+func (h *TransactionHandler) GetCompanyDebtById(w http.ResponseWriter, r *http.Request) {
+
+	debtData, err := h.Service.GetCompanyDebtById(r.Context())
+	if err != nil {
+		log.Printf("Error fetching company debt: %v", err)
+		http.Error(w, "Failed to fetch company debt", http.StatusInternalServerError)
+		return
+	}
+
+	// Set response headers and encode the result as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(debtData); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}

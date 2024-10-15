@@ -32,6 +32,12 @@ type DebtResult struct {
 	Debt      float64 `json:"debt"`
 }
 
+type DebtResult1 struct {
+	TransactionID int     `json:"transaction_id"`
+	CompanyID     int     `json:"company_id"`
+	Debt          float64 `json:"debt"`
+}
+
 func (r *TransactionRepository) CreateTransaction(ctx context.Context, transaction models.Transaction) (models.Transaction, error) {
 	// Begin a new database transaction
 	tx, err := r.Db.BeginTx(ctx, nil)
@@ -1842,6 +1848,44 @@ func (r *TransactionRepository) GetCompanyDebt(ctx context.Context) ([]DebtResul
 	for rows.Next() {
 		var result DebtResult
 		err := rows.Scan(&result.CompanyID, &result.Debt)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+
+	// Check for errors during row iteration
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+func (r *TransactionRepository) GetCompanyDebtById(ctx context.Context) ([]DebtResult1, error) {
+	rows, err := r.Db.QueryContext(ctx, `
+		SELECT
+			t.id AS transaction_id,
+			t.company_id,
+			t.sell - IFNULL(SUM(tr.amount), 0) AS debt
+		FROM
+			transactions t
+				LEFT JOIN
+			tranches tr ON t.id = tr.transaction_id
+		WHERE
+			t.status = 2
+		GROUP BY
+			t.id
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []DebtResult1
+	for rows.Next() {
+		var result DebtResult1
+		err := rows.Scan(&result.TransactionID, &result.CompanyID, &result.Debt)
 		if err != nil {
 			return nil, err
 		}

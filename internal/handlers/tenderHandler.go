@@ -182,6 +182,36 @@ func (h *TenderHandler) GetTendersByUserID(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+func (h *TenderHandler) GetTendersByCompanyID(w http.ResponseWriter, r *http.Request) {
+	// Extract the user_id from the query parameters or URL (depending on your setup)
+	companyIDStr := r.URL.Query().Get(":id")
+	if companyIDStr == "" {
+		http.Error(w, "user_id is required", http.StatusBadRequest)
+		return
+	}
+
+	// Convert userIDStr to int
+	companyID, err := strconv.Atoi(companyIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	// Call the service to get tenders by user_id
+	tenders, err := h.Service.GetTendersByCompanyID(r.Context(), companyID)
+	if err != nil {
+		http.Error(w, "Failed to fetch tenders", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the tenders in JSON format
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(tenders); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+
 func (h *TenderHandler) GetAllTendersSum(w http.ResponseWriter, r *http.Request) {
 	// Call the service to get the total sums for "ГОИК" and "ГОПП"
 	tenderDebt, err := h.Service.GetAllTendersSum(r.Context())
