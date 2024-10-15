@@ -864,6 +864,35 @@ func (h *TransactionHandler) GetCompanyDebt(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func (h *TransactionHandler) GetCompanyDebtId(w http.ResponseWriter, r *http.Request) {
+	IDStr := r.URL.Query().Get(":id")
+
+	if IDStr == "" {
+		http.Error(w, "Missing user ID ", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(IDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	debtData, err := h.Service.GetCompanyDebtId(r.Context(), id)
+	if err != nil {
+		log.Printf("Error fetching company debt: %v", err)
+		http.Error(w, "Failed to fetch company debt", http.StatusInternalServerError)
+		return
+	}
+
+	// Set response headers and encode the result as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(debtData); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
 func (h *TransactionHandler) GetCompanyDebtById(w http.ResponseWriter, r *http.Request) {
 
 	debtData, err := h.Service.GetCompanyDebtById(r.Context())

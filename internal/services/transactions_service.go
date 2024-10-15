@@ -179,6 +179,10 @@ func (s *TransactionService) GetCompanyDebt(ctx context.Context) ([]repositories
 	return s.Repo.GetCompanyDebt(ctx)
 }
 
+func (s *TransactionService) GetCompanyDebtId(ctx context.Context, id int) ([]repositories.DebtResult2, error) {
+	return s.Repo.GetCompanyDebtId(ctx, id)
+}
+
 func (s *TransactionService) GetCompanyDebtById(ctx context.Context) ([]repositories.DebtResult1, error) {
 	return s.Repo.GetCompanyDebtById(ctx)
 }
