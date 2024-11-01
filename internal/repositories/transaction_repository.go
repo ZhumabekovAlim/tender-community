@@ -1919,7 +1919,7 @@ func (r *TransactionRepository) GetCompanyDebtById(ctx context.Context) ([]DebtR
 				LEFT JOIN
 			tranches tr ON t.id = tr.transaction_id
 		WHERE
-			t.status = 2
+			t.status = 2 OR t.status = 3
 		GROUP BY
 			t.id
 	`)
