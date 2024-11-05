@@ -232,6 +232,7 @@ func (r *TransactionRepository) GetTransactionsByUser(ctx context.Context, userI
 			&transaction.CompletedDate,
 			&transaction.Date,
 			&transaction.Status,
+			&transaction.Margin,
 			&transaction.UserName,
 			&transaction.CompanyName,
 		); err != nil {
@@ -1933,7 +1934,7 @@ func (r *TransactionRepository) GetCompanyDebtById(ctx context.Context) ([]DebtR
 				LEFT JOIN
 			tranches tr ON t.id = tr.transaction_id
 		WHERE
-			t.status = 2 OR t.status = 3
+			t.status = 2
 		GROUP BY
 			t.id
 	`)
