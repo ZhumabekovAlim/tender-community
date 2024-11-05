@@ -299,6 +299,7 @@ func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, co
 			&transaction.CompletedDate,
 			&transaction.Date,
 			&transaction.Status,
+			&transaction.Margin,
 			&transaction.UserName,
 			&transaction.CompanyName,
 		); err != nil {
@@ -516,12 +517,12 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	// Retrieve existing transaction data to preserve non-updated fields
 	var existingTransaction models.Transaction
 	row := tx.QueryRowContext(ctx, `
-		SELECT transaction_number,type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, status 
+		SELECT transaction_number,type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, status,margin
 		FROM transactions WHERE id = ?`, transaction.ID)
 	err = row.Scan(&existingTransaction.TransactionNumber, &existingTransaction.Type, &existingTransaction.TenderNumber, &existingTransaction.UserID,
 		&existingTransaction.CompanyID, &existingTransaction.Organization, &existingTransaction.Amount,
 		&existingTransaction.Total, &existingTransaction.Sell, &existingTransaction.ProductName,
-		&existingTransaction.CompletedDate, &existingTransaction.Status)
+		&existingTransaction.CompletedDate, &existingTransaction.Status, &existingTransaction.Margin)
 	if err == sql.ErrNoRows {
 		tx.Rollback()
 		return models.Transaction{}, models.ErrTransactionNotFound
@@ -564,14 +565,17 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	if transaction.CompletedDate == nil {
 		transaction.CompletedDate = existingTransaction.CompletedDate
 	}
+	if transaction.Margin == 0 {
+		transaction.Margin = existingTransaction.Margin
+	}
 
 	// Update the transaction
 	result, err := tx.ExecContext(ctx, `
 		UPDATE transactions SET transaction_number = ?, type = ?, tender_number = ?, user_id = ?, company_id = ?, 
-		organization = ?, amount = ?, total = ?, sell = ?, product_name = ?,  status = ?, completed_date = ? WHERE id = ?`,
+		organization = ?, amount = ?, total = ?, sell = ?, product_name = ?,  status = ?, completed_date = ?, margin = ? WHERE id = ?`,
 		transaction.TransactionNumber, transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
 		transaction.Organization, transaction.Amount, transaction.Total, transaction.Sell,
-		transaction.ProductName, transaction.Status, transaction.CompletedDate, transaction.ID)
+		transaction.ProductName, transaction.Status, transaction.CompletedDate, transaction.ID, transaction.Margin)
 	if err != nil {
 		tx.Rollback()
 		return models.Transaction{}, err
@@ -613,7 +617,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 
 	// Retrieve the updated transaction data including the user name, company name, and updated expenses
 	row = r.Db.QueryRowContext(ctx, `
-		SELECT t.id, t.transaction_number, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, u.name, c.name 
+		SELECT t.id, t.transaction_number, t.type, t.tender_number, t.user_id, t.company_id, t.organization, t.amount, t.total, t.sell, t.product_name, t.completed_date, t.date, t.status, u.name, c.name, t.margin
 		FROM transactions t
 		JOIN users u ON t.user_id = u.id
 		JOIN companies c ON t.company_id = c.id
@@ -621,7 +625,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	err = row.Scan(&transaction.ID, &transaction.TransactionNumber, &transaction.Type, &transaction.TenderNumber, &transaction.UserID,
 		&transaction.CompanyID, &transaction.Organization, &transaction.Amount, &transaction.Total, &transaction.Sell,
 		&transaction.ProductName, &transaction.CompletedDate, &transaction.Date, &transaction.Status,
-		&transaction.UserName, &transaction.CompanyName)
+		&transaction.UserName, &transaction.CompanyName, &transaction.Margin)
 	if err != nil {
 		return models.Transaction{}, err
 	}
