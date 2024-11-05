@@ -21,6 +21,7 @@ type Tender struct {
 	Status        int       `json:"status"`
 	UserName      *string   `json:"username,omitempty"`
 	CompanyName   *string   `json:"companyname,omitempty"`
+	Debt          *float64  `json:"debt,omitempty"`
 }
 
 type TenderDebt struct {

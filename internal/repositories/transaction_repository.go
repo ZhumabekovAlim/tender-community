@@ -265,7 +265,7 @@ func (r *TransactionRepository) GetTransactionsByUser(ctx context.Context, userI
 
 func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, companyID int) ([]models.Transaction, error) {
 	query := `
-		SELECT transactions.*, u.name, c.name
+		SELECT transactions.*, u.name AS user_name, c.name AS company_name
 		FROM transactions
 		JOIN tender.users u ON u.id = transactions.user_id
 		JOIN tender.companies c ON c.id = transactions.company_id
@@ -322,8 +322,18 @@ func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, co
 			}
 			expenses = append(expenses, expense)
 		}
-
 		transaction.Expenses = expenses
+
+		// Calculate the debt (sell - sum of tranches)
+		var totalTranches float64
+		err = r.Db.QueryRowContext(ctx, `
+			SELECT COALESCE(SUM(amount), 0) FROM tranches WHERE transaction_id = ? AND transaction_id IN 
+				(SELECT id FROM transactions WHERE company_id = ?)`, transaction.ID, companyID).Scan(&totalTranches)
+		if err != nil {
+			return nil, err
+		}
+		transaction.Debt = transaction.Sell - totalTranches
+
 		transactions = append(transactions, transaction)
 	}
 

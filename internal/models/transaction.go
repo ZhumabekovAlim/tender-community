@@ -5,7 +5,7 @@ type Transaction struct {
 	TransactionNumber *string   `json:"transaction_number,omitempty"`
 	Type              string    `json:"type"`
 	TenderNumber      *string   `json:"tender_number,omitempty"`
-	UserID            int       `json:"user_id"`
+	UserID            *int      `json:"user_id,omitempty"`
 	CompanyID         *int      `json:"company_id,omitempty"`
 	Organization      *string   `json:"organization,omitempty"`
 	Amount            float64   `json:"amount"`
@@ -18,6 +18,7 @@ type Transaction struct {
 	Expenses          []Expense `json:"expenses"`
 	UserName          *string   `json:"username,omitempty"`
 	CompanyName       *string   `json:"companyname,omitempty"`
+	Debt              float64   `json:"debt,omitempty"`
 }
 
 type Expense struct {
