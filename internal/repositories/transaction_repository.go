@@ -540,7 +540,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	if transaction.TenderNumber == nil {
 		transaction.TenderNumber = existingTransaction.TenderNumber
 	}
-	if transaction.UserID == 0 {
+	if transaction.UserID == nil {
 		transaction.UserID = existingTransaction.UserID
 	}
 	if transaction.CompanyID == nil {
