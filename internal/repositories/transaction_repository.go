@@ -565,7 +565,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 	if transaction.CompletedDate == nil {
 		transaction.CompletedDate = existingTransaction.CompletedDate
 	}
-	if transaction.Margin == 0 {
+	if transaction.Margin == nil {
 		transaction.Margin = existingTransaction.Margin
 	}
 

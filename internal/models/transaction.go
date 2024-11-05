@@ -19,7 +19,7 @@ type Transaction struct {
 	UserName          *string   `json:"username,omitempty"`
 	CompanyName       *string   `json:"companyname,omitempty"`
 	Debt              float64   `json:"debt,omitempty"`
-	Margin            float64   `json:"margin,omitempty"`
+	Margin            *float64  `json:"margin,omitempty"`
 }
 
 type Expense struct {
