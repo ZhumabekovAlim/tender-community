@@ -328,7 +328,7 @@ func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, co
 		var totalTranches float64
 		err = r.Db.QueryRowContext(ctx, `
 			SELECT COALESCE(SUM(amount), 0) FROM tranches WHERE transaction_id = ? AND transaction_id IN 
-				(SELECT id FROM transactions WHERE company_id = ?)`, transaction.ID, companyID).Scan(&totalTranches)
+				(SELECT id FROM transactions WHERE company_id = ? AND status = 2)`, transaction.ID, companyID).Scan(&totalTranches)
 		if err != nil {
 			return nil, err
 		}
