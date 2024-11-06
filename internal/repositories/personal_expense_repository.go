@@ -93,8 +93,8 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpensesSummary(ctx context.Co
 		expenses = append(expenses, expense)
 		allTimeTotal += expense.Amount
 
-		// Parse the expense date
-		expenseDate, err := time.Parse("2006-01-02", expense.Date) // Assuming date is in YYYY-MM-DD format
+		// Parse the expense date (assuming date is in ISO 8601 format, e.g., "2024-11-05T19:02:05Z")
+		expenseDate, err := time.Parse(time.RFC3339, expense.Date)
 		if err != nil {
 			return nil, err
 		}
