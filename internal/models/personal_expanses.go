@@ -8,3 +8,9 @@ type PersonalExpense struct {
 	CategoryID  int     `json:"category_id"`
 	Date        string  `json:"date"`
 }
+
+type PersonalExpenseSummary struct {
+	Expenses     []PersonalExpense `json:"expenses"`
+	MonthlyTotal float64           `json:"monthly_total"`
+	AllTimeTotal float64           `json:"all_time_total"`
+}

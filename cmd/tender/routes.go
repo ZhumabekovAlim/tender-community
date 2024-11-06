@@ -66,6 +66,7 @@ func (app *application) routes() http.Handler {
 	// PERSONAL EXPENSES
 	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))                        // Create a new expense
 	mux.Get("/expenses", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpenses))                       // Get all expenses
+	mux.Get("/expenses", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpensesSummary))                // Get all expenses
 	mux.Get("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpenseByID))                   // Get expense by ID
 	mux.Get("/expenses/category/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpensesByCategoryId)) // Get expense by ID
 	mux.Put("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.UpdatePersonalExpense))                    // Update expense by ID

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"tender/internal/models"
+	"time"
 )
 
 // PersonalExpenseRepository handles database operations for personal expenses.
@@ -65,6 +66,58 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpenses(ctx context.Context) 
 	}
 
 	return expenses, nil
+}
+
+func (r *PersonalExpenseRepository) GetAllPersonalExpensesSummary(ctx context.Context) (*models.PersonalExpenseSummary, error) {
+	// Query to get all expenses
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, reason, description, category_id, date FROM personal_expenses")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var expenses []models.PersonalExpense
+	var allTimeTotal, monthlyTotal float64
+
+	// Get current year and month
+	now := time.Now()
+	currentYear, currentMonth := now.Year(), now.Month()
+
+	for rows.Next() {
+		var expense models.PersonalExpense
+		err := rows.Scan(&expense.ID, &expense.Amount, &expense.Reason, &expense.Description, &expense.CategoryID, &expense.Date)
+		if err != nil {
+			return nil, err
+		}
+
+		expenses = append(expenses, expense)
+		allTimeTotal += expense.Amount
+
+		// Parse the expense date
+		expenseDate, err := time.Parse("2006-01-02", expense.Date) // Assuming date is in YYYY-MM-DD format
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if the expense is in the current month and year
+		if expenseDate.Year() == currentYear && expenseDate.Month() == currentMonth {
+			monthlyTotal += expense.Amount
+		}
+	}
+
+	// Error check for rows iteration
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Populate summary with totals and list of expenses
+	summary := &models.PersonalExpenseSummary{
+		Expenses:     expenses,
+		MonthlyTotal: monthlyTotal,
+		AllTimeTotal: allTimeTotal,
+	}
+
+	return summary, nil
 }
 
 // GetAllPersonalExpenses retrieves all expenses from the database.

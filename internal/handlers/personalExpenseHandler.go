@@ -102,6 +102,17 @@ func (h *PersonalExpenseHandler) GetAllPersonalExpenses(w http.ResponseWriter, r
 	json.NewEncoder(w).Encode(expenses)
 }
 
+func (h *PersonalExpenseHandler) GetAllPersonalExpensesSummary(w http.ResponseWriter, r *http.Request) {
+	summary, err := h.Service.GetAllPersonalExpensesSummary(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(summary)
+}
+
 // UpdatePersonalExpense updates an existing personal expense.
 func (h *PersonalExpenseHandler) UpdatePersonalExpense(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")
