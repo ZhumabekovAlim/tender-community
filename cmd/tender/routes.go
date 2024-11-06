@@ -116,10 +116,11 @@ func (app *application) routes() http.Handler {
 	mux.Del("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.DeleteCategory))  // Delete category by ID
 
 	// BALANCE HISTORY
-	mux.Post("/balance-history", dynamicMiddleware.ThenFunc(app.balanceHistoryHandler.CreateBalanceHistory))          // Create a new balance history record
-	mux.Get("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.GetBalanceHistoryByUserID)) // Get balance history record by user ID
-	mux.Put("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.UpdateBalanceHistory))      // Update balance history record by ID
-	mux.Del("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.DeleteBalanceHistory))      // Delete balance history record by ID
+	mux.Post("/balance-history", dynamicMiddleware.ThenFunc(app.balanceHistoryHandler.CreateBalanceHistory))                       // Create a new balance history record
+	mux.Get("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.GetBalanceHistoryByUserID))              // Get balance history record by user ID
+	mux.Get("/balance-history/category/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.GetBalanceHistoryByCategoryID)) // Get balance history record by user ID
+	mux.Put("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.UpdateBalanceHistory))                   // Update balance history record by ID
+	mux.Del("/balance-history/:id", standardMiddleware.ThenFunc(app.balanceHistoryHandler.DeleteBalanceHistory))                   // Delete balance history record by ID
 
 	// TENDERS ( GOIK and GOPP)
 	mux.Post("/tenders", dynamicMiddleware.ThenFunc(app.tenderHandler.CreateTender))                                  // Create a new tender
@@ -154,6 +155,27 @@ func (app *application) routes() http.Handler {
 	mux.Put("/tranches", standardMiddleware.ThenFunc(app.trancheHandler.UpdateTranche))                                             // Update tranche by ID
 	mux.Del("/tranches/:id", standardMiddleware.ThenFunc(app.trancheHandler.DeleteTranche))                                         // Delete tranche by ID
 	mux.Get("/tranches/transaction/:transaction_id", standardMiddleware.ThenFunc(app.trancheHandler.GetAllTranchesByTransactionID)) // Get all tranches by transaction_id
+
+	// CHANGE
+	mux.Post("/changes", dynamicMiddleware.ThenFunc(app.changeHandler.CreateChange))                                             // Create a new change
+	mux.Get("/changes/:id", standardMiddleware.ThenFunc(app.changeHandler.GetChangeByID))                                        // Get change by ID
+	mux.Put("/changes", standardMiddleware.ThenFunc(app.changeHandler.UpdateChange))                                             // Update change by ID
+	mux.Del("/changes/:id", standardMiddleware.ThenFunc(app.changeHandler.DeleteChange))                                         // Delete change by ID
+	mux.Get("/changes/transaction/:transaction_id", standardMiddleware.ThenFunc(app.changeHandler.GetAllChangesByTransactionID)) // Get all changes by transaction_id
+
+	// BALANCE CATEGORY
+	mux.Post("/balance_categories", dynamicMiddleware.ThenFunc(app.balanceCategoryHandler.CreateBalanceCategory))      // Create a new balance category
+	mux.Get("/balance_categories/:id", standardMiddleware.ThenFunc(app.balanceCategoryHandler.GetBalanceCategoryByID)) // Get balance category by ID
+	mux.Put("/balance_categories", standardMiddleware.ThenFunc(app.balanceCategoryHandler.UpdateBalanceCategory))      // Update balance category by ID
+	mux.Del("/balance_categories/:id", standardMiddleware.ThenFunc(app.balanceCategoryHandler.DeleteBalanceCategory))  // Delete balance category by ID
+	mux.Get("/balance_categories", standardMiddleware.ThenFunc(app.balanceCategoryHandler.GetAllBalanceCategories))    // Get all balance categories
+
+	// PERSONAL DEBTS
+	mux.Post("/personal_debts", dynamicMiddleware.ThenFunc(app.personalDebtHandler.CreatePersonalDebt))      // Create a new personal debt
+	mux.Get("/personal_debts/:id", standardMiddleware.ThenFunc(app.personalDebtHandler.GetPersonalDebtByID)) // Get personal debt by ID
+	mux.Put("/personal_debts", standardMiddleware.ThenFunc(app.personalDebtHandler.UpdatePersonalDebt))      // Update personal debt by ID
+	mux.Del("/personal_debts/:id", standardMiddleware.ThenFunc(app.personalDebtHandler.DeletePersonalDebt))  // Delete personal debt by ID
+	mux.Get("/personal_debts", standardMiddleware.ThenFunc(app.personalDebtHandler.GetAllPersonalDebts))     // Get all personal debts
 
 	return standardMiddleware.Then(mux)
 }

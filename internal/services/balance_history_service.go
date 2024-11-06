@@ -29,3 +29,7 @@ func (s *BalanceHistoryService) UpdateBalanceHistory(ctx context.Context, histor
 func (s *BalanceHistoryService) GetBalanceHistoryByUserID(ctx context.Context, id int) ([]models.BalanceHistory, error) {
 	return s.Repo.GetBalanceHistoryByUserID(ctx, id)
 }
+
+func (s *BalanceHistoryService) GetBalanceHistoryByCategoryID(ctx context.Context, id int) ([]models.BalanceHistory, error) {
+	return s.Repo.GetBalanceHistoryByCategoryID(ctx, id)
+}

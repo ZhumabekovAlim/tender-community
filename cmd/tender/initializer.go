@@ -29,6 +29,9 @@ type application struct {
 	sumHandler              *handlers.SumHandler
 	clientHandler           *handlers.ClientHandler
 	trancheHandler          *handlers.TrancheHandler
+	changeHandler           *handlers.ChangeHandler
+	balanceCategoryHandler  *handlers.BalanceCategoryHandler
+	personalDebtHandler     *handlers.PersonalDebtHandler
 }
 
 func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
@@ -99,6 +102,18 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	trancheService := &services.TrancheService{Repo: trancheRepo}
 	trancheHandler := &handlers.TrancheHandler{Service: trancheService}
 
+	changeRepo := &repositories.ChangeRepository{Db: db}
+	changeService := &services.ChangeService{Repo: changeRepo}
+	changeHandler := &handlers.ChangeHandler{Service: changeService}
+
+	balanceCategoryRepo := &repositories.BalanceCategoryRepository{Db: db}
+	balanceCategoryService := &services.BalanceCategoryService{Repo: balanceCategoryRepo}
+	balanceCategoryHandler := &handlers.BalanceCategoryHandler{Service: balanceCategoryService}
+
+	personalDebtRepo := &repositories.PersonalDebtRepository{Db: db}
+	personalDebtService := &services.PersonalDebtService{Repo: personalDebtRepo}
+	personalDebtHandler := &handlers.PersonalDebtHandler{Service: personalDebtService}
+
 	return &application{
 		errorLog:                errorLog,
 		infoLog:                 infoLog,
@@ -115,6 +130,9 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 		sumHandler:              sumHandler,
 		clientHandler:           clientHandler,
 		trancheHandler:          trancheHandler,
+		changeHandler:           changeHandler,
+		balanceCategoryHandler:  balanceCategoryHandler,
+		personalDebtHandler:     personalDebtHandler,
 	}
 }
 

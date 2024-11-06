@@ -13,8 +13,8 @@ type BalanceHistoryRepository struct {
 
 // CreateBalanceHistory inserts a new balance history record into the database.
 func (r *BalanceHistoryRepository) CreateBalanceHistory(ctx context.Context, history models.BalanceHistory) (models.BalanceHistory, error) {
-	result, err := r.Db.ExecContext(ctx, "INSERT INTO balance_history (amount, description, user_id) VALUES (?, ?, ?)",
-		history.Amount, history.Description, history.UserID)
+	result, err := r.Db.ExecContext(ctx, "INSERT INTO balance_history (amount, description, user_id, category_id) VALUES (?, ?, ?, ?)",
+		history.Amount, history.Description, history.UserID, history.CategoryID)
 	if err != nil {
 		return models.BalanceHistory{}, err
 	}
@@ -24,14 +24,14 @@ func (r *BalanceHistoryRepository) CreateBalanceHistory(ctx context.Context, his
 		return models.BalanceHistory{}, err
 	}
 
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, created_at, updated_at FROM balance_history WHERE id = ?", id)
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, category_id , created_at, updated_at FROM balance_history WHERE id = ?", id)
 	if err != nil {
 		return models.BalanceHistory{}, err
 	}
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CreatedAt, &history.UpdatedAt)
+		err = rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CategoryID, &history.CreatedAt, &history.UpdatedAt)
 		if err != nil {
 			return models.BalanceHistory{}, err
 		}
@@ -62,8 +62,8 @@ func (r *BalanceHistoryRepository) DeleteBalanceHistory(ctx context.Context, id 
 
 // UpdateBalanceHistory updates an existing balance history record in the database.
 func (r *BalanceHistoryRepository) UpdateBalanceHistory(ctx context.Context, history models.BalanceHistory) (models.BalanceHistory, error) {
-	_, err := r.Db.ExecContext(ctx, "UPDATE balance_history SET amount = ?, description = ?, user_id = ? WHERE id = ?",
-		history.Amount, history.Description, history.UserID, history.ID)
+	_, err := r.Db.ExecContext(ctx, "UPDATE balance_history SET amount = ?, description = ?, user_id = ?, category_id = ? WHERE id = ?",
+		history.Amount, history.Description, history.UserID, history.ID, history.CategoryID)
 	if err != nil {
 		return models.BalanceHistory{}, err
 	}
@@ -82,7 +82,27 @@ func (r *BalanceHistoryRepository) GetBalanceHistoryByUserID(ctx context.Context
 	var histories []models.BalanceHistory
 	for rows.Next() {
 		var history models.BalanceHistory
-		err := rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CreatedAt, &history.UpdatedAt)
+		err := rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CategoryID, &history.CreatedAt, &history.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		histories = append(histories, history)
+	}
+
+	return histories, nil
+}
+
+func (r *BalanceHistoryRepository) GetBalanceHistoryByCategoryID(ctx context.Context, id int) ([]models.BalanceHistory, error) {
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, created_at, updated_at FROM balance_history WHERE category_id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var histories []models.BalanceHistory
+	for rows.Next() {
+		var history models.BalanceHistory
+		err := rows.Scan(&history.ID, &history.Amount, &history.Description, &history.UserID, &history.CategoryID, &history.CreatedAt, &history.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

@@ -309,9 +309,8 @@ func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, co
 			return nil, err
 		}
 
-		// Format the UserName as "A.Zhumabekov"
 		if len(firstName) > 0 {
-			transaction.UserName = fmt.Sprintf("%s.%s", string(firstName[0]), lastName)
+			transaction.UserName = fmt.Sprintf("%s %s", firstName, lastName)
 		} else {
 			transaction.UserName = lastName
 		}

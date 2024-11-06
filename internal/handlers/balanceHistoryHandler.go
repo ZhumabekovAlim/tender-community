@@ -111,3 +111,26 @@ func (h *BalanceHistoryHandler) GetBalanceHistoryByUserID(w http.ResponseWriter,
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(histories)
 }
+
+func (h *BalanceHistoryHandler) GetBalanceHistoryByCategoryID(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get(":id")
+	if idStr == "" {
+		http.Error(w, "Missing balance history category ID", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid balance history category ID", http.StatusBadRequest)
+		return
+	}
+
+	histories, err := h.Service.GetBalanceHistoryByCategoryID(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(histories)
+}
