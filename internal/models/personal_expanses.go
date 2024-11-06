@@ -11,5 +11,5 @@ type PersonalExpense struct {
 
 type PersonalExpenseSummary struct {
 	MonthlyTotal float64 `json:"monthly_total"`
-	AllTimeTotal float64 `json:"all_time_total"`
+	YearTotal    float64 `json:"year_total"`
 }

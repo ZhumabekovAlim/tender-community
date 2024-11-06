@@ -77,7 +77,7 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpensesSummary(ctx context.Co
 	defer rows.Close()
 
 	var expenses []models.PersonalExpense
-	var allTimeTotal, monthlyTotal float64
+	var yearTotal, monthlyTotal float64
 
 	// Get current year and month
 	now := time.Now()
@@ -91,17 +91,21 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpensesSummary(ctx context.Co
 		}
 
 		expenses = append(expenses, expense)
-		allTimeTotal += expense.Amount
 
-		// Parse the expense date (assuming date is in ISO 8601 format, e.g., "2024-11-05T19:02:05Z")
+		// Parse the expense date
 		expenseDate, err := time.Parse(time.RFC3339, expense.Date)
 		if err != nil {
 			return nil, err
 		}
 
-		// Check if the expense is in the current month and year
-		if expenseDate.Year() == currentYear && expenseDate.Month() == currentMonth {
-			monthlyTotal += expense.Amount
+		// Check if the expense is in the current year
+		if expenseDate.Year() == currentYear {
+			yearTotal += expense.Amount
+
+			// Check if the expense is also in the current month
+			if expenseDate.Month() == currentMonth {
+				monthlyTotal += expense.Amount
+			}
 		}
 	}
 
@@ -113,7 +117,7 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpensesSummary(ctx context.Co
 	// Populate summary with totals and list of expenses
 	summary := &models.PersonalExpenseSummary{
 		MonthlyTotal: monthlyTotal,
-		AllTimeTotal: allTimeTotal,
+		YearTotal:    yearTotal,
 	}
 
 	return summary, nil
