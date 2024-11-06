@@ -39,5 +39,5 @@ func (s *CategoryService) GetAllCategories(ctx context.Context) ([]models.Catego
 
 // GetAllCategories retrieves all categories.
 func (s *CategoryService) GetAllCategoriesByParent(ctx context.Context, id int) ([]models.Category, error) {
-	return s.Repo.GetAllCategoriesByParent(ctx)
+	return s.Repo.GetAllCategoriesByParent(ctx, id)
 }
