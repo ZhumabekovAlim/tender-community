@@ -533,9 +533,11 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		&existingTransaction.Total, &existingTransaction.Sell, &existingTransaction.ProductName,
 		&existingTransaction.CompletedDate, &existingTransaction.Status, &existingTransaction.Margin)
 	if err == sql.ErrNoRows {
+		fmt.Println("1")
 		tx.Rollback()
 		return models.Transaction{}, models.ErrTransactionNotFound
 	} else if err != nil {
+		fmt.Println("2")
 		tx.Rollback()
 		return models.Transaction{}, err
 	}
@@ -586,17 +588,20 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		transaction.Organization, transaction.Amount, transaction.Total, transaction.Sell,
 		transaction.ProductName, transaction.Status, transaction.CompletedDate, transaction.ID, transaction.Margin)
 	if err != nil {
+		fmt.Println("3")
 		tx.Rollback()
 		return models.Transaction{}, err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		fmt.Println("4")
 		tx.Rollback()
 		return models.Transaction{}, err
 	}
 
 	if rowsAffected == 0 {
+		fmt.Println("5")
 		tx.Rollback()
 		log.Printf("No rows affected for transaction ID: %d", transaction.ID)
 		return models.Transaction{}, models.ErrTransactionNotFound
@@ -604,6 +609,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 
 	_, err = tx.ExecContext(ctx, `DELETE FROM additional_expenses WHERE transaction_id = ?`, transaction.ID)
 	if err != nil {
+		fmt.Println("6")
 		tx.Rollback()
 		return models.Transaction{}, err
 	}
@@ -614,6 +620,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 			VALUES (?, ?, ?)`,
 			expense.Name, expense.Amount, transaction.ID)
 		if err != nil {
+			fmt.Println("7")
 			tx.Rollback()
 			return models.Transaction{}, err
 		}
@@ -621,6 +628,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 
 	// Commit the transaction
 	if err := tx.Commit(); err != nil {
+		fmt.Println("8")
 		return models.Transaction{}, err
 	}
 
@@ -636,12 +644,14 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		&transaction.ProductName, &transaction.CompletedDate, &transaction.Date, &transaction.Status,
 		&transaction.UserName, &transaction.CompanyName, &transaction.Margin)
 	if err != nil {
+		fmt.Println("9")
 		return models.Transaction{}, err
 	}
 
 	// Retrieve the updated expenses
 	rows, err := r.Db.QueryContext(ctx, `SELECT id, name, amount, transaction_id FROM additional_expenses WHERE transaction_id = ?`, transaction.ID)
 	if err != nil {
+		fmt.Println("10")
 		return models.Transaction{}, err
 	}
 	defer rows.Close()
@@ -650,6 +660,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		var expense models.Expense
 		err := rows.Scan(&expense.ID, &expense.Name, &expense.Amount, &expense.TransactionID)
 		if err != nil {
+			fmt.Println("11")
 			return models.Transaction{}, err
 		}
 		transaction.Expenses = append(transaction.Expenses, expense)
