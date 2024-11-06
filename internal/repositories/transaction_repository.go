@@ -586,7 +586,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, transacti
 		organization = ?, amount = ?, total = ?, sell = ?, product_name = ?,  status = ?, completed_date = ?, margin = ? WHERE id = ?`,
 		transaction.TransactionNumber, transaction.Type, transaction.TenderNumber, transaction.UserID, transaction.CompanyID,
 		transaction.Organization, transaction.Amount, transaction.Total, transaction.Sell,
-		transaction.ProductName, transaction.Status, transaction.CompletedDate, transaction.ID, transaction.Margin)
+		transaction.ProductName, transaction.Status, transaction.CompletedDate, transaction.Margin, transaction.ID)
 	if err != nil {
 		fmt.Println("3")
 		tx.Rollback()
