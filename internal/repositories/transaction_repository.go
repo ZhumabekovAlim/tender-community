@@ -266,7 +266,7 @@ func (r *TransactionRepository) GetTransactionsByUser(ctx context.Context, userI
 
 func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, companyID int) ([]models.Transaction, error) {
 	query := `
-		SELECT transactions.*, u.name AS user_name, c.name AS company_name
+		SELECT transactions.*, u.name AS user_name, u.last_name AS user_last_name, c.name AS company_name
 		FROM transactions
 		JOIN tender.users u ON u.id = transactions.user_id
 		JOIN tender.companies c ON c.id = transactions.company_id
@@ -284,6 +284,7 @@ func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, co
 
 	for rows.Next() {
 		var transaction models.Transaction
+		var firstName, lastName string
 
 		if err := rows.Scan(
 			&transaction.ID,
@@ -301,10 +302,18 @@ func (r *TransactionRepository) GetTransactionsByCompany(ctx context.Context, co
 			&transaction.Date,
 			&transaction.Status,
 			&transaction.Margin,
-			&transaction.UserName,
+			&firstName,
+			&lastName,
 			&transaction.CompanyName,
 		); err != nil {
 			return nil, err
+		}
+
+		// Format the UserName as "A.Zhumabekov"
+		if len(firstName) > 0 {
+			transaction.UserName = fmt.Sprintf("%s.%s", string(firstName[0]), lastName)
+		} else {
+			transaction.UserName = lastName
 		}
 
 		// Retrieve associated expenses for each transaction

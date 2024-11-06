@@ -16,7 +16,7 @@ type Transaction struct {
 	Date              string    `json:"date"`
 	Status            int       `json:"status"`
 	Expenses          []Expense `json:"expenses"`
-	UserName          *string   `json:"username,omitempty"`
+	UserName          string    `json:"username,omitempty"`
 	CompanyName       *string   `json:"companyname,omitempty"`
 	Debt              float64   `json:"debt,omitempty"`
 	Margin            *float64  `json:"margin,omitempty"`
