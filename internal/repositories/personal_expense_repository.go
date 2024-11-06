@@ -112,7 +112,6 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpensesSummary(ctx context.Co
 
 	// Populate summary with totals and list of expenses
 	summary := &models.PersonalExpenseSummary{
-		Expenses:     expenses,
 		MonthlyTotal: monthlyTotal,
 		AllTimeTotal: allTimeTotal,
 	}
