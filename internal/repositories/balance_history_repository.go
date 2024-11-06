@@ -93,7 +93,7 @@ func (r *BalanceHistoryRepository) GetBalanceHistoryByUserID(ctx context.Context
 }
 
 func (r *BalanceHistoryRepository) GetBalanceHistoryByCategoryID(ctx context.Context, id int) ([]models.BalanceHistory, error) {
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, created_at, updated_at FROM balance_history WHERE category_id = ?", id)
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, description, user_id, category_id, created_at, updated_at FROM balance_history WHERE category_id = ?", id)
 	if err != nil {
 		return nil, err
 	}
