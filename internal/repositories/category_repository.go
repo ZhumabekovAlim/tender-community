@@ -81,7 +81,27 @@ func (r *CategoryRepository) GetCategoryByID(ctx context.Context, id int) (model
 
 // GetAllCategories retrieves all categories from the database.
 func (r *CategoryRepository) GetAllCategories(ctx context.Context) ([]models.Category, error) {
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, category_name FROM categories")
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, category_name FROM categories WHERE parent_id = 0")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categories []models.Category
+	for rows.Next() {
+		var category models.Category
+		err := rows.Scan(&category.ID, &category.CategoryName)
+		if err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+
+	return categories, nil
+}
+
+func (r *CategoryRepository) GetAllCategoriesByParent(ctx context.Context, parentID int) ([]models.Category, error) {
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, category_name FROM categories WHERE parent_id = ?", parentID)
 	if err != nil {
 		return nil, err
 	}

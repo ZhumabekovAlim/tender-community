@@ -109,11 +109,12 @@ func (app *application) routes() http.Handler {
 	mux.Get("/password/recovery/mail", dynamicMiddleware.ThenFunc(app.userHandler.PasswordRecoveryHandler))
 
 	// CATEGORY
-	mux.Post("/categories", dynamicMiddleware.ThenFunc(app.categoryHandler.CreateCategory))      // Create a new category
-	mux.Get("/categories", standardMiddleware.ThenFunc(app.categoryHandler.GetAllCategories))    // Get all categories
-	mux.Get("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.GetCategoryByID)) // Get category by ID
-	mux.Put("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.UpdateCategory))  // Update category by ID
-	mux.Del("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.DeleteCategory))  // Delete category by ID
+	mux.Post("/categories", dynamicMiddleware.ThenFunc(app.categoryHandler.CreateCategory))              // Create a new category
+	mux.Get("/categories", standardMiddleware.ThenFunc(app.categoryHandler.GetAllCategories))            // Get all categories
+	mux.Get("/categories/parent/:id", standardMiddleware.ThenFunc(app.categoryHandler.GetAllCategories)) // Get all categories
+	mux.Get("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.GetCategoryByID))         // Get category by ID
+	mux.Put("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.UpdateCategory))          // Update category by ID
+	mux.Del("/categories/:id", standardMiddleware.ThenFunc(app.categoryHandler.DeleteCategory))          // Delete category by ID
 
 	// BALANCE HISTORY
 	mux.Post("/balance-history", dynamicMiddleware.ThenFunc(app.balanceHistoryHandler.CreateBalanceHistory))                       // Create a new balance history record
