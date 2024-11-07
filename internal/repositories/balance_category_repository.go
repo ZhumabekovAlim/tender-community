@@ -13,8 +13,8 @@ type BalanceCategoryRepository struct {
 
 func (r *BalanceCategoryRepository) CreateBalanceCategory(ctx context.Context, category *models.BalanceCategory) (int, error) {
 	query := `
-		INSERT INTO balance_category (name) 
-		VALUES (?)
+		INSERT INTO balance_category (name, parent_id) 
+		VALUES (?, ?)
 	`
 	result, err := r.Db.ExecContext(ctx, query, category.Name)
 	if err != nil {
