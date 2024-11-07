@@ -101,14 +101,14 @@ func (r *PersonalDebtRepository) GetAllPersonalDebts(ctx context.Context) ([]mod
 	return debts, nil
 }
 
-func (r *PersonalDebtRepository) GetAllPersonalDebtsByStatus(ctx context.Context, id int) ([]models.PersonalDebt, error) {
+func (r *PersonalDebtRepository) GetAllPersonalDebtsByStatus(ctx context.Context, status int) ([]models.PersonalDebt, error) {
 	query := `
 		SELECT id, name, amount, type, get_date, return_date, status, created_at, updated_at
 		FROM personal_debts WHERE status = ?
 		ORDER BY created_at DESC
 	`
 
-	rows, err := r.Db.QueryContext(ctx, query, id)
+	rows, err := r.Db.QueryContext(ctx, query, status)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query personal debts: %w", err)
 	}
