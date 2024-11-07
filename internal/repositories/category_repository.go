@@ -26,8 +26,8 @@ func (r *CategoryRepository) CreateCategory(ctx context.Context, category models
 
 	// Query the database to get the full category model
 	var createdCategory models.Category
-	err = r.Db.QueryRowContext(ctx, "SELECT id, category_name FROM categories WHERE id = ?", id).
-		Scan(&createdCategory.ID, &createdCategory.CategoryName)
+	err = r.Db.QueryRowContext(ctx, "SELECT id, category_name, parent_id FROM categories WHERE id = ?", id).
+		Scan(&createdCategory.ID, &createdCategory.CategoryName, &createdCategory.ParentID)
 	if err != nil {
 		return models.Category{}, err
 	}
