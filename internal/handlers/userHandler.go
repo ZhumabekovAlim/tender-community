@@ -380,3 +380,18 @@ func (h *UserHandler) PasswordRecoveryHandler(w http.ResponseWriter, r *http.Req
 
 	http.Redirect(w, r, "tendercommunity://reset_password?hash="+user_id, http.StatusSeeOther)
 }
+
+func (h *UserHandler) GetUserTransactionDifferences(w http.ResponseWriter, r *http.Request) {
+
+	differences, err := h.Service.GetUserTransactionDifferences(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(differences); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}

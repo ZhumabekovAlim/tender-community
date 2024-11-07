@@ -272,3 +272,40 @@ func (r *UserRepository) FindUserByEmail(ctx context.Context, email string) (int
 	}
 	return userId, nil
 }
+
+func (r *UserRepository) GetUserTransactionDifferences(ctx context.Context) ([]models.UserTransactionDifference, error) {
+	query := `
+        SELECT
+            u.id,
+            u.name,
+            u.last_name,
+            COALESCE(SUM(CASE WHEN et.status = 2 THEN et.total ELSE 0 END), 0) AS difference
+        FROM
+            users u
+                JOIN
+            extra_transactions et ON u.id = et.user_id
+        GROUP BY
+            u.id, u.name, u.last_name
+    `
+
+	rows, err := r.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []models.UserTransactionDifference
+	for rows.Next() {
+		var result models.UserTransactionDifference
+		if err := rows.Scan(&result.ID, &result.Name, &result.LastName, &result.Difference); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}

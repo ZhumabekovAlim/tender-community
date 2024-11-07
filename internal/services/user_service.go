@@ -72,3 +72,7 @@ func (s *UserService) ChangePassword(ctx context.Context, userID int, oldPasswor
 func (s *UserService) FindUserByEmail(ctx context.Context, email string) (int, error) {
 	return s.Repo.FindUserByEmail(ctx, email)
 }
+
+func (s *UserService) GetUserTransactionDifferences(ctx context.Context) ([]models.UserTransactionDifference, error) {
+	return s.Repo.GetUserTransactionDifferences(ctx)
+}

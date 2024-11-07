@@ -10,3 +10,10 @@ type User struct {
 	Balance  float64 `json:"balance"`
 	Password string  `json:"password"`
 }
+
+type UserTransactionDifference struct {
+	ID         int     `json:"id"`
+	Name       string  `json:"name"`
+	LastName   string  `json:"last_name"`
+	Difference float64 `json:"difference"`
+}
