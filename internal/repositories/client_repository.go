@@ -35,7 +35,7 @@ func (r *ClientRepository) GetClientData(ctx context.Context, userID int) (model
 		}
 		var empty *string = new(string)
 		*empty = "-"
-		if &transaction.TransactionNumber == nil {
+		if transaction.TransactionNumber == nil {
 			transaction.TransactionNumber = empty
 		}
 		clientData.Transactions = append(clientData.Transactions, transaction)
