@@ -33,6 +33,11 @@ func (r *ClientRepository) GetClientData(ctx context.Context, userID int) (model
 		if err != nil {
 			return clientData, err
 		}
+		var empty *string = new(string)
+		*empty = "-"
+		if &transaction.TransactionNumber == nil {
+			transaction.TransactionNumber = empty
+		}
 		clientData.Transactions = append(clientData.Transactions, transaction)
 	}
 	if err := transRows.Err(); err != nil {
