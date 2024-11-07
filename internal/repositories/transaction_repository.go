@@ -386,6 +386,7 @@ func (r *TransactionRepository) GetTransactionsForUserByCompany(ctx context.Cont
 			&transaction.CompletedDate,
 			&transaction.Date,
 			&transaction.Status,
+			&transaction.Margin,
 			&transaction.UserName,
 			&transaction.CompanyName,
 		); err != nil {
