@@ -110,3 +110,23 @@ func (h *PersonalDebtHandler) GetAllPersonalDebts(w http.ResponseWriter, r *http
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(debts)
 }
+
+// Get all personal debts
+func (h *PersonalDebtHandler) GetAllPersonalDebtsByStatus(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get(":id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || idStr == "" {
+		http.Error(w, "Invalid or missing personal debt ID", http.StatusBadRequest)
+		return
+	}
+
+	debts, err := h.Service.GetAllPersonalDebtsByStatus(r.Context(), id)
+	if err != nil {
+		log.Printf("Error fetching all personal debts: %v", err)
+		http.Error(w, "Failed to fetch personal debts", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(debts)
+}

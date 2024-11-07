@@ -13,7 +13,7 @@ type CategoryRepository struct {
 // CreateCategory inserts a new category into the database.
 func (r *CategoryRepository) CreateCategory(ctx context.Context, category models.Category) (models.Category, error) {
 	// Insert the new category into the database
-	result, err := r.Db.ExecContext(ctx, "INSERT INTO categories (category_name) VALUES (?)", category.CategoryName)
+	result, err := r.Db.ExecContext(ctx, "INSERT INTO categories (category_name,  parent_id) VALUES (?, ?)", category.CategoryName, category.ParentID)
 	if err != nil {
 		return models.Category{}, err
 	}

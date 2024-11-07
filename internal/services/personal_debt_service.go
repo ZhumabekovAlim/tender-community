@@ -29,3 +29,7 @@ func (s *PersonalDebtService) DeletePersonalDebt(ctx context.Context, id int) er
 func (s *PersonalDebtService) GetAllPersonalDebts(ctx context.Context) ([]models.PersonalDebt, error) {
 	return s.Repo.GetAllPersonalDebts(ctx)
 }
+
+func (s *PersonalDebtService) GetAllPersonalDebtsByStatus(ctx context.Context, id int) ([]models.PersonalDebt, error) {
+	return s.Repo.GetAllPersonalDebtsByStatus(ctx, id)
+}
