@@ -123,6 +123,61 @@ func (r *PersonalExpenseRepository) GetAllPersonalExpensesSummary(ctx context.Co
 	return summary, nil
 }
 
+func (r *PersonalExpenseRepository) GetPersonalExpensesSummaryBySubCategory(ctx context.Context, category_id int) (*models.PersonalExpenseSummary, error) {
+	// Query to get all expenses with the specified category_id
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, reason, description, category_id, date FROM personal_expenses WHERE category_id = ?", category_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var expenses []models.PersonalExpense
+	var yearTotal, monthlyTotal float64
+
+	// Get current year and month
+	now := time.Now()
+	currentYear, currentMonth := now.Year(), now.Month()
+
+	for rows.Next() {
+		var expense models.PersonalExpense
+		err := rows.Scan(&expense.ID, &expense.Amount, &expense.Reason, &expense.Description, &expense.CategoryID, &expense.Date)
+		if err != nil {
+			return nil, err
+		}
+
+		expenses = append(expenses, expense)
+
+		// Parse the expense date
+		expenseDate, err := time.Parse(time.RFC3339, expense.Date)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if the expense is in the current year
+		if expenseDate.Year() == currentYear {
+			yearTotal += expense.Amount
+
+			// Check if the expense is also in the current month
+			if expenseDate.Month() == currentMonth {
+				monthlyTotal += expense.Amount
+			}
+		}
+	}
+
+	// Error check for rows iteration
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Populate summary with totals
+	summary := &models.PersonalExpenseSummary{
+		MonthlyTotal: monthlyTotal,
+		YearTotal:    yearTotal,
+	}
+
+	return summary, nil
+}
+
 // GetAllPersonalExpenses retrieves all expenses from the database.
 func (r *PersonalExpenseRepository) GetPersonalExpensesByCategoryId(ctx context.Context, category_id int) ([]models.PersonalExpense, error) {
 	rows, err := r.Db.QueryContext(ctx, "SELECT id, amount, reason, description, category_id, date FROM personal_expenses WHERE category_id = ?", category_id)

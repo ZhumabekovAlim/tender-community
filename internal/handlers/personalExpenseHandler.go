@@ -116,6 +116,31 @@ func (h *PersonalExpenseHandler) GetAllPersonalExpensesSummary(w http.ResponseWr
 	json.NewEncoder(w).Encode(summary)
 }
 
+func (h *PersonalExpenseHandler) GetPersonalExpensesSummaryBySubCategory(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get(":id")
+	if idStr == "" {
+		http.Error(w, "Missing expense ID", http.StatusBadRequest)
+		return
+	}
+
+	category_id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid expense ID", http.StatusBadRequest)
+		return
+	}
+
+	summary, err := h.Service.GetPersonalExpensesSummaryBySubCategory(r.Context(), category_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("hello!")
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(summary)
+}
+
 // UpdatePersonalExpense updates an existing personal expense.
 func (h *PersonalExpenseHandler) UpdatePersonalExpense(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get(":id")

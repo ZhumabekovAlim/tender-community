@@ -64,13 +64,14 @@ func (app *application) routes() http.Handler {
 	mux.Get("/extra_transactions/realization/:id", standardMiddleware.ThenFunc(app.extraTransactionHandler.GetExtraTransactionCountsByUserID)) // Get extra transactions by user ID
 
 	// PERSONAL EXPENSES
-	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))                        // Create a new expense
-	mux.Get("/expenses", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpenses))                       // Get all expenses
-	mux.Get("/expenses/month", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpensesSummary))          // Get all expenses
-	mux.Get("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpenseByID))                   // Get expense by ID
-	mux.Get("/expenses/category/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpensesByCategoryId)) // Get expense by ID
-	mux.Put("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.UpdatePersonalExpense))                    // Update expense by ID
-	mux.Del("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.DeletePersonalExpense))                    // Delete expense by ID
+	mux.Post("/expenses", dynamicMiddleware.ThenFunc(app.expenseHandler.CreatePersonalExpense))                                      // Create a new expense
+	mux.Get("/expenses", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpenses))                                     // Get all expenses
+	mux.Get("/expenses/month", standardMiddleware.ThenFunc(app.expenseHandler.GetAllPersonalExpensesSummary))                        // Get all expenses
+	mux.Get("/expenses/month/category/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpensesSummaryBySubCategory)) // Get all expenses
+	mux.Get("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpenseByID))                                 // Get expense by ID
+	mux.Get("/expenses/category/:id", standardMiddleware.ThenFunc(app.expenseHandler.GetPersonalExpensesByCategoryId))               // Get expense by ID
+	mux.Put("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.UpdatePersonalExpense))                                  // Update expense by ID
+	mux.Del("/expenses/:id", standardMiddleware.ThenFunc(app.expenseHandler.DeletePersonalExpense))                                  // Delete expense by ID
 
 	// REPORTS
 	// company month
