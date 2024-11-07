@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"tender/internal/models"
@@ -108,6 +109,8 @@ func (h *PersonalExpenseHandler) GetAllPersonalExpensesSummary(w http.ResponseWr
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Println("hello")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(summary)

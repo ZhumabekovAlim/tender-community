@@ -48,6 +48,8 @@ jobs:
 
           # Распаковываем и собираем проект на сервере
           ssh -i key.pem -p $SERVER_PORT -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
+            export PATH=$PATH:/usr/local/go/bin
+          
             cd /root/go/src/tender/
             tar -xzf tender.tar.gz
             cd /root/go/src/tender/cmd/tender/
