@@ -76,8 +76,10 @@ func (r *ExtraTransactionRepository) GetAllExtraTransactions(ctx context.Context
 
 func (r *ExtraTransactionRepository) GetExtraTransactionsByUser(ctx context.Context, userID int) ([]models.ExtraTransaction, error) {
 	rows, err := r.Db.QueryContext(ctx, `
-		SELECT id, user_id, description, total, date, status 
-		FROM extra_transactions WHERE user_id = ? ORDER BY date DESC`, userID)
+		SELECT extra_transactions.id, user_id, description, total, date, status , CONCAT(u.name, ' ', u.last_name) as username
+		FROM extra_transactions
+		JOIN tender.users u on extra_transactions.user_id = u.id
+		WHERE user_id = ? ORDER BY date DESC`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +88,7 @@ func (r *ExtraTransactionRepository) GetExtraTransactionsByUser(ctx context.Cont
 	var extraTransactions []models.ExtraTransaction
 	for rows.Next() {
 		var extraTransaction models.ExtraTransaction
-		err := rows.Scan(&extraTransaction.ID, &extraTransaction.UserID, &extraTransaction.Description, &extraTransaction.Total, &extraTransaction.Date, &extraTransaction.Status)
+		err := rows.Scan(&extraTransaction.ID, &extraTransaction.UserID, &extraTransaction.Description, &extraTransaction.Total, &extraTransaction.Date, &extraTransaction.Status, &extraTransaction.UserName)
 		if err != nil {
 			return nil, err
 		}
