@@ -17,7 +17,7 @@ func (r *ClientRepository) GetClientData(ctx context.Context, userID int) (model
 
 	// Transactions data
 	transactionsQuery := `
-    SELECT tender_number, amount
+    SELECT transaction_number, sell
     FROM transactions
     WHERE user_id = ? AND status = 2
     `
