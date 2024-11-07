@@ -139,7 +139,7 @@ func (h *PersonalDebtHandler) GetAllPersonalDebtsByType(w http.ResponseWriter, r
 		return
 	}
 
-	debts, err := h.Service.GetAllPersonalDebtsByStatus(r.Context(), id)
+	debts, err := h.Service.GetAllPersonalDebtsByType(r.Context(), id)
 	if err != nil {
 		log.Printf("Error fetching all personal debts: %v", err)
 		http.Error(w, "Failed to fetch personal debts", http.StatusInternalServerError)
