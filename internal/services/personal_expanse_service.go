@@ -40,6 +40,10 @@ func (s *PersonalExpenseService) GetPersonalExpensesSummaryBySubCategory(ctx con
 	return s.Repo.GetPersonalExpensesSummaryBySubCategory(ctx, category_id)
 }
 
+func (s *PersonalExpenseService) GetPersonalExpensesSummaryByCategory(ctx context.Context, category_id int) (*models.PersonalExpenseSummary, error) {
+	return s.Repo.GetPersonalExpensesSummaryByCategory(ctx, category_id)
+}
+
 // GetPersonalExpensesByCategoryId retrieves all personal expenses by category id.
 func (s *PersonalExpenseService) GetPersonalExpensesByCategoryId(ctx context.Context, category_id int) ([]models.PersonalExpense, error) {
 	return s.Repo.GetPersonalExpensesByCategoryId(ctx, category_id)

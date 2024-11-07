@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"tender/internal/models"
@@ -110,8 +109,6 @@ func (h *PersonalExpenseHandler) GetAllPersonalExpensesSummary(w http.ResponseWr
 		return
 	}
 
-	fmt.Println("hello!")
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(summary)
 }
@@ -135,7 +132,28 @@ func (h *PersonalExpenseHandler) GetPersonalExpensesSummaryBySubCategory(w http.
 		return
 	}
 
-	fmt.Println("hello!")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(summary)
+}
+
+func (h *PersonalExpenseHandler) GetPersonalExpensesSummaryByCategory(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get(":id")
+	if idStr == "" {
+		http.Error(w, "Missing expense ID", http.StatusBadRequest)
+		return
+	}
+
+	category_id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid expense ID", http.StatusBadRequest)
+		return
+	}
+
+	summary, err := h.Service.GetPersonalExpensesSummaryByCategory(r.Context(), category_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(summary)
