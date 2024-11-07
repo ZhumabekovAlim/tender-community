@@ -110,7 +110,7 @@ func (h *PersonalExpenseHandler) GetAllPersonalExpensesSummary(w http.ResponseWr
 		return
 	}
 
-	fmt.Println("hello")
+	fmt.Println("hello!")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(summary)
