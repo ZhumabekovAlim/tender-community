@@ -33,3 +33,7 @@ func (s *PersonalDebtService) GetAllPersonalDebts(ctx context.Context) ([]models
 func (s *PersonalDebtService) GetAllPersonalDebtsByStatus(ctx context.Context, id int) ([]models.PersonalDebt, error) {
 	return s.Repo.GetAllPersonalDebtsByStatus(ctx, id)
 }
+
+func (s *PersonalDebtService) GetAllPersonalDebtsByType(ctx context.Context, id int) ([]models.PersonalDebt, error) {
+	return s.Repo.GetAllPersonalDebtsByType(ctx, id)
+}

@@ -179,6 +179,7 @@ func (app *application) routes() http.Handler {
 	mux.Del("/personal_debts/:id", standardMiddleware.ThenFunc(app.personalDebtHandler.DeletePersonalDebt))                 // Delete personal debt by ID
 	mux.Get("/personal_debts", standardMiddleware.ThenFunc(app.personalDebtHandler.GetAllPersonalDebts))                    // Get all personal debts
 	mux.Get("/personal_debts/status/:id", standardMiddleware.ThenFunc(app.personalDebtHandler.GetAllPersonalDebtsByStatus)) // Get all personal debts
+	mux.Get("/personal_debts/type/:id", standardMiddleware.ThenFunc(app.personalDebtHandler.GetAllPersonalDebtsByType))     // Get all personal debts
 
 	return standardMiddleware.Then(mux)
 }

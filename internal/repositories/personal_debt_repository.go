@@ -129,3 +129,32 @@ func (r *PersonalDebtRepository) GetAllPersonalDebtsByStatus(ctx context.Context
 
 	return debts, nil
 }
+
+func (r *PersonalDebtRepository) GetAllPersonalDebtsByType(ctx context.Context, status int) ([]models.PersonalDebt, error) {
+	query := `
+		SELECT id, name, amount, type, get_date, return_date, status, created_at, updated_at
+		FROM personal_debts WHERE type = ?
+		ORDER BY created_at DESC
+	`
+
+	rows, err := r.Db.QueryContext(ctx, query, status)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query personal debts: %w", err)
+	}
+	defer rows.Close()
+
+	var debts []models.PersonalDebt
+	for rows.Next() {
+		var debt models.PersonalDebt
+		if err := rows.Scan(&debt.ID, &debt.Name, &debt.Amount, &debt.Type, &debt.GetDate, &debt.ReturnDate, &debt.Status, &debt.CreatedAt, &debt.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan personal debt: %w", err)
+		}
+		debts = append(debts, debt)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return debts, nil
+}
