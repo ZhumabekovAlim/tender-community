@@ -289,7 +289,7 @@ func (r *TenderRepository) GetAllTendersSum(ctx context.Context) (*models.Tender
 	queryGOIK := `
         SELECT COALESCE(SUM(total-commission), 0) AS total_sum
         FROM tenders
-        WHERE status = 3
+        WHERE status = 3 AND status = 2
         AND type = 'ГОИК';
     `
 
@@ -303,7 +303,7 @@ func (r *TenderRepository) GetAllTendersSum(ctx context.Context) (*models.Tender
 	queryGOPP := `
         SELECT COALESCE(SUM(total-commission), 0) AS total_sum
         FROM tenders
-        WHERE status = 3
+        WHERE status = 3 AND status = 2
         AND type = 'ГОПП';
     `
 
