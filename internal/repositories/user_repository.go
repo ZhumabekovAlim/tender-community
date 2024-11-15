@@ -24,7 +24,7 @@ var (
 
 func (r *UserRepository) GetAllUsers(ctx context.Context) ([]models.User, error) {
 
-	rows, err := r.Db.QueryContext(ctx, "SELECT id, name, last_name, email, phone, inn, balance, password FROM users WHERE id != 1")
+	rows, err := r.Db.QueryContext(ctx, "SELECT id, name, last_name, email, phone, inn, balance, password, status FROM users WHERE id != 1")
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (r *UserRepository) GetAllUsers(ctx context.Context) ([]models.User, error)
 	var users []models.User
 	for rows.Next() {
 		var user models.User
-		if err := rows.Scan(&user.ID, &user.Name, &user.LastName, &user.Email, &user.Phone, &user.INN, &user.Balance, &user.Password); err != nil {
+		if err := rows.Scan(&user.ID, &user.Name, &user.LastName, &user.Email, &user.Phone, &user.INN, &user.Balance, &user.Password, &user.Status); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
@@ -91,7 +91,7 @@ func (r *UserRepository) SignUp(ctx context.Context, user models.User) (models.U
 func (r *UserRepository) LogIn(ctx context.Context, user models.User) (models.User, error) {
 	var storedUser models.User
 
-	query := "SELECT id, name, last_name, email, phone, inn, password, balance FROM users WHERE email = ? OR phone = ?"
+	query := "SELECT id, name, last_name, email, phone, inn, password, balance,status FROM users WHERE email = ? OR phone = ?"
 	err := r.Db.QueryRowContext(ctx, query, user.Email, user.Phone).Scan(
 		&storedUser.ID,
 		&storedUser.Name,
@@ -101,6 +101,7 @@ func (r *UserRepository) LogIn(ctx context.Context, user models.User) (models.Us
 		&storedUser.INN,
 		&storedUser.Password,
 		&storedUser.Balance,
+		&storedUser.Status,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -117,13 +118,17 @@ func (r *UserRepository) LogIn(ctx context.Context, user models.User) (models.Us
 		return models.User{}, err
 	}
 
+	if storedUser.Status == 2 {
+		return models.User{}, errors.New("Пользователь заблокирован")
+	}
+
 	return storedUser, nil
 }
 
 func (r *UserRepository) GetUserByID(ctx context.Context, id int) (models.User, error) {
 	var user models.User
 
-	query := "SELECT id, name, last_name, email, phone, inn, balance, password FROM users WHERE id = ?"
+	query := "SELECT id, name, last_name, email, phone, inn, balance, password, status FROM users WHERE id = ?"
 	err := r.Db.QueryRowContext(ctx, query, id).Scan(
 		&user.ID,
 		&user.Name,
@@ -133,6 +138,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int) (models.User, 
 		&user.INN,
 		&user.Balance,
 		&user.Password,
+		&user.Status,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -229,6 +235,12 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user models.User) (mode
 		params = append(params, user.Password)
 	}
 
+	if user.Status != 0 {
+		query += " status = ?,"
+		params = append(params, user.Status)
+
+	}
+
 	// Trim the last comma from the query
 	query = query[:len(query)-1]
 	query += " WHERE id = ?"
@@ -240,9 +252,9 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user models.User) (mode
 	}
 
 	// Retrieve the updated user
-	row := r.Db.QueryRowContext(ctx, "SELECT id, name, last_name, email, phone, inn, balance, password FROM users WHERE id = ?", user.ID)
+	row := r.Db.QueryRowContext(ctx, "SELECT id, name, last_name, email, phone, inn, balance, password, status FROM users WHERE id = ?", user.ID)
 	var updatedUser models.User
-	err = row.Scan(&updatedUser.ID, &updatedUser.Name, &updatedUser.LastName, &updatedUser.Email, &updatedUser.Phone, &updatedUser.INN, &updatedUser.Balance, &updatedUser.Password)
+	err = row.Scan(&updatedUser.ID, &updatedUser.Name, &updatedUser.LastName, &updatedUser.Email, &updatedUser.Phone, &updatedUser.INN, &updatedUser.Balance, &updatedUser.Password, &updatedUser.Status)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return models.User{}, models.ErrUserNotFound

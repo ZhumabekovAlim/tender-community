@@ -9,6 +9,7 @@ type User struct {
 	INN      string  `json:"inn"`
 	Balance  float64 `json:"balance"`
 	Password string  `json:"password"`
+	Status   int     `json:"status"`
 }
 
 type UserTransactionDifference struct {
