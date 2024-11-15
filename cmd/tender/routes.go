@@ -14,7 +14,7 @@ func (app *application) routes() http.Handler {
 	mux := pat.New()
 
 	// USERS
-	mux.Post("/users/signup", dynamicMiddleware.ThenFunc(app.userHandler.SignUp))                                    // sign up
+	mux.Post("/users/signup", dynamicMiddleware.ThenFunc(app.userHandler.SignUp))                                    // sign up user
 	mux.Post("/users/login", dynamicMiddleware.ThenFunc(app.userHandler.LogIn))                                      // login
 	mux.Get("/users", standardMiddleware.ThenFunc(app.userHandler.GetAllUsers))                                      // get all users
 	mux.Get("/users/details/:id", standardMiddleware.ThenFunc(app.userHandler.GetUserByID))                          // get one user info http://localhost:4000/clients/details/1
