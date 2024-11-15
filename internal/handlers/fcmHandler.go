@@ -27,6 +27,7 @@ type NotificationRequest struct {
 	Body     string `json:"body"`
 	Sender   int    `json:"sender"`
 	Receiver int    `json:"receiver"`
+	Link     string `json:"link"`
 }
 
 type Token struct {
@@ -38,12 +39,15 @@ func NewFCMHandler(client *messaging.Client, db *sql.DB) *FCMHandler {
 	return &FCMHandler{Client: client, DB: db}
 }
 
-func (h *FCMHandler) SendMessage(ctx context.Context, token string, UserId, sender, receiver int, title, body string) error {
+func (h *FCMHandler) SendMessage(ctx context.Context, token string, UserId, sender, receiver int, title, body, link string) error {
 	message := &messaging.Message{
 		Token: token,
 		Notification: &messaging.Notification{
 			Title: title,
 			Body:  body,
+		},
+		Data: map[string]string{
+			"link": link, // Custom data payload for the link
 		},
 		Android: &messaging.AndroidConfig{
 			Priority: "high",
@@ -104,7 +108,7 @@ func (h *FCMHandler) NotifyChange(w http.ResponseWriter, r *http.Request) {
 
 	// Send notifications to each token
 	for _, token := range tokens {
-		err = h.SendMessage(ctx, token, req.UserId, req.Sender, req.Receiver, req.Title, req.Body)
+		err = h.SendMessage(ctx, token, req.UserId, req.Sender, req.Receiver, req.Title, req.Body, req.Link)
 		if err != nil {
 			log.Printf("Error sending notification to token %s: %v", token, err)
 		}
