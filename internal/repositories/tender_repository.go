@@ -135,7 +135,7 @@ func (r *TenderRepository) GetTenderByID(ctx context.Context, id int) (models.Te
 		&tender.ID, &tender.Type, &tender.TenderNumber, &tender.UserID, &tender.CompanyID, &tender.Organization,
 		&tender.Total, &tender.Commission, &tender.CompletedDate, &tender.Date, &tender.Status, &tender.UserName, &tender.CompanyName,
 	)
-	fmt.Println("123")
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return tender, models.ErrTenderNotFound
