@@ -126,7 +126,7 @@ func (r *TenderRepository) GetTenderByID(ctx context.Context, id int) (models.Te
 	var tender models.Tender
 	err := r.Db.QueryRowContext(ctx, `
         SELECT tenders.id, type, tender_number, user_id, company_id, organization,
-               total, commission, completed_date, date, status, u.name, c.name
+               total, commission, completed_date, date, tenders.status, u.name, c.name
         FROM tenders
         JOIN tender.users u ON u.id = tenders.user_id
 		JOIN tender.companies c ON c.id = tenders.company_id
