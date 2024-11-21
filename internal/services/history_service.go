@@ -11,6 +11,6 @@ type HistoryService struct {
 }
 
 // GetAllHistory retrieves combined history data from the repository.
-func (s *HistoryService) GetAllHistory(ctx context.Context) ([]models.CombinedAction, error) {
-	return s.Repo.GetAllHistory(ctx)
+func (s *HistoryService) GetAllHistory(ctx context.Context, source *string, startDate, endDate string, limit, offset int) ([]models.CombinedAction, error) {
+	return s.Repo.GetAllHistory(ctx, source, startDate, endDate, limit, offset)
 }
