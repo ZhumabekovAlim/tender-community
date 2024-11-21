@@ -145,7 +145,7 @@ func (app *application) routes() http.Handler {
 
 	mux.Get("/sums/:id", standardMiddleware.ThenFunc(app.clientHandler.GetClientData))
 
-	mux.Get("/history/all", standardMiddleware.ThenFunc(app.historyHandler.GetAllHistory))
+	mux.Post("/history/all", standardMiddleware.ThenFunc(app.historyHandler.GetAllHistory))
 
 	//REALIZATION
 	mux.Post("/data/user/:user_id/status/:status", standardMiddleware.ThenFunc(app.transactionHandler.GetAllByUserIDAndStatus))
