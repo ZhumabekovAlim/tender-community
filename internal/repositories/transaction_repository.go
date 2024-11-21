@@ -108,11 +108,14 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id int) 
 
 	// Retrieve the transaction
 	err := r.Db.QueryRowContext(ctx, `
-		SELECT id, transaction_number, type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, date, status
-		FROM transactions WHERE id = ?`, id).Scan(&transaction.ID, &transaction.TransactionNumber, &transaction.Type, &transaction.TenderNumber,
+		SELECT t.id, transaction_number, type, tender_number, user_id, company_id, organization, amount, total, sell, product_name, completed_date, date, t.status, CONCAT(u.name, ' ', u.last_name) as username, c.name
+		FROM transactions t
+		JOIN users u ON t.user_id = u.id
+		JOIN companies c ON t.company_id = c.id
+		WHERE t.id = ?`, id).Scan(&transaction.ID, &transaction.TransactionNumber, &transaction.Type, &transaction.TenderNumber,
 		&transaction.UserID, &transaction.CompanyID, &transaction.Organization, &transaction.Amount,
 		&transaction.Total, &transaction.Sell, &transaction.ProductName, &transaction.CompletedDate,
-		&transaction.Date, &transaction.Status)
+		&transaction.Date, &transaction.Status, &transaction.UserName, &transaction.CompanyName)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return transaction, models.ErrTransactionNotFound

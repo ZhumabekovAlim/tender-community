@@ -255,7 +255,7 @@ func (r *TenderRepository) GetTendersByUserID(ctx context.Context, userID int) (
 func (r *TenderRepository) GetTendersByCompanyID(ctx context.Context, companyID int) ([]models.Tender, error) {
 	rows, err := r.Db.QueryContext(ctx, `
         SELECT tenders.id, type, tender_number, user_id, company_id, organization,
-               total, commission, completed_date, date, status, u.name, c.name
+               total, commission, completed_date, date, tenders.status, CONCAT(u.name, ' ', u.last_name) as username, c.name
         FROM tenders
         JOIN tender.users u ON u.id = tenders.user_id
         JOIN tender.companies c ON c.id = tenders.company_id

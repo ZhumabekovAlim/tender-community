@@ -33,9 +33,11 @@ func (r *ExtraTransactionRepository) CreateExtraTransaction(ctx context.Context,
 func (r *ExtraTransactionRepository) GetExtraTransactionByID(ctx context.Context, id int) (models.ExtraTransaction, error) {
 	var extraTransaction models.ExtraTransaction
 	err := r.Db.QueryRowContext(ctx, `
-		SELECT id, user_id, description, total, date, status 
-		FROM extra_transactions WHERE id = ?`, id).
-		Scan(&extraTransaction.ID, &extraTransaction.UserID, &extraTransaction.Description, &extraTransaction.Total, &extraTransaction.Date, &extraTransaction.Status)
+		SELECT et.id, user_id, description, total, date, status,CONCAT(u.name, ' ', u.last_name) as username
+		FROM extra_transactions et
+		JOIN tender.users u on u.id = et.user_id
+		WHERE et.id = ?`, id).
+		Scan(&extraTransaction.ID, &extraTransaction.UserID, &extraTransaction.Description, &extraTransaction.Total, &extraTransaction.Date, &extraTransaction.Status, &extraTransaction.UserName)
 	if err != nil {
 		return models.ExtraTransaction{}, err
 	}
@@ -76,7 +78,7 @@ func (r *ExtraTransactionRepository) GetAllExtraTransactions(ctx context.Context
 
 func (r *ExtraTransactionRepository) GetExtraTransactionsByUser(ctx context.Context, userID int) ([]models.ExtraTransaction, error) {
 	rows, err := r.Db.QueryContext(ctx, `
-		SELECT extra_transactions.id, user_id, description, total, date, status , CONCAT(u.name, ' ', u.last_name) as username
+		SELECT extra_transactions.id, user_id, description, total, date, extra_transactions.status , CONCAT(u.name, ' ', u.last_name) as username
 		FROM extra_transactions
 		JOIN tender.users u on extra_transactions.user_id = u.id
 		WHERE user_id = ? ORDER BY date DESC`, userID)
