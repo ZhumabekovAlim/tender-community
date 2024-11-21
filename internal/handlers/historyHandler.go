@@ -24,6 +24,8 @@ func (h *HistoryHandler) GetAllHistory(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.Offset == 0 {
 		req.Offset = 0
+	} else {
+		req.Offset = req.Offset - 1
 	}
 
 	history, err := h.Service.GetAllHistory(r.Context(), req.Source, req.StartDate, req.EndDate, req.Limit, req.Offset)
