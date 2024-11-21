@@ -15,5 +15,6 @@
     <file url="file://$PROJECT_DIR$/db/migrations/000013_changes.up.sql" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/db/migrations/000014_balance_category.up.sql" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/db/migrations/000015_personal_debts.up.sql" dialect="MariaDB" />
+    <file url="file://$PROJECT_DIR$/db/migrations/000017_debt_tranches.up.sql" dialect="MariaDB" />
   </component>
 </project>

@@ -32,6 +32,7 @@ type application struct {
 	changeHandler           *handlers.ChangeHandler
 	balanceCategoryHandler  *handlers.BalanceCategoryHandler
 	personalDebtHandler     *handlers.PersonalDebtHandler
+	debtTrancheHandler      *handlers.DebtTrancheHandler
 }
 
 func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
@@ -114,6 +115,10 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 	personalDebtService := &services.PersonalDebtService{Repo: personalDebtRepo}
 	personalDebtHandler := &handlers.PersonalDebtHandler{Service: personalDebtService}
 
+	debtTrancheRepo := &repositories.DebtTrancheRepository{Db: db}
+	debtTrancheService := &services.DebtTrancheService{Repo: debtTrancheRepo}
+	debtTrancheHandler := &handlers.DebtTrancheHandler{Service: debtTrancheService}
+
 	return &application{
 		errorLog:                errorLog,
 		infoLog:                 infoLog,
@@ -133,6 +138,7 @@ func initializeApp(db *sql.DB, errorLog, infoLog *log.Logger) *application {
 		changeHandler:           changeHandler,
 		balanceCategoryHandler:  balanceCategoryHandler,
 		personalDebtHandler:     personalDebtHandler,
+		debtTrancheHandler:      debtTrancheHandler,
 	}
 }
 
