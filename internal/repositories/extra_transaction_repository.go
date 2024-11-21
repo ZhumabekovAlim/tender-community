@@ -33,7 +33,7 @@ func (r *ExtraTransactionRepository) CreateExtraTransaction(ctx context.Context,
 func (r *ExtraTransactionRepository) GetExtraTransactionByID(ctx context.Context, id int) (models.ExtraTransaction, error) {
 	var extraTransaction models.ExtraTransaction
 	err := r.Db.QueryRowContext(ctx, `
-		SELECT et.id, user_id, description, total, date, status,CONCAT(u.name, ' ', u.last_name) as username
+		SELECT et.id, user_id, description, total, date, et.status,CONCAT(u.name, ' ', u.last_name) as username
 		FROM extra_transactions et
 		JOIN tender.users u on u.id = et.user_id
 		WHERE et.id = ?`, id).
