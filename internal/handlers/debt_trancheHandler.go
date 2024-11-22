@@ -99,7 +99,7 @@ func (h *DebtTrancheHandler) DeleteDebtTranche(w http.ResponseWriter, r *http.Re
 
 func (h *DebtTrancheHandler) GetAllDebtTranchesByTransactionID(w http.ResponseWriter, r *http.Request) {
 	// Extract transaction_id from query parameters
-	transactionIDStr := r.URL.Query().Get(":transaction_id")
+	transactionIDStr := r.URL.Query().Get(":debt_id")
 	transactionID, err := strconv.Atoi(transactionIDStr)
 	if err != nil || transactionIDStr == "" {
 		http.Error(w, "Invalid or missing transaction_id", http.StatusBadRequest)

@@ -164,11 +164,11 @@ func (app *application) routes() http.Handler {
 	mux.Get("/tranches/transaction/:transaction_id", standardMiddleware.ThenFunc(app.trancheHandler.GetAllTranchesByTransactionID)) // Get all tranches by transaction_id
 
 	// DEBT TRANCHE
-	mux.Post("/tranches/debt", dynamicMiddleware.ThenFunc(app.debtTrancheHandler.CreateDebtTranche))                          // Create a new debt tranche
-	mux.Get("/tranches/debt/:id", standardMiddleware.ThenFunc(app.debtTrancheHandler.GetDebtTrancheByID))                     // Get debt tranche by ID
-	mux.Put("/tranches/debt", standardMiddleware.ThenFunc(app.debtTrancheHandler.UpdateDebtTranche))                          // Update debt tranche by ID
-	mux.Del("/tranches/debt/:id", standardMiddleware.ThenFunc(app.debtTrancheHandler.DeleteDebtTranche))                      // Delete debt tranche by ID
-	mux.Get("/tranches/debt/:debt_id", standardMiddleware.ThenFunc(app.debtTrancheHandler.GetAllDebtTranchesByTransactionID)) // Get all debt tranches by debt_id
+	mux.Post("/tranches/debt", dynamicMiddleware.ThenFunc(app.debtTrancheHandler.CreateDebtTranche))                              // Create a new debt tranche
+	mux.Get("/tranches/debt/:id", standardMiddleware.ThenFunc(app.debtTrancheHandler.GetDebtTrancheByID))                         // Get debt tranche by ID
+	mux.Put("/tranches/debt", standardMiddleware.ThenFunc(app.debtTrancheHandler.UpdateDebtTranche))                              // Update debt tranche by ID
+	mux.Del("/tranches/debt/:id", standardMiddleware.ThenFunc(app.debtTrancheHandler.DeleteDebtTranche))                          // Delete debt tranche by ID
+	mux.Get("/tranches/all/debt/:debt_id", standardMiddleware.ThenFunc(app.debtTrancheHandler.GetAllDebtTranchesByTransactionID)) // Get all debt tranches by debt_id
 
 	// CHANGE
 	mux.Post("/changes", dynamicMiddleware.ThenFunc(app.changeHandler.CreateChange))                                             // Create a new change
