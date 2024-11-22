@@ -14,10 +14,10 @@ type DebtTrancheRepository struct {
 // Create a new tranche
 func (r *DebtTrancheRepository) CreateDebtTranche(ctx context.Context, tranche *models.DebtTranche) (int, error) {
 	query := `
-		INSERT INTO debt_tranches (debt_id, amount, description) 
-		VALUES (?, ?, ?)
+		INSERT INTO debt_tranches (debt_id, amount, description, date) 
+		VALUES (?, ?, ?, ?)
 	`
-	result, err := r.Db.ExecContext(ctx, query, tranche.DebtID, tranche.Amount, tranche.Description)
+	result, err := r.Db.ExecContext(ctx, query, tranche.DebtID, tranche.Amount, tranche.Description, tranche.Date)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create tranche: %w", err)
 	}
@@ -52,10 +52,10 @@ func (r *DebtTrancheRepository) UpdateDebtTranche(ctx context.Context, tranche *
 	// Update the tranche
 	updateQuery := `
 		UPDATE debt_tranches
-		SET debt_id = ?, amount = ?, description = ?
+		SET debt_id = ?, amount = ?, description = ?, date = ?
 		WHERE id = ?
 	`
-	_, err := r.Db.ExecContext(ctx, updateQuery, tranche.DebtID, tranche.Amount, tranche.Description, tranche.ID)
+	_, err := r.Db.ExecContext(ctx, updateQuery, tranche.DebtID, tranche.Amount, tranche.Description, tranche.ID, tranche.Date)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update tranche: %w", err)
 	}
