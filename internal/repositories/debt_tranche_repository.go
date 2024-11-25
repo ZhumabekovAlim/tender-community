@@ -55,7 +55,7 @@ func (r *DebtTrancheRepository) UpdateDebtTranche(ctx context.Context, tranche *
 		SET debt_id = ?, amount = ?, description = ?, date = ?
 		WHERE id = ?
 	`
-	_, err := r.Db.ExecContext(ctx, updateQuery, tranche.DebtID, tranche.Amount, tranche.Description, tranche.ID, tranche.Date)
+	_, err := r.Db.ExecContext(ctx, updateQuery, tranche.DebtID, tranche.Amount, tranche.Description, tranche.Date, tranche.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update tranche: %w", err)
 	}
@@ -68,7 +68,7 @@ func (r *DebtTrancheRepository) UpdateDebtTranche(ctx context.Context, tranche *
 	`
 	var updatedTranche models.DebtTranche
 	err = r.Db.QueryRowContext(ctx, selectQuery, tranche.ID).Scan(
-		&updatedTranche.ID, &updatedTranche.DebtID, &updatedTranche.Amount, &updatedTranche.Description, &updatedTranche.Date)
+		&updatedTranche.ID, &updatedTranche.DebtID, &updatedTranche.Amount, &updatedTranche.Description, &updatedTranche.Date, &updatedTranche.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve updated tranche: %w", err)
 	}
