@@ -47,7 +47,7 @@ func (r *ExtraTransactionRepository) GetExtraTransactionByID(ctx context.Context
 
 func (r *ExtraTransactionRepository) GetAllExtraTransactions(ctx context.Context) ([]models.ExtraTransaction, error) {
 	rows, err := r.Db.QueryContext(ctx, `
-		SELECT et.id, user_id, description, total, date, status, u.name 
+		SELECT et.id, user_id, description, total, date, et.status, u.name 
 		FROM extra_transactions et
 		JOIN tender.users u on u.id = et.user_id
 		ORDER BY date DESC`)

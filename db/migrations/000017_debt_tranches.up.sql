@@ -5,5 +5,5 @@ CREATE TABLE debt_tranches
     amount      INT,
     description VARCHAR(255),
     date        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (debt_id) REFERENCES transactions (id)
+    FOREIGN KEY (debt_id) REFERENCES personal_debts (id)
 );
