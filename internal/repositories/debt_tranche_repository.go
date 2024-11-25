@@ -66,9 +66,10 @@ func (r *DebtTrancheRepository) UpdateDebtTranche(ctx context.Context, tranche *
 		FROM debt_tranches
 		WHERE id = ?
 	`
+
 	var updatedTranche models.DebtTranche
 	err = r.Db.QueryRowContext(ctx, selectQuery, tranche.ID).Scan(
-		&updatedTranche.ID, &updatedTranche.DebtID, &updatedTranche.Amount, &updatedTranche.Description, &updatedTranche.Date, &updatedTranche.ID)
+		&updatedTranche.ID, &updatedTranche.DebtID, &updatedTranche.Amount, &updatedTranche.Description, &updatedTranche.Date)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve updated tranche: %w", err)
 	}
